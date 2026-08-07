@@ -28,7 +28,7 @@ import Footer from "../components/layout/Footer";
 export default function MainLayout() {
   return (
     <>
-      <TopBar />
+      {/* <TopBar /> */}
       <Navbar />
 
       <main className="min-h-screen">
