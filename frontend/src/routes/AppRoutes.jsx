@@ -2,9 +2,9 @@ import { Routes, Route } from "react-router-dom";
 
 import MainLayout from "../layouts/MainLayout";
 
-// =========================
+// =====================================================
 // PUBLIC PAGES
-// =========================
+// =====================================================
 
 import Home from "../pages/Home";
 import About from "../pages/About";
@@ -13,13 +13,18 @@ import PoliticalJourney from "../pages/PoliticalJourney";
 import Development from "../pages/Development";
 import Gallery from "../pages/Gallery";
 import News from "../pages/News";
+import Videos from "../pages/Videos";
 import Contact from "../pages/Contact";
 
-// =========================
-// ADMIN PAGES
-// =========================
+// =====================================================
+// ADMIN LOGIN
+// =====================================================
 
 import AdminLogin from "../pages/AdminLogin";
+
+// =====================================================
+// ADMIN PAGES
+// =====================================================
 
 import Dashboard from "../pages/Dashboard";
 
@@ -41,13 +46,25 @@ import EditDevelopment from "../pages/EditDevelopment";
 // CONTACT ADMIN
 import EditContact from "../pages/EditContact";
 
+// POLITICAL CAREER ADMIN
+import AdminPoliticalCareer from "../pages/AdminPoliticalCareer";
+
+// NEWS ADMIN
+import AdminNews from "../pages/AdminNews";
+
+// ARTICLES ADMIN
+import AdminArticles from "../pages/AdminArticles";
+
+// VIDEOS ADMIN
+import AdminVideos from "../pages/adminvideos";
+
 export default function AppRoutes() {
   return (
     <Routes>
 
-      {/* ========================= */}
-      {/* PUBLIC WEBSITE */}
-      {/* ========================= */}
+      {/* =====================================================
+          PUBLIC WEBSITE
+      ===================================================== */}
 
       <Route element={<MainLayout />}>
 
@@ -87,49 +104,56 @@ export default function AppRoutes() {
         />
 
         <Route
+          path="/videos"
+          element={<Videos />}
+        />
+
+        <Route
           path="/contact"
           element={<Contact />}
         />
 
       </Route>
 
-      {/* ========================= */}
-      {/* ADMIN LOGIN */}
-      {/* ========================= */}
+
+      {/* =====================================================
+          ADMIN LOGIN
+      ===================================================== */}
 
       <Route
         path="/admin-login"
         element={<AdminLogin />}
       />
 
-      {/* ========================= */}
-      {/* ADMIN DASHBOARD */}
-      {/* ========================= */}
+
+      {/* =====================================================
+          ADMIN DASHBOARD
+      ===================================================== */}
 
       <Route
         path="/admin"
         element={<Dashboard />}
       />
 
-      {/* ========================= */}
-      {/* HOME ADMIN */}
-      {/* ========================= */}
 
-      {/* Clicking Home directly opens Edit Home */}
+      {/* =====================================================
+          HOME ADMIN
+      ===================================================== */}
+
       <Route
         path="/admin/home"
         element={<EditHome />}
       />
 
-      {/* Edit route also opens the same page */}
       <Route
         path="/admin/home/edit"
         element={<EditHome />}
       />
 
-      {/* ========================= */}
-      {/* ABOUT ADMIN */}
-      {/* ========================= */}
+
+      {/* =====================================================
+          ABOUT ADMIN
+      ===================================================== */}
 
       <Route
         path="/admin/about"
@@ -141,9 +165,10 @@ export default function AppRoutes() {
         element={<EditAbout />}
       />
 
-      {/* ========================= */}
-      {/* BIOGRAPHY ADMIN */}
-      {/* ========================= */}
+
+      {/* =====================================================
+          BIOGRAPHY ADMIN
+      ===================================================== */}
 
       <Route
         path="/admin/biography"
@@ -155,9 +180,10 @@ export default function AppRoutes() {
         element={<EditBiography />}
       />
 
-      {/* ========================= */}
-      {/* DEVELOPMENT ADMIN */}
-      {/* ========================= */}
+
+      {/* =====================================================
+          DEVELOPMENT ADMIN
+      ===================================================== */}
 
       <Route
         path="/admin/development"
@@ -169,9 +195,50 @@ export default function AppRoutes() {
         element={<EditDevelopment />}
       />
 
-      {/* ========================= */}
-      {/* CONTACT ADMIN */}
-      {/* ========================= */}
+
+      {/* =====================================================
+          POLITICAL CAREER ADMIN
+      ===================================================== */}
+
+      <Route
+        path="/admin/political-career"
+        element={<AdminPoliticalCareer />}
+      />
+
+
+      {/* =====================================================
+          NEWS ADMIN
+      ===================================================== */}
+
+      <Route
+        path="/admin/news"
+        element={<AdminNews />}
+      />
+
+
+      {/* =====================================================
+          ARTICLES ADMIN
+      ===================================================== */}
+
+      <Route
+        path="/admin/articles"
+        element={<AdminArticles />}
+      />
+
+
+      {/* =====================================================
+          VIDEOS ADMIN
+      ===================================================== */}
+
+      <Route
+        path="/admin/videos"
+        element={<AdminVideos />}
+      />
+
+
+      {/* =====================================================
+          CONTACT ADMIN
+      ===================================================== */}
 
       <Route
         path="/admin/contact"

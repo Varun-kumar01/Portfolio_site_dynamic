@@ -1,8 +1,12 @@
 const express = require("express");
+const  pool  = require("./config/db");
 const cors = require("cors");
 const multer = require("multer");
 const fs = require("fs");
 const path = require("path");
+const dotenv = require("dotenv");
+
+dotenv.config();
 
 const app = express();
 
@@ -42,6 +46,193 @@ const uploadsFolder = path.join(
   __dirname,
   "uploads"
 );
+
+// const dataFolder = path.join(
+//   __dirname,
+//   "data"
+// );
+
+const uploadFolder = path.join(
+  __dirname,
+  "uploads"
+);
+
+const videoFolder = path.join(
+  uploadFolder,
+  "videos"
+);
+
+const videoStorage =
+  multer.diskStorage({
+    destination: (
+      req,
+      file,
+      cb
+    ) => {
+      cb(null, videoFolder);
+    },
+
+    filename: (
+      req,
+      file,
+      cb
+    ) => {
+      const extension =
+        path.extname(
+          file.originalname
+        );
+
+      const originalName =
+        path
+          .basename(
+            file.originalname,
+            extension
+          )
+          .replace(
+            /\s+/g,
+            "-"
+          )
+          .replace(
+            /[^a-zA-Z0-9-_]/g,
+            ""
+          );
+
+      const filename =
+        Date.now() +
+        "-" +
+        originalName +
+        extension;
+
+      cb(
+        null,
+        filename
+      );
+    },
+  });
+
+const videoUpload =
+  multer({
+    storage:
+      videoStorage,
+
+    limits: {
+      fileSize:
+        500 *
+        1024 *
+        1024,
+    },
+
+    fileFilter: (
+      req,
+      file,
+      cb
+    ) => {
+      /*
+       * Accept ANY video MIME type:
+       *
+       * video/mp4
+       * video/webm
+       * video/quicktime
+       * video/x-msvideo
+       * video/x-matroska
+       * video/mpeg
+       * video/ogg
+       * video/3gpp
+       * etc.
+       */
+
+      if (
+        file.mimetype &&
+        file.mimetype.startsWith(
+          "video/"
+        )
+      ) {
+        return cb(
+          null,
+          true
+        );
+      }
+
+      /*
+       * Some browsers send
+       * unknown video files as
+       * application/octet-stream.
+       */
+
+      if (
+        file.mimetype ===
+        "application/octet-stream"
+      ) {
+        return cb(
+          null,
+          true
+        );
+      }
+
+      /*
+       * Fallback by extension.
+       */
+
+      const videoExtensions = [
+        ".mp4",
+        ".m4v",
+        ".webm",
+        ".mov",
+        ".qt",
+        ".avi",
+        ".mkv",
+        ".wmv",
+        ".flv",
+        ".f4v",
+        ".mpeg",
+        ".mpg",
+        ".mpe",
+        ".mpv",
+        ".3gp",
+        ".3g2",
+        ".ts",
+        ".mts",
+        ".m2ts",
+        ".vob",
+        ".ogv",
+        ".ogg",
+        ".rm",
+        ".rmvb",
+        ".asf",
+        ".amv",
+        ".divx",
+        ".mxf",
+        ".m2v",
+        ".m4p",
+        ".m4b",
+        ".m4a",
+      ];
+
+      const extension =
+        path
+          .extname(
+            file.originalname
+          )
+          .toLowerCase();
+
+      if (
+        videoExtensions.includes(
+          extension
+        )
+      ) {
+        return cb(
+          null,
+          true
+        );
+      }
+
+      cb(
+        new Error(
+          "The selected file is not recognized as a video."
+        )
+      );
+    },
+  });
 
 
 // =====================================
@@ -1072,6 +1263,1558 @@ app.put(
 );
 
 
+//admin political_journey
+app.get(
+  "/api/political-career",
+  async (
+    req,
+    res
+  ) => {
+    try {
+      console.log("triggered ////////////")
+      const result =
+        await pool.query(`
+          SELECT
+            id,
+            year,
+            position,
+            organization,
+            location,
+            description,
+            category,
+            display_order,
+            image_url,
+            created_at,
+            updated_at
+          FROM political_career
+          ORDER BY
+            display_order ASC,
+            id ASC
+        `);
+          console.log("\\\\\\\\\\")
+        console.log("GET POLITICAL CAREER RESULT:");
+        console.log(result);
+      res.json({
+        success: true,
+        data:
+          result.rows,
+      });
+    } catch (error) {
+      console.error(
+        "GET POLITICAL CAREER ERROR 12334434:",
+        error
+      );
+
+      res.status(500).json({
+        success: false,
+        message:
+          "Unable to load political career entries",
+        error:
+          error.message,
+      });
+    }
+  }
+);
+
+app.post(
+  "/api/political-career",
+  upload.single("image"),
+  async (
+    req,
+    res
+  ) => {
+    try {
+      const {
+        year,
+        position,
+        organization,
+        location,
+        description,
+        category,
+        display_order,
+      } = req.body;
+
+      if (
+        !year ||
+        !position ||
+        !organization ||
+        !location
+      ) {
+        return res.status(400).json({
+          success: false,
+          message:
+            "Year, position, organization and location are required",
+        });
+      }
+
+      let imageUrl = "";
+
+      if (req.file) {
+        imageUrl =
+          `${req.protocol}://${req.get(
+            "host"
+          )}/uploads/${req.file.filename}`;
+      }
+
+      let orderValue;
+
+      if (
+        display_order !==
+          undefined &&
+        display_order !==
+          ""
+      ) {
+        orderValue =
+          Number(
+            display_order
+          );
+      } else {
+        const orderResult =
+          await pool.query(`
+            SELECT COALESCE(
+              MAX(display_order),
+              -1
+            ) + 1 AS next_order
+            FROM political_career
+          `);
+
+        orderValue =
+          Number(
+            orderResult.rows[0]
+              .next_order
+          );
+      }
+
+      const result =
+        await pool.query(
+          `
+          INSERT INTO political_career
+          (
+            year,
+            position,
+            organization,
+            location,
+            description,
+            category,
+            display_order,
+            image_url
+          )
+          VALUES
+          ($1,$2,$3,$4,$5,$6,$7,$8)
+          RETURNING
+            id,
+            year,
+            position,
+            organization,
+            location,
+            description,
+            category,
+            display_order,
+            image_url,
+            created_at,
+            updated_at
+          `,
+          [
+            year,
+            position,
+            organization,
+            location,
+            description || "",
+            category ||
+              "Political Career",
+            orderValue,
+            imageUrl,
+          ]
+        );
+
+      res.status(201).json({
+        success: true,
+        message:
+          "Political career entry added successfully",
+        data:
+          result.rows[0],
+      });
+    } catch (error) {
+      console.error(
+        "ADD POLITICAL CAREER ERROR:",
+        error
+      );
+
+      res.status(500).json({
+        success: false,
+        message:
+          "Unable to add political career entry",
+        error:
+          error.message,
+      });
+    }
+  }
+);
+
+app.put(
+  "/api/political-career/:id",
+  upload.single("image"),
+  async (
+    req,
+    res
+  ) => {
+    try {
+      const {
+        id,
+      } = req.params;
+
+      const {
+        year,
+        position,
+        organization,
+        location,
+        description,
+        category,
+        display_order,
+      } = req.body;
+
+      if (
+        !year ||
+        !position ||
+        !organization ||
+        !location
+      ) {
+        return res.status(400).json({
+          success: false,
+          message:
+            "Year, position, organization and location are required",
+        });
+      }
+
+      const existing =
+        await pool.query(
+          `
+          SELECT
+            image_url,
+            display_order
+          FROM political_career
+          WHERE id = $1
+          `,
+          [id]
+        );
+
+      if (
+        existing.rows.length ===
+        0
+      ) {
+        return res.status(404).json({
+          success: false,
+          message:
+            "Political career entry not found",
+        });
+      }
+
+      let imageUrl =
+        existing.rows[0]
+          .image_url || "";
+
+      if (req.file) {
+        imageUrl =
+          `${req.protocol}://${req.get(
+            "host"
+          )}/uploads/${req.file.filename}`;
+      }
+
+      let orderValue =
+        existing.rows[0]
+          .display_order;
+
+      if (
+        display_order !==
+          undefined &&
+        display_order !==
+          ""
+      ) {
+        orderValue =
+          Number(
+            display_order
+          );
+      }
+
+      const result =
+        await pool.query(
+          `
+          UPDATE political_career
+          SET
+            year = $1,
+            position = $2,
+            organization = $3,
+            location = $4,
+            description = $5,
+            category = $6,
+            display_order = $7,
+            image_url = $8,
+            updated_at = CURRENT_TIMESTAMP
+          WHERE id = $9
+          RETURNING
+            id,
+            year,
+            position,
+            organization,
+            location,
+            description,
+            category,
+            display_order,
+            image_url,
+            created_at,
+            updated_at
+          `,
+          [
+            year,
+            position,
+            organization,
+            location,
+            description || "",
+            category ||
+              "Political Career",
+            orderValue,
+            imageUrl,
+            id,
+          ]
+        );
+
+      res.json({
+        success: true,
+        message:
+          "Political career entry updated successfully",
+        data:
+          result.rows[0],
+      });
+    } catch (error) {
+      console.error(
+        "UPDATE POLITICAL CAREER ERROR:",
+        error
+      );
+
+      res.status(500).json({
+        success: false,
+        message:
+          "Unable to update political career entry",
+        error:
+          error.message,
+      });
+    }
+  }
+);
+
+app.delete(
+  "/api/political-career/:id",
+  async (
+    req,
+    res
+  ) => {
+    try {
+      const {
+        id,
+      } = req.params;
+
+      const existing =
+        await pool.query(
+          `
+          SELECT
+            image_url
+          FROM political_career
+          WHERE id = $1
+          `,
+          [id]
+        );
+
+      if (
+        existing.rows.length ===
+        0
+      ) {
+        return res.status(404).json({
+          success: false,
+          message:
+            "Political career entry not found",
+        });
+      }
+
+      const imageUrl =
+        existing.rows[0]
+          .image_url || "";
+
+      await pool.query(
+        `
+        DELETE FROM political_career
+        WHERE id = $1
+        `,
+        [id]
+      );
+
+      if (imageUrl) {
+        try {
+          const filename =
+            path.basename(
+              imageUrl
+            );
+
+          const filePath =
+            path.join(
+              uploadFolder,
+              filename
+            );
+
+          if (
+            fs.existsSync(
+              filePath
+            )
+          ) {
+            fs.unlinkSync(
+              filePath
+            );
+          }
+        } catch (imageError) {
+          console.error(
+            "IMAGE DELETE WARNING:",
+            imageError.message
+          );
+        }
+      }
+
+      res.json({
+        success: true,
+        message:
+          "Political career entry deleted successfully",
+      });
+    } catch (error) {
+      console.error(
+        "DELETE POLITICAL CAREER ERROR:",
+        error
+      );
+
+      res.status(500).json({
+        success: false,
+        message:
+          "Unable to delete political career entry",
+        error:
+          error.message,
+      });
+    }
+  }
+);
+
+
+//Gallery---Videos
+
+app.get(
+  "/api/videos",
+  async (
+    req,
+    res
+  ) => {
+    try {
+      const result =
+        await pool.query(`
+          SELECT
+            id,
+            title,
+            description,
+            video_url,
+            thumbnail_url,
+            category,
+            published_date,
+            link,
+            display_order,
+            created_at,
+            updated_at
+          FROM videos
+          ORDER BY
+            display_order ASC,
+            id ASC
+        `);
+
+      return res.status(200).json({
+        success: true,
+        data:
+          result.rows,
+      });
+    } catch (error) {
+      console.error(
+        "GET VIDEOS ERROR:",
+        error
+      );
+
+      return res.status(500).json({
+        success: false,
+        message:
+          "Unable to load videos",
+        error:
+          error.message,
+      });
+    }
+  }
+);
+
+app.get(
+  "/api/videos/:id",
+  async (
+    req,
+    res
+  ) => {
+    try {
+      const {
+        id,
+      } = req.params;
+
+      const result =
+        await pool.query(
+          `
+          SELECT
+            id,
+            title,
+            description,
+            video_url,
+            thumbnail_url,
+            category,
+            published_date,
+            link,
+            display_order,
+            created_at,
+            updated_at
+          FROM videos
+          WHERE id = $1
+          `,
+          [id]
+        );
+
+      if (
+        result.rows.length ===
+        0
+      ) {
+        return res.status(404).json({
+          success: false,
+          message:
+            "Video not found",
+        });
+      }
+
+      return res.json({
+        success: true,
+        data:
+          result.rows[0],
+      });
+    } catch (error) {
+      console.error(
+        "GET VIDEO ERROR:",
+        error
+      );
+
+      return res.status(500).json({
+        success: false,
+        message:
+          "Unable to load video",
+        error:
+          error.message,
+      });
+    }
+  }
+);
+
+app.post(
+  "/api/videos",
+  videoUpload.single(
+    "video"
+  ),
+  async (
+    req,
+    res
+  ) => {
+    try {
+      const {
+        title,
+        description,
+        thumbnail_url,
+        category,
+        published_date,
+        link,
+        display_order,
+      } = req.body;
+
+      if (
+        !title ||
+        !title.trim()
+      ) {
+        return res.status(400).json({
+          success: false,
+          message:
+            "Video title is required",
+        });
+      }
+
+      if (!req.file) {
+        return res.status(400).json({
+          success: false,
+          message:
+            "Please select a video file",
+        });
+      }
+
+      const videoUrl =
+        `${req.protocol}://${req.get(
+          "host"
+        )}/uploads/videos/${req.file.filename}`;
+
+      let orderValue;
+
+      if (
+        display_order !==
+          undefined &&
+        display_order !==
+          ""
+      ) {
+        orderValue =
+          Number(
+            display_order
+          );
+      } else {
+        const orderResult =
+          await pool.query(`
+            SELECT COALESCE(
+              MAX(display_order),
+              -1
+            ) + 1 AS next_order
+            FROM videos
+          `);
+
+        orderValue =
+          Number(
+            orderResult.rows[0]
+              .next_order
+          );
+      }
+
+      const result =
+        await pool.query(
+          `
+          INSERT INTO videos
+          (
+            title,
+            description,
+            video_url,
+            thumbnail_url,
+            category,
+            published_date,
+            link,
+            display_order
+          )
+          VALUES
+          ($1,$2,$3,$4,$5,$6,$7,$8)
+          RETURNING
+            id,
+            title,
+            description,
+            video_url,
+            thumbnail_url,
+            category,
+            published_date,
+            link,
+            display_order,
+            created_at,
+            updated_at
+          `,
+          [
+            title.trim(),
+            description || "",
+            videoUrl,
+            thumbnail_url || "",
+            category ||
+              "Video",
+            published_date ||
+              null,
+            link || "",
+            orderValue,
+          ]
+        );
+
+      return res.status(201).json({
+        success: true,
+        message:
+          "Video added successfully",
+        data:
+          result.rows[0],
+      });
+    } catch (error) {
+      console.error(
+        "ADD VIDEO ERROR:",
+        error
+      );
+
+      /*
+       * If database insert fails after
+       * file upload, remove uploaded file.
+       */
+
+      if (req.file) {
+        try {
+          const filePath =
+            path.join(
+              videoFolder,
+              req.file.filename
+            );
+
+          if (
+            fs.existsSync(
+              filePath
+            )
+          ) {
+            fs.unlinkSync(
+              filePath
+            );
+          }
+        } catch (fileError) {
+          console.error(
+            "VIDEO CLEANUP ERROR:",
+            fileError.message
+          );
+        }
+      }
+
+      return res.status(500).json({
+        success: false,
+        message:
+          "Unable to add video",
+        error:
+          error.message,
+      });
+    }
+  }
+);
+
+app.put(
+  "/api/videos/:id",
+  videoUpload.single(
+    "video"
+  ),
+  async (
+    req,
+    res
+  ) => {
+    try {
+      const {
+        id,
+      } = req.params;
+
+      const {
+        title,
+        description,
+        thumbnail_url,
+        category,
+        published_date,
+        link,
+        display_order,
+      } = req.body;
+
+      if (
+        !title ||
+        !title.trim()
+      ) {
+        return res.status(400).json({
+          success: false,
+          message:
+            "Video title is required",
+        });
+      }
+
+      const existing =
+        await pool.query(
+          `
+          SELECT
+            video_url,
+            display_order
+          FROM videos
+          WHERE id = $1
+          `,
+          [id]
+        );
+
+      if (
+        existing.rows.length ===
+        0
+      ) {
+        return res.status(404).json({
+          success: false,
+          message:
+            "Video not found",
+        });
+      }
+
+      let videoUrl =
+        existing.rows[0]
+          .video_url || "";
+
+      if (req.file) {
+        videoUrl =
+          `${req.protocol}://${req.get(
+            "host"
+          )}/uploads/videos/${req.file.filename}`;
+      }
+
+      let orderValue =
+        existing.rows[0]
+          .display_order;
+
+      if (
+        display_order !==
+          undefined &&
+        display_order !==
+          ""
+      ) {
+        const parsedOrder =
+          Number(
+            display_order
+          );
+
+        if (
+          Number.isFinite(
+            parsedOrder
+          )
+        ) {
+          orderValue =
+            parsedOrder;
+        }
+      }
+
+      const result =
+        await pool.query(
+          `
+          UPDATE videos
+          SET
+            title = $1,
+            description = $2,
+            video_url = $3,
+            thumbnail_url = $4,
+            category = $5,
+            published_date = $6,
+            link = $7,
+            display_order = $8,
+            updated_at = CURRENT_TIMESTAMP
+          WHERE id = $9
+          RETURNING
+            id,
+            title,
+            description,
+            video_url,
+            thumbnail_url,
+            category,
+            published_date,
+            link,
+            display_order,
+            created_at,
+            updated_at
+          `,
+          [
+            title.trim(),
+            description || "",
+            videoUrl,
+            thumbnail_url || "",
+            category ||
+              "Video",
+            published_date ||
+              null,
+            link || "",
+            orderValue,
+            id,
+          ]
+        );
+
+      /*
+       * Delete old video only after
+       * successful database update.
+       */
+
+      if (
+        req.file &&
+        existing.rows[0]
+          .video_url
+      ) {
+        try {
+          const oldFilename =
+            path.basename(
+              existing.rows[0]
+                .video_url
+            );
+
+          const oldPath =
+            path.join(
+              videoFolder,
+              oldFilename
+            );
+
+          if (
+            fs.existsSync(
+              oldPath
+            )
+          ) {
+            fs.unlinkSync(
+              oldPath
+            );
+          }
+        } catch (fileError) {
+          console.error(
+            "OLD VIDEO DELETE WARNING:",
+            fileError.message
+          );
+        }
+      }
+
+      return res.json({
+        success: true,
+        message:
+          "Video updated successfully",
+        data:
+          result.rows[0],
+      });
+    } catch (error) {
+      console.error(
+        "UPDATE VIDEO ERROR:",
+        error
+      );
+
+      if (req.file) {
+        try {
+          const filePath =
+            path.join(
+              videoFolder,
+              req.file.filename
+            );
+
+          if (
+            fs.existsSync(
+              filePath
+            )
+          ) {
+            fs.unlinkSync(
+              filePath
+            );
+          }
+        } catch (fileError) {
+          console.error(
+            "VIDEO CLEANUP ERROR:",
+            fileError.message
+          );
+        }
+      }
+
+      return res.status(500).json({
+        success: false,
+        message:
+          "Unable to update video",
+        error:
+          error.message,
+      });
+    }
+  }
+);
+
+app.delete(
+  "/api/videos/:id",
+  async (
+    req,
+    res
+  ) => {
+    try {
+      const {
+        id,
+      } = req.params;
+
+      const existing =
+        await pool.query(
+          `
+          SELECT
+            video_url
+          FROM videos
+          WHERE id = $1
+          `,
+          [id]
+        );
+
+      if (
+        existing.rows.length ===
+        0
+      ) {
+        return res.status(404).json({
+          success: false,
+          message:
+            "Video not found",
+        });
+      }
+
+      const videoUrl =
+        existing.rows[0]
+          .video_url || "";
+
+      await pool.query(
+        `
+        DELETE FROM videos
+        WHERE id = $1
+        `,
+        [id]
+      );
+
+      if (videoUrl) {
+        try {
+          const filename =
+            path.basename(
+              videoUrl
+            );
+
+          const filePath =
+            path.join(
+              videoFolder,
+              filename
+            );
+
+          if (
+            fs.existsSync(
+              filePath
+            )
+          ) {
+            fs.unlinkSync(
+              filePath
+            );
+          }
+        } catch (fileError) {
+          console.error(
+            "VIDEO FILE DELETE WARNING:",
+            fileError.message
+          );
+        }
+      }
+
+      return res.json({
+        success: true,
+        message:
+          "Video deleted successfully",
+      });
+    } catch (error) {
+      console.error(
+        "DELETE VIDEO ERROR:",
+        error
+      );
+
+      return res.status(500).json({
+        success: false,
+        message:
+          "Unable to delete video",
+        error:
+          error.message,
+      });
+    }
+  }
+);
+//NEW API
+app.get(
+  "/api/news",
+  async (
+    req,
+    res
+  ) => {
+    try {
+      const result =
+        await pool.query(`
+          SELECT
+            id,
+            title,
+            description,
+            content,
+            category,
+            image_url,
+            published_date,
+            display_order,
+            link,
+            created_at,
+            updated_at
+          FROM news
+          ORDER BY
+            display_order ASC,
+            id ASC
+        `);
+
+      res.json({
+        success: true,
+        data:
+          result.rows,
+      });
+    } catch (error) {
+      console.error(
+        "GET NEWS ERROR:",
+        error
+      );
+
+      res.status(500).json({
+        success: false,
+        message:
+          "Unable to load news",
+        error:
+          error.message,
+      });
+    }
+  }
+);
+app.get(
+  "/api/news/:id",
+  async (
+    req,
+    res
+  ) => {
+    try {
+      const {
+        id,
+      } = req.params;
+
+      const result =
+        await pool.query(
+          `
+          SELECT
+            id,
+            title,
+            description,
+            content,
+            category,
+            image_url,
+            published_date,
+            display_order,
+            link,
+            created_at,
+            updated_at
+          FROM news
+          WHERE id = $1
+          `,
+          [id]
+        );
+
+      if (
+        result.rows.length ===
+        0
+      ) {
+        return res.status(404).json({
+          success: false,
+          message:
+            "News not found",
+        });
+      }
+
+      res.json({
+        success: true,
+        data:
+          result.rows[0],
+      });
+    } catch (error) {
+      console.error(
+        "GET NEWS BY ID ERROR:",
+        error
+      );
+
+      res.status(500).json({
+        success: false,
+        message:
+          "Unable to load news",
+        error:
+          error.message,
+      });
+    }
+  }
+);
+app.post(
+  "/api/news",
+  upload.single("image"),
+  async (
+    req,
+    res
+  ) => {
+    try {
+      const {
+        title,
+        description,
+        content,
+        category,
+        published_date,
+        display_order,
+        link,
+      } = req.body;
+
+      if (
+        !title ||
+        !title.trim()
+      ) {
+        return res.status(400).json({
+          success: false,
+          message:
+            "Title is required",
+        });
+      }
+
+      let imageUrl = "";
+
+      if (req.file) {
+        imageUrl =
+          `${req.protocol}://${req.get(
+            "host"
+          )}/uploads/${req.file.filename}`;
+      }
+
+      let orderValue;
+
+      if (
+        display_order !==
+          undefined &&
+        display_order !==
+          ""
+      ) {
+        orderValue =
+          Number(
+            display_order
+          );
+      } else {
+        const orderResult =
+          await pool.query(`
+            SELECT COALESCE(
+              MAX(display_order),
+              -1
+            ) + 1 AS next_order
+            FROM news
+          `);
+
+        orderValue =
+          Number(
+            orderResult.rows[0]
+              .next_order
+          );
+      }
+
+      const result =
+        await pool.query(
+          `
+          INSERT INTO news
+          (
+            title,
+            description,
+            content,
+            category,
+            image_url,
+            published_date,
+            display_order,
+            link
+          )
+          VALUES
+          ($1,$2,$3,$4,$5,$6,$7,$8)
+          RETURNING
+            id,
+            title,
+            description,
+            content,
+            category,
+            image_url,
+            published_date,
+            display_order,
+            link,
+            created_at,
+            updated_at
+          `,
+          [
+            title.trim(),
+            description || "",
+            content || "",
+            category ||
+              "News",
+            imageUrl,
+            published_date ||
+              null,
+            orderValue,
+            link || "",
+          ]
+        );
+
+      res.status(201).json({
+        success: true,
+        message:
+          "News added successfully",
+        data:
+          result.rows[0],
+      });
+    } catch (error) {
+      console.error(
+        "ADD NEWS ERROR:",
+        error
+      );
+
+      res.status(500).json({
+        success: false,
+        message:
+          "Unable to add news",
+        error:
+          error.message,
+      });
+    }
+  }
+);
+app.put(
+  "/api/news/:id",
+  upload.single("image"),
+  async (
+    req,
+    res
+  ) => {
+    try {
+      const {
+        id,
+      } = req.params;
+
+      const {
+        title,
+        description,
+        content,
+        category,
+        published_date,
+        display_order,
+        link,
+      } = req.body;
+
+      if (
+        !title ||
+        !title.trim()
+      ) {
+        return res.status(400).json({
+          success: false,
+          message:
+            "Title is required",
+        });
+      }
+
+      const existing =
+        await pool.query(
+          `
+          SELECT
+            image_url,
+            display_order,
+            link
+          FROM news
+          WHERE id = $1
+          `,
+          [id]
+        );
+
+      if (
+        existing.rows.length ===
+        0
+      ) {
+        return res.status(404).json({
+          success: false,
+          message:
+            "News not found",
+        });
+      }
+
+      let imageUrl =
+        existing.rows[0]
+          .image_url || "";
+
+      if (req.file) {
+        imageUrl =
+          `${req.protocol}://${req.get(
+            "host"
+          )}/uploads/${req.file.filename}`;
+      }
+
+      let orderValue =
+        existing.rows[0]
+          .display_order;
+
+      if (
+        display_order !==
+          undefined &&
+        display_order !==
+          ""
+      ) {
+        const parsedOrder =
+          Number(
+            display_order
+          );
+
+        if (
+          Number.isFinite(
+            parsedOrder
+          )
+        ) {
+          orderValue =
+            parsedOrder;
+        }
+      }
+
+      const linkValue =
+        link !== undefined
+          ? link || ""
+          : existing.rows[0]
+              .link || "";
+
+      const result =
+        await pool.query(
+          `
+          UPDATE news
+          SET
+            title = $1,
+            description = $2,
+            content = $3,
+            category = $4,
+            image_url = $5,
+            published_date = $6,
+            display_order = $7,
+            link = $8,
+            updated_at = CURRENT_TIMESTAMP
+          WHERE id = $9
+          RETURNING
+            id,
+            title,
+            description,
+            content,
+            category,
+            image_url,
+            published_date,
+            display_order,
+            link,
+            created_at,
+            updated_at
+          `,
+          [
+            title.trim(),
+            description || "",
+            content || "",
+            category ||
+              "News",
+            imageUrl,
+            published_date ||
+              null,
+            orderValue,
+            linkValue,
+            id,
+          ]
+        );
+
+      res.json({
+        success: true,
+        message:
+          "News updated successfully",
+        data:
+          result.rows[0],
+      });
+    } catch (error) {
+      console.error(
+        "UPDATE NEWS ERROR:",
+        error
+      );
+
+      res.status(500).json({
+        success: false,
+        message:
+          "Unable to update news",
+        error:
+          error.message,
+      });
+    }
+  }
+);
+app.delete(
+  "/api/news/:id",
+  async (
+    req,
+    res
+  ) => {
+    try {
+      const {
+        id,
+      } = req.params;
+
+      const existing =
+        await pool.query(
+          `
+          SELECT
+            image_url
+          FROM news
+          WHERE id = $1
+          `,
+          [id]
+        );
+
+      if (
+        existing.rows.length ===
+        0
+      ) {
+        return res.status(404).json({
+          success: false,
+          message:
+            "News not found",
+        });
+      }
+
+      const imageUrl =
+        existing.rows[0]
+          .image_url || "";
+
+      await pool.query(
+        `
+        DELETE FROM news
+        WHERE id = $1
+        `,
+        [id]
+      );
+
+      if (imageUrl) {
+        try {
+          const filename =
+            path.basename(
+              imageUrl
+            );
+
+          const filePath =
+            path.join(
+              uploadFolder,
+              filename
+            );
+
+          if (
+            fs.existsSync(
+              filePath
+            )
+          ) {
+            fs.unlinkSync(
+              filePath
+            );
+          }
+        } catch (imageError) {
+          console.error(
+            "NEWS IMAGE DELETE WARNING:",
+            imageError.message
+          );
+        }
+      }
+
+      res.json({
+        success: true,
+        message:
+          "News deleted successfully",
+      });
+    } catch (error) {
+      console.error(
+        "DELETE NEWS ERROR:",
+        error
+      );
+
+      res.status(500).json({
+        success: false,
+        message:
+          "Unable to delete news",
+        error:
+          error.message,
+      });
+    }
+  }
+);
 // =====================================
 // START SERVER
 // =====================================
