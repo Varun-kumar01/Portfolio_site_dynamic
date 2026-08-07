@@ -1,16 +1,21 @@
-import MainLayout from '../layouts/MainLayout'
-import SectionTitle from '../components/common/SectionTitle'
+import BiographyHero from "../components/biography/BiographyHero";
+import ProfileSection from "../components/biography/ProfileSection";
+import Education from "../components/biography/Education";
+import PoliticalTimeline from "../components/biography/PoliticalTimeline";
+import LeadershipRoles from "../components/biography/LeadershipRoles";
+import Awards from "../components/biography/Awards";
+import GalleryStrip from "../components/biography/GalleryStrip";
 
-const Biography = () => {
+export default function Biography() {
   return (
-    <MainLayout>
-      <section className="py-20">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <SectionTitle eyebrow="Biography" title="Biography and public life overview." subtitle="A concise overview of the leader's journey and values." />
-        </div>
-      </section>
-    </MainLayout>
-  )
+    <>
+      <BiographyHero />
+      <ProfileSection />
+      <Education />
+      <PoliticalTimeline />
+      <LeadershipRoles />
+      <Awards />
+      <GalleryStrip />
+    </>
+  );
 }
-
-export default Biography

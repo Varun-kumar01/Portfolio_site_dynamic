@@ -1,27 +1,99 @@
-import SectionTitle from '../common/SectionTitle'
+import {
+  Award,
+  Building2,
+  GraduationCap,
+  HeartHandshake,
+} from "lucide-react";
 
-const items = [
-  { title: 'Public Service', text: 'Dedicated years of service across communities and institutions.' },
-  { title: 'Policy Leadership', text: 'Shaped initiatives rooted in practical reform and accountability.' },
-  { title: 'Development Focus', text: 'Supported civic progress and grassroots empowerment.' },
-]
+const achievements = [
+  {
+    icon: Building2,
+    title: "Infrastructure",
+    description:
+      "Roads, drinking water, public facilities and civic improvements.",
+  },
+  {
+    icon: GraduationCap,
+    title: "Education",
+    description:
+      "Schools, scholarships, digital classrooms and youth programs.",
+  },
+  {
+    icon: HeartHandshake,
+    title: "Healthcare",
+    description:
+      "Medical camps, health awareness and hospital development.",
+  },
+  {
+    icon: Award,
+    title: "Public Welfare",
+    description:
+      "Community empowerment and welfare initiatives across constituencies.",
+  },
+];
 
-const Achievements = () => {
+export default function Achievements() {
   return (
-    <section className="bg-slate-50 py-20">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <SectionTitle eyebrow="Achievements" title="Milestones that reflect sustained public commitment." subtitle="A record of purpose-driven leadership and measurable impact." />
-        <div className="grid gap-6 md:grid-cols-3">
-          {items.map((item) => (
-            <div key={item.title} className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
-              <h3 className="text-xl font-semibold text-slate-900">{item.title}</h3>
-              <p className="mt-3 text-slate-600">{item.text}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  )
-}
+    <section className="py-20 bg-gray-50">
 
-export default Achievements
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+        <div className="text-center max-w-3xl mx-auto">
+
+          <span className="text-orange-600 font-semibold uppercase tracking-widest">
+            Achievements
+          </span>
+
+          <h2 className="mt-4 text-4xl lg:text-5xl font-bold text-gray-900">
+            Working Towards Meaningful Change
+          </h2>
+
+          <p className="mt-6 text-gray-600 leading-8">
+            Every initiative is focused on sustainable development,
+            transparency and improving the everyday lives of citizens.
+          </p>
+
+        </div>
+
+        <div className="grid md:grid-cols-2 xl:grid-cols-4 gap-8 mt-16">
+
+          {achievements.map((item, index) => {
+
+            const Icon = item.icon;
+
+            return (
+
+              <div
+                key={index}
+                className="bg-white rounded-2xl p-8 shadow-sm hover:shadow-lg transition duration-300"
+              >
+
+                <div className="w-16 h-16 rounded-2xl bg-orange-100 flex items-center justify-center">
+
+                  <Icon
+                    className="text-orange-600"
+                    size={30}
+                  />
+
+                </div>
+
+                <h3 className="mt-6 text-xl font-bold">
+                  {item.title}
+                </h3>
+
+                <p className="mt-4 text-gray-600 leading-7">
+                  {item.description}
+                </p>
+
+              </div>
+
+            );
+          })}
+
+        </div>
+
+      </div>
+
+    </section>
+  );
+}

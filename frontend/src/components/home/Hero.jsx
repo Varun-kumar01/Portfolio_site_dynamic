@@ -1,28 +1,146 @@
-import Button from '../common/Button'
+import { ArrowRight, Play } from "lucide-react";
 
-const Hero = () => {
+export default function Hero() {
   return (
-    <section className="bg-gradient-to-br from-slate-50 to-white py-20">
-      <div className="mx-auto grid max-w-7xl items-center gap-10 px-4 sm:px-6 lg:grid-cols-2 lg:px-8">
-        <div>
-          <p className="mb-4 text-sm font-semibold uppercase tracking-[0.3em] text-blue-700">Official Portfolio</p>
-          <h1 className="text-4xl font-semibold leading-tight text-slate-900 sm:text-5xl">
-            Leadership rooted in service, vision, and progress.
-          </h1>
-          <p className="mt-6 max-w-2xl text-lg text-slate-600">
-            A trusted public platform for biography, achievements, development work, media, and official updates.
-          </p>
-          <div className="mt-8 flex flex-wrap gap-4">
-            <Button>Explore Profile</Button>
-            <Button variant="secondary">View Achievements</Button>
+    <section className="relative overflow-hidden bg-gradient-to-br from-orange-50 via-white to-white">
+      {/* Background Shapes */}
+      <div className="absolute -top-40 -left-40 h-96 w-96 rounded-full bg-orange-100 blur-3xl opacity-60"></div>
+      <div className="absolute bottom-0 right-0 h-80 w-80 rounded-full bg-orange-50 blur-3xl opacity-70"></div>
+
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24">
+
+        <div className="grid lg:grid-cols-2 gap-14 items-center">
+
+          {/* LEFT */}
+          <div>
+
+            <span className="inline-flex items-center rounded-full bg-orange-100 px-4 py-2 text-sm font-medium text-orange-700">
+              Dedicated to Public Service
+            </span>
+
+            <h1 className="mt-6 text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight text-gray-900">
+              Building a Better
+              <br />
+              Future Together
+            </h1>
+
+            <p className="mt-6 text-gray-600 text-lg leading-8 max-w-xl">
+              Committed to transparent governance, sustainable development,
+              quality education, healthcare, youth empowerment, and creating
+              better opportunities for every citizen.
+            </p>
+
+            <div className="mt-10 flex flex-wrap gap-4">
+
+              <button className="bg-orange-600 hover:bg-orange-700 text-white px-8 py-4 rounded-lg font-semibold flex items-center gap-2 transition">
+                Explore Journey
+                <ArrowRight size={18} />
+              </button>
+
+              <button className="border border-gray-300 hover:border-orange-600 hover:text-orange-600 px-8 py-4 rounded-lg font-semibold flex items-center gap-2 transition">
+                <Play size={18} />
+                Watch Video
+              </button>
+
+            </div>
+
+            {/* Stats */}
+
+            <div className="grid grid-cols-3 gap-6 mt-14">
+
+              <div>
+                <h2 className="text-3xl font-bold text-orange-600">
+                  15+
+                </h2>
+
+                <p className="text-gray-600 mt-2 text-sm">
+                  Years of Service
+                </p>
+              </div>
+
+              <div>
+                <h2 className="text-3xl font-bold text-orange-600">
+                  200+
+                </h2>
+
+                <p className="text-gray-600 mt-2 text-sm">
+                  Development Works
+                </p>
+              </div>
+
+              <div>
+                <h2 className="text-3xl font-bold text-orange-600">
+                  5L+
+                </h2>
+
+                <p className="text-gray-600 mt-2 text-sm">
+                  Citizens Reached
+                </p>
+              </div>
+
+            </div>
+
           </div>
+
+          {/* RIGHT */}
+
+          <div className="relative flex justify-center">
+
+            {/* Orange Card */}
+
+            <div className="absolute top-10 right-5 w-52 h-52 bg-orange-100 rounded-3xl rotate-6 hidden lg:block"></div>
+
+            <div className="relative rounded-3xl overflow-hidden shadow-2xl bg-white">
+
+              <img
+                src="/leader.png"
+                alt="Leader"
+                className="w-full max-w-md object-cover"
+              />
+
+            </div>
+
+            {/* Floating Card */}
+
+            <div className="hidden lg:flex absolute bottom-10 -left-5 bg-white rounded-xl shadow-xl p-5 items-center gap-4">
+
+              <div className="w-14 h-14 rounded-full bg-orange-100 flex items-center justify-center">
+
+                <svg
+                  className="w-7 h-7 text-orange-600"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="M12 5v14M5 12h14"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+
+              </div>
+
+              <div>
+
+                <h4 className="font-semibold">
+                  People First
+                </h4>
+
+                <p className="text-sm text-gray-500">
+                  Service • Development • Trust
+                </p>
+
+              </div>
+
+            </div>
+
+          </div>
+
         </div>
-        <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
-          <div className="aspect-[4/5] rounded-2xl bg-slate-100" />
-        </div>
+
       </div>
     </section>
-  )
+  );
 }
-
-export default Hero

@@ -1,16 +1,17 @@
-import MainLayout from '../layouts/MainLayout'
-import SectionTitle from '../components/common/SectionTitle'
+import AboutHero from "../components/about/AboutHero";
+import Biography from "../components/about/Biography";
+import Journey from "../components/about/Journey";
+import VisionMission from "../components/about/VisionMission";
+import LeaderQuote from "../components/about/LeaderQuote";
 
-const About = () => {
+export default function About() {
   return (
-    <MainLayout>
-      <section className="py-20">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <SectionTitle eyebrow="About" title="About the public leadership journey." subtitle="A profile grounded in service, responsibility, and public trust." />
-        </div>
-      </section>
-    </MainLayout>
-  )
+    <>
+      <AboutHero />
+      <Biography />
+      <Journey />
+      <VisionMission />
+      <LeaderQuote />
+    </>
+  );
 }
-
-export default About

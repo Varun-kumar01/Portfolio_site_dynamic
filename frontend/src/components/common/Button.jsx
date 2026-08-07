@@ -1,15 +1,22 @@
-const Button = ({ children, variant = 'primary', className = '', ...props }) => {
-  const base = 'inline-flex items-center justify-center rounded-full px-6 py-3 font-medium transition-all duration-200'
-  const variants = {
-    primary: 'bg-blue-700 text-white hover:bg-blue-800',
-    secondary: 'border border-slate-300 bg-white text-slate-800 hover:bg-slate-50',
-  }
+import { ArrowRight } from "lucide-react";
+
+export default function Button({
+  children,
+  variant = "primary",
+}) {
+  const styles = {
+    primary:
+      "bg-orange-600 hover:bg-orange-700 text-white",
+    secondary:
+      "border border-orange-600 text-orange-600 hover:bg-orange-50",
+  };
 
   return (
-    <button className={`${base} ${variants[variant]} ${className}`} {...props}>
+    <button
+      className={`${styles[variant]} inline-flex items-center gap-2 px-7 py-3 rounded-lg font-semibold transition`}
+    >
       {children}
+      <ArrowRight size={18} />
     </button>
-  )
+  );
 }
-
-export default Button
