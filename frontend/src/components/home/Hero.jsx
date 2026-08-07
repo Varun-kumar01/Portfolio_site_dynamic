@@ -265,7 +265,7 @@ export default function Hero() {
             <img
               src="/leader.png"
               alt="Leader"
-              className="relative z-20 h-[560px] md:h-[620px] lg:h-[640px] object-contain animate-float"
+              className="relative z-20 h-[560px] md:h-[620px] lg:h-[640px] object-contain animate-float rounded-full"
             />
 
             {/* Glass Card */}
@@ -310,7 +310,7 @@ export default function Hero() {
 
       {/* Scroll */}
 
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex flex-col items-center animate-bounce">
+      {/* <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex flex-col items-center animate-bounce">
 
         <span className="text-xs uppercase tracking-[0.35em] text-gray-500">
 
@@ -323,7 +323,7 @@ export default function Hero() {
           className="mt-2 text-orange-600"
         />
 
-      </div>
+      </div> */}
 
     </section>
   );
