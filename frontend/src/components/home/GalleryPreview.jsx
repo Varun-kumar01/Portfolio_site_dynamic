@@ -84,11 +84,13 @@ export default function GalleryPreview() {
 
                 </p>
 
-                <span className="text-white/80">
+                <button onClick={() => navigate("/gallery")}>
+                  <span className="text-white/80">
 
-                  View Photo
+                    View Photo
 
-                </span>
+                  </span>
+                </button>
 
               </div>
 
@@ -115,11 +117,13 @@ export default function GalleryPreview() {
 
                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition duration-500 flex items-center justify-center">
 
-                  <span className="text-white font-semibold">
+                  <button onClick={() => navigate("/gallery")}>
+                    <span className="text-white font-semibold">
 
-                    View
+                      View
 
-                  </span>
+                    </span>
+                  </button>
 
                 </div>
 

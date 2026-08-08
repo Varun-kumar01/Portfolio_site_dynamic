@@ -150,12 +150,6 @@
 
 
 
-
-
-
-
-
-
 import { ArrowRight } from "lucide-react";
 import leader from "../../data/leader"
 import { useNavigate } from "react-router-dom";
@@ -253,7 +247,7 @@ export default function Hero() {
 
               </button>
 
-              <button className="rounded-full border border-gray-300 hover:border-orange-600 hover:text-orange-600 transition-all duration-300 px-7 py-4 font-semibold">
+              <button onClick={() => navigate("/news")} className="rounded-full border border-gray-300 hover:border-orange-600 hover:text-orange-600 transition-all duration-300 px-7 py-4 font-semibold">
 
                 Development Works
 

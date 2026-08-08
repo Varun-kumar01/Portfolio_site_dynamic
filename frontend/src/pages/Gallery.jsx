@@ -1,67 +1,106 @@
 import { useMemo, useState } from "react";
-import { Play, X, ArrowRight } from "lucide-react";
-import PageBanner from "../components/common/PageBanner";
+import { Play, X } from "lucide-react";
 
 const galleryItems = [
   {
     id: 1,
     type: "photo",
     category: "Public Events",
-    image: "/gallery/1.jpg",
-    title: "Public Interaction",
+    image: "/gallery/1.png",
+    title: "Public Meetings",
   },
   {
     id: 2,
     type: "photo",
     category: "Meetings",
-    image: "/gallery/2.jpg",
-    title: "Official Meeting",
+    image: "/gallery/2.png",
+    title: "Public Meetings",
   },
   {
     id: 3,
     type: "photo",
     category: "Constituency",
-    image: "/gallery/3.jpg",
-    title: "Constituency Visit",
+    image: "/gallery/3.png",
+    title: "Public Meetings",
   },
   {
     id: 4,
     type: "photo",
     category: "Events",
-    image: "/gallery/4.jpg",
-    title: "Public Programme",
+    image: "/gallery/4.png",
+    title: "Public Meetings",
   },
   {
     id: 5,
     type: "photo",
     category: "Public Events",
-    image: "/gallery/5.jpg",
-    title: "Community Interaction",
+    image: "/gallery/5.png",
+    title: "Public Meetings",
   },
   {
     id: 6,
     type: "photo",
     category: "Meetings",
-    image: "/gallery/6.jpg",
-    title: "Leadership Meeting",
+    image: "/gallery/6.png",
+    title: "Public Meetings",
   },
-
-  // Replace these thumbnails/URLs with actual videos later.
   {
     id: 7,
-    type: "video",
+    type: "photo",
     category: "Public Events",
-    image: "/gallery/video1.jpg",
-    title: "Public Programme",
-    videoUrl: "https://www.youtube.com/watch?v=YOUR_VIDEO_ID",
+    image: "/gallery/7.png",
+    title: "Public Interaction",
   },
   {
     id: 8,
+    type: "photo",
+    category: "Meetings",
+    image: "/gallery/8.png",
+    title: "Official Meeting",
+  },
+  {
+    id: 9,
+    type: "photo",
+    category: "Constituency",
+    image: "/gallery/9.png",
+    title: "Constituency Visit",
+  },
+  {
+    id: 10,
+    type: "photo",
+    category: "Events",
+    image: "/gallery/10.png",
+    title: "Public Programme",
+  },
+  {
+    id: 11,
+    type: "photo",
+    category: "Public Events",
+    image: "/gallery/11.png",
+    title: "Community Interaction",
+  },
+  {
+    id: 12,
+    type: "photo",
+    category: "Meetings",
+    image: "/gallery/12.png",
+    title: "Leadership Meeting",
+  },
+
+  // Videos
+  {
+    id: 13,
+    type: "video",
+    category: "Public Events",
+    title: "Public Programme",
+    videoUrl: "https://www.youtube.com/watch?v=qFusARwKYPk",
+  },
+  {
+    id: 14,
     type: "video",
     category: "Meetings",
-    image: "/gallery/video2.jpg",
     title: "Public Interaction",
-    videoUrl: "https://www.youtube.com/watch?v=YOUR_VIDEO_ID",
+    videoUrl: "https://www.youtube.com/watch?v=XTZMEkK0F7s",
   },
 ];
 
@@ -72,6 +111,17 @@ const categories = [
   "Meetings",
   "Events",
 ];
+
+// Get YouTube thumbnail from video URL
+const getYoutubeThumbnail = (url) => {
+  const match = url.match(
+    /(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&?/]+)/
+  );
+
+  return match
+    ? `https://img.youtube.com/vi/${match[1]}/hqdefault.jpg`
+    : "";
+};
 
 export default function Gallery() {
   const [type, setType] = useState("photo");
@@ -91,13 +141,9 @@ export default function Gallery() {
 
   return (
     <>
-      {/* <PageBanner
-        title="Gallery"
-        subtitle="Moments of public service, leadership and connection with the people."
-      /> */}
+      {/* Gallery Section */}
 
       <section className="bg-white py-16 lg:py-20">
-
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
 
           {/* Header */}
@@ -162,7 +208,6 @@ export default function Gallery() {
           <div className="flex flex-wrap gap-3 mt-10">
 
             {categories.map((item) => (
-
               <button
                 key={item}
                 onClick={() => setCategory(item)}
@@ -174,7 +219,6 @@ export default function Gallery() {
               >
                 {item}
               </button>
-
             ))}
 
           </div>
@@ -196,14 +240,24 @@ export default function Gallery() {
                   }`}
                 >
 
+                  {/* Image / Video Thumbnail */}
+
                   <img
-                    src={item.image}
+                    src={
+                      item.type === "video"
+                        ? getYoutubeThumbnail(item.videoUrl)
+                        : item.image
+                    }
                     alt={item.title}
                     onClick={() =>
                       item.type === "photo" &&
                       setSelectedImage(item.image)
                     }
-                    className={`w-full object-cover cursor-pointer transition duration-700 group-hover:scale-105 ${
+                    className={`w-full object-cover transition duration-700 group-hover:scale-105 ${
+                      item.type === "photo"
+                        ? "cursor-pointer"
+                        : ""
+                    } ${
                       index === 0
                         ? "h-[300px] md:h-[520px]"
                         : "h-[220px] md:h-[250px]"
@@ -240,11 +294,13 @@ export default function Gallery() {
                     >
 
                       <div className="w-14 h-14 rounded-full bg-white/90 flex items-center justify-center shadow-xl group-hover:scale-110 transition">
+
                         <Play
                           size={22}
                           className="text-orange-600 ml-1"
                           fill="currentColor"
                         />
+
                       </div>
 
                     </a>
@@ -270,7 +326,6 @@ export default function Gallery() {
           )}
 
         </div>
-
       </section>
 
       {/* Lightbox */}

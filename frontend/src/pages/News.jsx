@@ -6,56 +6,62 @@ const newsData = [
   {
     id: 1,
     title: "Development Review Meeting Conducted Successfully",
-    image: "/news/news1.jpg",
+    image: "/news/news1.png",
     category: "Government",
     date: "20 August 2026",
     description:
       "Review meeting conducted to monitor ongoing infrastructure and welfare projects.",
+    link: "https://hyderabadnewshunt.com/minister-adluri-laxman-kumar-reviews-village-development-works/",  
   },
   {
     id: 2,
     title: "Village Development Programme",
-    image: "/news/news2.jpg",
+    image: "/news/news2.png",
     category: "Public",
     date: "18 August 2026",
     description:
       "Interaction with local citizens regarding drinking water and road development.",
+    link: "https://www.facebook.com/61557986352577/videos/the-true-measure-of-governance-lies-in-ensuring-that-every-welfare-initiative-re/1388621763113437/",  
   },
   {
     id: 3,
     title: "Health Camp Inaugurated",
-    image: "/news/news3.jpg",
+    image: "/news/news3.png",
     category: "Healthcare",
     date: "16 August 2026",
     description:
       "Large scale medical camp organized for citizens across the constituency.",
+    link: "https://www.facebook.com/smsghm/videos/honble-minister-for-minorities-welfare-telangana-sri-adluri-laxman-kumar-praised/1596232714869992/",  
   },
   {
     id: 4,
     title: "Education Support Initiative",
-    image: "/news/news4.jpg",
+    image: "/news/news4.png",
     category: "Education",
     date: "14 August 2026",
     description:
       "Scholarship and educational assistance programme launched.",
+    link: "https://timesofindia.indiatimes.com/city/hyderabad/t-urges-centre-to-release-450cr-scholarship-dues-for-tribal-students/articleshow/133035186.cms",  
   },
   {
     id: 5,
     title: "Farmer Welfare Meeting",
-    image: "/news/news5.jpg",
+    image: "/news/news5.png",
     category: "Agriculture",
     date: "10 August 2026",
     description:
       "Interaction with farmers regarding irrigation and welfare schemes.",
+    link: "https://www.facebook.com/IPRTelangana/posts/minister-adluri-laxman-kumar-assures-village-level-problem-resolutiontelangana-s/1399975242161476/",  
   },
   {
     id: 6,
     title: "Public Grievance Programme",
-    image: "/news/news6.jpg",
+    image: "/news/news6.png",
     category: "Public",
     date: "08 August 2026",
     description:
       "Meeting with citizens to discuss and address constituency issues.",
+    link: "https://www.thehansindia.com/news/cities/hyderabad/laxman-assures-support-to-differently-abled-employees-1101729",  
   },
 ];
 
@@ -266,7 +272,7 @@ export default function News() {
                       {item.description}
                     </p>
 
-                    <button className="mt-6 inline-flex items-center gap-2 font-semibold text-orange-600">
+                    {/* <button className="mt-6 inline-flex items-center gap-2 font-semibold text-orange-600">
 
                       Read More
 
@@ -275,7 +281,22 @@ export default function News() {
                         className="transition group-hover:translate-x-1"
                       />
 
-                    </button>
+                    </button> */}
+
+
+                    <a
+                      href={item.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-6 inline-flex items-center gap-2 font-semibold text-orange-600"
+                    >
+                      Read More
+
+                      <ArrowRight
+                        size={17}
+                        className="transition group-hover:translate-x-1"
+                      />
+                    </a>
 
                   </div>
 
