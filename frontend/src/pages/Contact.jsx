@@ -22,7 +22,7 @@ import ContactCard from "../components/contact/ContactCard";
 const Contact = () => {
   return (
     <>
-      <section className="bg-[#2f2f2f] py-16">
+      {/* <section className="bg-[#2f2f2f] py-16">
         <div className="max-w-7xl mx-auto px-4 text-center">
           <h1 className="text-5xl md:text-6xl font-light tracking-wide text-white">
             Contact
@@ -36,7 +36,7 @@ const Contact = () => {
             <span className="text-white font-medium">Contact</span>
           </div>
         </div>
-      </section>
+      </section> */}
 
       <section className="bg-gray-50 py-20">
         <div className="max-w-7xl mx-auto px-6">

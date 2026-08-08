@@ -68,7 +68,7 @@ export default function TopBar() {
 
           <div className="flex items-center gap-2">
             <Mail size={14} className="text-orange-600" />
-            <span>office@email.com</span>
+            <span>leader.contact.email</span>
           </div>
 
           <div className="hidden xl:flex items-center gap-2">

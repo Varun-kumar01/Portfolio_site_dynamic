@@ -1,4 +1,5 @@
 import Container from "../common/Container";
+import leader from "../../data/leader"
 
 export default function LeaderQuote() {
   return (
@@ -29,11 +30,11 @@ export default function LeaderQuote() {
             />
 
             <h3 className="mt-5 text-white text-xl font-semibold">
-              Politician Name
+              <p>{leader.profile.name}</p>
             </h3>
 
             <p className="text-orange-100">
-              Public Representative
+              {leader.profile.designation}
             </p>
 
           </div>

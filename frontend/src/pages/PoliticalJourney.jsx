@@ -409,7 +409,7 @@ const CareerImage = ({ item }) => {
    MAIN DEVELOPMENT PAGE
 ========================================================= */
 
-const Development = () => {
+const PoliticalJourney = () => {
   return (
     <div className="min-h-screen bg-white">
 
@@ -434,219 +434,127 @@ const Development = () => {
           "
         >
 
-          {/* ORANGE LINE + LABEL */}
+          <div className="grid lg:grid-cols-[1fr_340px] gap-12 lg:gap-20 items-center">
 
-          <div className="mb-4 flex items-center gap-3">
+            {/* ================= LEFT ================= */}
 
-            <span className="h-[2px] w-8 bg-orange-500 sm:w-12" />
+            <div>
 
-            <span
-              className="
-                text-[9px]
-                font-bold
-                uppercase
-                tracking-[0.2em]
-                text-orange-500
+              {/* LABEL */}
 
-                sm:text-xs
-              "
-            >
-              Political Journey
-            </span>
+              <div className="mb-5 flex items-center gap-3">
 
-          </div>
+                <span className="h-[2px] w-10 bg-orange-500" />
 
+                <span className="text-xs font-bold uppercase tracking-[0.25em] text-orange-500">
 
-          {/* HEADING */}
+                  Political Journey
 
-          <h1
-            className="
-              max-w-3xl
-              text-2xl
-              font-bold
-              leading-tight
-              text-slate-900
+                </span>
 
-              sm:text-4xl
+              </div>
 
-              lg:text-5xl
-            "
-          >
-            Political Career
-          </h1>
+              {/* HEADING */}
 
-
-          {/* SUBTITLE */}
-
-          <p
-            className="
-              mt-3
-              max-w-2xl
-              text-xs
-              leading-5
-              text-slate-600
-
-              sm:mt-4
-              sm:text-sm
-              sm:leading-6
-
-              lg:text-base
-            "
-          >
-            A journey of public service, leadership, social justice and
-            inclusive development.
-          </p>
-
-
-          {/* =================================================
-              HIGHLIGHT STATS
-          ================================================= */}
-
-          <div
-            className="
-              mt-7
-              grid
-              grid-cols-3
-              gap-2
-
-              sm:mt-10
-              sm:max-w-2xl
-              sm:gap-4
-            "
-          >
-
-            {/* 25+ YEARS */}
-
-            <div
-              className="
-                rounded-lg
-                border
-                border-slate-200
-                bg-white
-                p-3
-                text-center
-                shadow-sm
-
-                sm:rounded-xl
-                sm:p-4
-              "
-            >
-              <div
+              <h1
                 className="
-                  text-lg
+                  max-w-3xl
+                  text-3xl
                   font-bold
-                  text-orange-500
+                  leading-tight
+                  text-slate-900
 
-                  sm:text-2xl
+                  sm:text-4xl
+
+                  lg:text-5xl
                 "
               >
-                25+
-              </div>
+                Political Career
+              </h1>
 
-              <div
+              {/* SUBTITLE */}
+
+              <p
                 className="
-                  mt-1
-                  text-[7px]
-                  font-medium
-                  uppercase
-                  tracking-wide
-                  text-slate-500
+                  mt-6
+                  max-w-2xl
+                  text-sm
+                  leading-7
+                  text-slate-600
 
-                  sm:text-[10px]
+                  sm:text-base
+
+                  lg:text-lg
+                  lg:leading-8
                 "
               >
-                Years Experience
-              </div>
+                A journey of public service, leadership, social justice and
+                inclusive development spanning more than two decades of
+                dedicated service to the people of Telangana.
+              </p>
+
             </div>
 
+            {/* ================= RIGHT ================= */}
 
-            {/* 2023 */}
+            <div className="grid gap-5">
 
-            <div
-              className="
-                rounded-lg
-                border
-                border-slate-200
-                bg-white
-                p-3
-                text-center
-                shadow-sm
+              {/* TOP */}
 
-                sm:rounded-xl
-                sm:p-4
-              "
-            >
-              <div
-                className="
-                  text-lg
-                  font-bold
-                  text-emerald-600
+              <div className="rounded-2xl border border-slate-200 bg-white p-6 text-center shadow-sm hover:shadow-lg transition">
 
-                  sm:text-2xl
-                "
-              >
-                2023
+                <h3 className="text-4xl font-bold text-orange-500">
+
+                  25+
+
+                </h3>
+
+                <p className="mt-2 text-xs uppercase tracking-[0.18em] text-slate-500">
+
+                  Years Experience
+
+                </p>
+
               </div>
 
-              <div
-                className="
-                  mt-1
-                  text-[7px]
-                  font-medium
-                  uppercase
-                  tracking-wide
-                  text-slate-500
+              {/* BOTTOM */}
 
-                  sm:text-[10px]
-                "
-              >
-                Assembly Victory
-              </div>
-            </div>
+              <div className="grid grid-cols-2 gap-5">
 
+                <div className="rounded-2xl border border-slate-200 bg-white p-6 text-center shadow-sm hover:shadow-lg transition">
 
-            {/* 2025 */}
+                  <h3 className="text-3xl font-bold text-emerald-600">
 
-            <div
-              className="
-                rounded-lg
-                border
-                border-slate-200
-                bg-white
-                p-3
-                text-center
-                shadow-sm
+                    2023
 
-                sm:rounded-xl
-                sm:p-4
-              "
-            >
-              <div
-                className="
-                  text-lg
-                  font-bold
-                  text-orange-500
+                  </h3>
 
-                  sm:text-2xl
-                "
-              >
-                2025
+                  <p className="mt-2 text-xs uppercase tracking-[0.15em] text-slate-500">
+
+                    Assembly Victory
+
+                  </p>
+
+                </div>
+
+                <div className="rounded-2xl border border-slate-200 bg-white p-6 text-center shadow-sm hover:shadow-lg transition">
+
+                  <h3 className="text-3xl font-bold text-orange-500">
+
+                    2025
+
+                  </h3>
+
+                  <p className="mt-2 text-xs uppercase tracking-[0.15em] text-slate-500">
+
+                    Cabinet Minister
+
+                  </p>
+
+                </div>
+
               </div>
 
-              <div
-                className="
-                  mt-1
-                  text-[7px]
-                  font-medium
-                  uppercase
-                  tracking-wide
-                  text-slate-500
-
-                  sm:text-[10px]
-                "
-              >
-                Cabinet Minister
-              </div>
             </div>
 
           </div>
@@ -1027,4 +935,4 @@ const Development = () => {
   )
 }
 
-export default Development
+export default PoliticalJourney;

@@ -8,6 +8,10 @@ body,
   scroll-behavior: smooth;
 }
 
+html{
+  scroll-behavior:smooth;
+}
+
 body {
   margin: 0;
   font-family: Inter, sans-serif;
@@ -26,6 +30,28 @@ img {
 
 button {
   cursor: pointer;
+}
+
+::selection{
+  background:#4e9653;
+  color:white;
+}
+
+::-webkit-scrollbar{
+width:8px;
+}
+
+::-webkit-scrollbar-track{
+background:#f8f8f8;
+}
+
+::-webkit-scrollbar-thumb{
+background:#ea580c;
+border-radius:20px;
+}
+
+::-webkit-scrollbar-thumb:hover{
+background:#c2410c;
 }
 
 @keyframes float {

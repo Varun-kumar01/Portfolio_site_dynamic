@@ -1,10 +1,5 @@
 import { useMemo, useState } from "react";
-import {
-  CalendarDays,
-  Search,
-  ArrowRight,
-} from "lucide-react";
-
+import { CalendarDays, Search, ArrowRight } from "lucide-react";
 import PageBanner from "../components/common/PageBanner";
 
 const newsData = [
@@ -12,7 +7,7 @@ const newsData = [
     id: 1,
     title: "Development Review Meeting Conducted Successfully",
     image: "/news/news1.jpg",
-    category: "Development",
+    category: "Government",
     date: "20 August 2026",
     description:
       "Review meeting conducted to monitor ongoing infrastructure and welfare projects.",
@@ -21,7 +16,7 @@ const newsData = [
     id: 2,
     title: "Village Development Programme",
     image: "/news/news2.jpg",
-    category: "Government",
+    category: "Public",
     date: "18 August 2026",
     description:
       "Interaction with local citizens regarding drinking water and road development.",
@@ -60,18 +55,17 @@ const newsData = [
     category: "Public",
     date: "08 August 2026",
     description:
-      "Meeting with citizens to resolve constituency issues.",
+      "Meeting with citizens to discuss and address constituency issues.",
   },
 ];
 
 const categories = [
   "All",
-  "Development",
   "Government",
+  "Public",
   "Healthcare",
   "Education",
   "Agriculture",
-  "Public",
 ];
 
 export default function News() {
@@ -79,13 +73,16 @@ export default function News() {
   const [search, setSearch] = useState("");
 
   const filteredNews = useMemo(() => {
+    const query = search.trim().toLowerCase();
+
     return newsData.filter((item) => {
       const categoryMatch =
         category === "All" || item.category === category;
 
-      const searchMatch = item.title
-        .toLowerCase()
-        .includes(search.toLowerCase());
+      const searchMatch =
+        !query ||
+        item.title.toLowerCase().includes(query) ||
+        item.description.toLowerCase().includes(query);
 
       return categoryMatch && searchMatch;
     });
@@ -93,36 +90,42 @@ export default function News() {
 
   return (
     <>
-      <PageBanner
-        title="Latest News"
-        background="/news-banner.jpg"
-      />
+      {/* <PageBanner
+        title="News & Updates"
+        subtitle="Latest updates, public activities, programmes and announcements."
+      /> */}
 
-      <section className="py-20 bg-gray-50">
-
-        <div className="max-w-7xl mx-auto px-4 lg:px-8">
+      <section className="bg-slate-50 py-16 lg:py-20">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8">
 
           {/* Header */}
 
-          <div className="flex flex-col lg:flex-row justify-between gap-8">
+          <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8">
 
-            <div>
+            <div className="max-w-2xl">
 
-              <span className="uppercase tracking-[0.25em] text-orange-600 font-semibold">
+              <span className="text-orange-600 text-sm font-semibold uppercase tracking-[0.25em]">
                 Latest Updates
               </span>
 
-              <h2 className="mt-3 text-4xl lg:text-5xl font-bold">
+              <h1 className="mt-3 text-3xl md:text-4xl lg:text-5xl font-bold text-slate-900">
                 News & Announcements
-              </h2>
+              </h1>
+
+              <p className="mt-4 text-gray-600 leading-8">
+                Follow the latest public programmes, constituency activities,
+                welfare initiatives and important announcements.
+              </p>
 
             </div>
 
-            <div className="relative lg:w-96">
+            {/* Search */}
+
+            <div className="relative w-full lg:w-80">
 
               <Search
-                className="absolute left-4 top-4 text-gray-400"
                 size={18}
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
               />
 
               <input
@@ -130,60 +133,22 @@ export default function News() {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search news..."
-                className="w-full rounded-xl border border-gray-300 bg-white py-4 pl-12 pr-4 outline-none focus:border-orange-600"
+                className="
+                  w-full
+                  rounded-2xl
+                  border border-slate-200
+                  bg-white
+                  py-3.5
+                  pl-11
+                  pr-4
+                  text-sm
+                  outline-none
+                  transition
+                  focus:border-orange-500
+                  focus:ring-2
+                  focus:ring-orange-100
+                "
               />
-
-            </div>
-
-          </div>
-
-          {/* Featured */}
-
-          <div className="mt-16">
-
-            <div className="grid lg:grid-cols-2 bg-white rounded-2xl shadow-lg overflow-hidden">
-
-              <img
-                src="/news/news1.jpg"
-                alt=""
-                className="w-full h-full min-h-[380px] object-cover"
-              />
-
-              <div className="p-10 flex flex-col justify-center">
-
-                <span className="bg-orange-100 text-orange-600 px-4 py-2 rounded-full text-sm font-semibold w-fit">
-                  FEATURED
-                </span>
-
-                <h2 className="mt-6 text-4xl font-bold leading-tight">
-
-                  Government Welfare Initiatives Continue Across Dharmapuri Constituency
-
-                </h2>
-
-                <div className="flex items-center gap-2 mt-5 text-gray-500">
-
-                  <CalendarDays size={16} />
-
-                  20 August 2026
-
-                </div>
-
-                <p className="mt-8 text-gray-600 leading-8">
-
-                  Shri Adluri Laxman Kumar reviewed multiple development
-                  projects and interacted with citizens regarding
-                  welfare programmes and constituency development.
-
-                </p>
-
-                <button className="mt-8 bg-orange-600 hover:bg-orange-700 transition text-white px-7 py-3 rounded-lg w-fit">
-
-                  Read Complete Story
-
-                </button>
-
-              </div>
 
             </div>
 
@@ -191,18 +156,27 @@ export default function News() {
 
           {/* Categories */}
 
-          <div className="flex flex-wrap gap-3 mt-16">
+          <div className="flex flex-wrap gap-3 mt-10">
 
             {categories.map((item) => (
 
               <button
                 key={item}
                 onClick={() => setCategory(item)}
-                className={`px-5 py-2 rounded-full border transition ${
-                  category === item
-                    ? "bg-orange-600 border-orange-600 text-white"
-                    : "bg-white hover:border-orange-600 hover:text-orange-600"
-                }`}
+                className={`
+                  rounded-full
+                  border
+                  px-5
+                  py-2
+                  text-sm
+                  font-medium
+                  transition
+                  ${
+                    category === item
+                      ? "border-orange-600 bg-orange-600 text-white"
+                      : "border-slate-200 bg-white text-slate-600 hover:border-orange-500 hover:text-orange-600"
+                  }
+                `}
               >
                 {item}
               </button>
@@ -211,113 +185,138 @@ export default function News() {
 
           </div>
 
-          {/* Cards */}
+          {/* Result Count */}
 
-          <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-8 mt-16">
+          <div className="mt-10 flex items-center justify-between">
 
-            {filteredNews.map((item) => (
-
-              <article
-                key={item.id}
-                className="group bg-white rounded-2xl overflow-hidden shadow hover:-translate-y-2 hover:shadow-2xl transition duration-300"
-              >
-
-                <div className="overflow-hidden">
-
-                  <img
-                    src={item.image}
-                    alt={item.title}
-                    className="w-full h-60 object-cover group-hover:scale-110 transition duration-500"
-                  />
-
-                </div>
-
-                <div className="p-7">
-
-                  <span className="inline-block bg-orange-100 text-orange-600 px-3 py-1 rounded-full text-xs font-semibold">
-
-                    {item.category}
-
-                  </span>
-
-                  <div className="flex items-center gap-2 mt-5 text-gray-500">
-
-                    <CalendarDays size={15} />
-
-                    {item.date}
-
-                  </div>
-
-                  <h3 className="mt-4 text-2xl font-bold leading-snug">
-
-                    {item.title}
-
-                  </h3>
-
-                  <p className="mt-4 text-gray-600 leading-8">
-
-                    {item.description}
-
-                  </p>
-
-                  <button className="mt-6 flex items-center gap-2 text-orange-600 font-semibold group-hover:gap-4 transition-all">
-
-                    Read More
-
-                    <ArrowRight size={18} />
-
-                  </button>
-
-                </div>
-
-              </article>
-
-            ))}
+            <p className="text-sm text-gray-500">
+              Showing{" "}
+              <span className="font-semibold text-slate-900">
+                {filteredNews.length}
+              </span>{" "}
+              {filteredNews.length === 1 ? "update" : "updates"}
+            </p>
 
           </div>
 
-          {/* Newsletter */}
+          {/* News Grid */}
 
-          <section className="mt-24">
+          {filteredNews.length > 0 ? (
 
-            <div className="rounded-3xl bg-orange-600 text-white p-12 text-center">
+            <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-7 mt-6">
 
-              <h2 className="text-4xl font-bold">
+              {filteredNews.map((item) => (
 
-                Stay Updated
+                <article
+                  key={item.id}
+                  className="
+                    group
+                    overflow-hidden
+                    rounded-3xl
+                    border border-slate-100
+                    bg-white
+                    shadow-sm
+                    transition-all
+                    duration-300
+                    hover:-translate-y-1
+                    hover:shadow-xl
+                  "
+                >
 
-              </h2>
+                  {/* Image */}
 
-              <p className="mt-5 max-w-2xl mx-auto text-orange-100 leading-8">
+                  <div className="overflow-hidden">
 
-                Subscribe to receive the latest updates regarding
-                development works, welfare programmes, public meetings,
-                and constituency activities.
+                    <img
+                      src={item.image}
+                      alt={item.title}
+                      className="
+                        h-56
+                        w-full
+                        object-cover
+                        transition
+                        duration-700
+                        group-hover:scale-105
+                      "
+                    />
 
-              </p>
+                  </div>
 
-              <div className="mt-10 flex flex-col md:flex-row gap-4 justify-center">
+                  {/* Content */}
 
-                <input
-                  type="email"
-                  placeholder="Enter your email"
-                  className="w-full md:w-96 px-5 py-4 rounded-lg text-gray-900 outline-none"
-                />
+                  <div className="p-6">
 
-                <button className="bg-white text-orange-600 font-semibold px-8 py-4 rounded-lg hover:bg-gray-100 transition">
+                    <div className="flex items-center gap-2 text-sm text-orange-600">
 
-                  Subscribe
+                      <CalendarDays size={16} />
 
-                </button>
+                      <span>{item.date}</span>
 
-              </div>
+                    </div>
+
+                    <span className="inline-block mt-4 rounded-full bg-orange-50 px-3 py-1 text-xs font-semibold text-orange-600">
+                      {item.category}
+                    </span>
+
+                    <h2 className="mt-4 text-xl font-bold leading-8 text-slate-900">
+                      {item.title}
+                    </h2>
+
+                    <p className="mt-3 text-sm leading-7 text-gray-600">
+                      {item.description}
+                    </p>
+
+                    <button className="mt-6 inline-flex items-center gap-2 font-semibold text-orange-600">
+
+                      Read More
+
+                      <ArrowRight
+                        size={17}
+                        className="transition group-hover:translate-x-1"
+                      />
+
+                    </button>
+
+                  </div>
+
+                </article>
+
+              ))}
 
             </div>
 
-          </section>
+          ) : (
+
+            <div className="mt-8 rounded-3xl border border-slate-200 bg-white py-20 text-center">
+
+              <Search
+                size={30}
+                className="mx-auto text-gray-300"
+              />
+
+              <h3 className="mt-4 text-xl font-semibold text-slate-900">
+                No news found
+              </h3>
+
+              <p className="mt-2 text-gray-500">
+                Try another search term or category.
+              </p>
+
+              <button
+                onClick={() => {
+                  setSearch("");
+                  setCategory("All");
+                }}
+                className="mt-6 rounded-full bg-orange-600 px-6 py-3 text-sm font-semibold text-white hover:bg-orange-700 transition"
+              >
+                Clear Filters
+              </button>
+
+            </div>
+
+          )}
 
         </div>
-
       </section>
     </>
   );

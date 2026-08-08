@@ -1,99 +1,184 @@
-import { ArrowRight, CalendarDays } from "lucide-react";
+import { CalendarDays, ArrowRight } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+
+const featured = {
+  image: "/news/news1.png",
+  date: "2 March 2026",
+  title: "Minister Calls for Reclaiming Encroached Government Land for the Poor",
+  description:
+    "Adluri Laxman Kumar directed officials to identify illegally occupied government land and redistribute eligible land to poor families while addressing a public awareness programme in Dharmaram Mandal.",
+};
 
 const news = [
   {
-    id: 1,
-    image: "/news1.jpg",
-    date: "20 August 2026",
-    title: "Development Review Meeting Conducted Successfully",
-    description:
-      "A comprehensive review meeting was held to monitor the progress of ongoing development projects.",
+    image: "/news/news2.png",
+    date: "1 March 2026",
+    title: "Annadanam Service Inaugurated at Dharmapuri Temple",
   },
   {
-    id: 2,
-    image: "/news2.jpg",
-    date: "18 August 2026",
-    title: "New Drinking Water Project Inaugurated",
-    description:
-      "The initiative aims to provide safe drinking water to thousands of families in rural areas.",
-  },
-  {
-    id: 3,
-    image: "/news3.jpg",
-    date: "14 August 2026",
-    title: "Youth Employment Awareness Programme",
-    description:
-      "Special employment and skill development camps organized for young citizens.",
+    image: "/news/news3.png",
+    date: "14 February 2026",
+    title: "Congress Records Complete Municipal Sweep in Dharmapuri",
   },
 ];
 
 export default function NewsPreview() {
-  return (
-    <section className="py-20 lg:py-28 bg-white">
-      <div className="max-w-7xl mx-auto px-4 lg:px-8">
 
-        <div className="flex justify-between items-end flex-wrap gap-5">
-          <div>
-            <span className="uppercase tracking-widest text-orange-600 font-semibold">
+  const navigate = useNavigate();
+  
+  return (
+    <section className="py-16 lg:py-20 bg-slate-50">
+
+      <div className="max-w-7xl mx-auto px-6 lg:px-8">
+
+        {/* Header */}
+
+        <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8">
+
+          <div className="max-w-2xl">
+
+            <span className="uppercase tracking-[0.25em] text-orange-600 text-sm font-semibold">
+
               Latest News
+
             </span>
 
-            <h2 className="mt-3 text-4xl font-bold">
-              Recent Updates
+            <h2 className="mt-4 text-3xl md:text-4xl lg:text-5xl font-bold text-slate-900">
+
+              Recent Updates & Public Activities
+
             </h2>
+
+            <p className="mt-5 text-gray-600 leading-8">
+
+              Stay updated with recent constituency visits,
+              welfare initiatives, government programmes and
+              important public announcements.
+
+            </p>
+
           </div>
 
-          <button className="flex items-center gap-2 font-semibold text-orange-600">
-            View All
-            <ArrowRight size={18}/>
+          <button onClick={() => navigate("/news")} className="inline-flex items-center gap-2 text-orange-600 font-semibold group">
+
+            View All News
+
+            <ArrowRight
+              size={18}
+              className="group-hover:translate-x-1 transition"
+            />
+
           </button>
+
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-8 mt-14">
+        {/* Content */}
 
-          {news.map(item=>(
-            <div
-              key={item.id}
-              className="rounded-2xl overflow-hidden shadow hover:shadow-xl transition bg-white"
-            >
+        <div className="grid lg:grid-cols-[1.25fr_.75fr] gap-8 mt-10">
 
-              <img
-                src={item.image}
-                alt=""
-                className="w-full h-60 object-cover"
-              />
+          {/* Featured */}
 
-              <div className="p-6">
+          <article className="bg-white rounded-[28px] overflow-hidden shadow-sm hover:shadow-xl transition duration-500">
 
-                <div className="flex items-center gap-2 text-sm text-orange-600">
+            <img
+              src={featured.image}
+              alt=""
+              className="w-full h-[260px] md:h-[380px] object-cover"
+            />
 
-                  <CalendarDays size={16}/>
+            <div className="p-8">
 
-                  {item.date}
+              <div className="flex items-center gap-2 text-orange-600 text-sm">
 
-                </div>
+                <CalendarDays size={16} />
 
-                <h3 className="mt-4 text-2xl font-semibold leading-snug">
-                  {item.title}
-                </h3>
-
-                <p className="mt-4 text-gray-600 leading-7">
-                  {item.description}
-                </p>
-
-                <button className="mt-6 text-orange-600 font-semibold flex items-center gap-2">
-                  Read More
-                  <ArrowRight size={16}/>
-                </button>
+                {featured.date}
 
               </div>
 
+              <h3 className="mt-4 text-2xl font-bold text-slate-900">
+
+                {featured.title}
+
+              </h3>
+
+              <p className="mt-5 text-gray-600 leading-8">
+
+                {featured.description}
+
+              </p>
+
+              <button className="mt-7 inline-flex items-center gap-2 text-orange-600 font-semibold group">
+
+                Read More
+
+                <ArrowRight
+                  size={18}
+                  className="group-hover:translate-x-1 transition"
+                />
+
+              </button>
+
             </div>
-          ))}
+
+          </article>
+
+          {/* Recent */}
+
+          <div className="space-y-6">
+
+            {news.map((item, index) => (
+
+              <article
+                key={index}
+                className="bg-white rounded-[24px] overflow-hidden shadow-sm hover:shadow-xl transition duration-500"
+              >
+
+                <img
+                  src={item.image}
+                  alt=""
+                  className="w-full h-[170px] object-cover"
+                />
+
+                <div className="p-6">
+
+                  <div className="flex items-center gap-2 text-orange-600 text-sm">
+
+                    <CalendarDays size={15} />
+
+                    {item.date}
+
+                  </div>
+
+                  <h4 className="mt-4 text-lg font-semibold text-slate-900 leading-8">
+
+                    {item.title}
+
+                  </h4>
+
+                  <button className="mt-5 inline-flex items-center gap-2 text-orange-600 font-semibold group">
+
+                    Read More
+
+                    <ArrowRight
+                      size={16}
+                      className="group-hover:translate-x-1 transition"
+                    />
+
+                  </button>
+
+                </div>
+
+              </article>
+
+            ))}
+
+          </div>
 
         </div>
 
       </div>
+
     </section>
   );
 }

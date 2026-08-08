@@ -107,9 +107,9 @@ export default function ProfileTabs() {
       <div className="max-w-7xl mx-auto px-6">
 
         <div className="text-center mb-12">
-          <span className="bg-green-700 text-white px-5 py-2 rounded-full uppercase tracking-widest text-sm">
+          {/* <span className="bg-green-700 text-white px-5 py-2 rounded-full uppercase tracking-widest text-sm">
             Profile
-          </span>
+          </span> */}
 
           <p className="text-gray-600 mt-4">
             Learn more about the life and leadership journey.

@@ -1,6 +1,12 @@
 import SectionTitle from "../components/common/SectionTitle";
 import ProfileTabs from "../components/profile/ProfileTabs";
 import BiographyTimeline from "../components/profile/BiographyTimeline";
+import leader from "../data/leader";
+import QuickFacts from "../components/profile/QucikFacts";
+import VisionLeadership from "../components/profile/VisionLeadership";
+// import LeadershipValues from "../components/profile/LeadershipValues";
+
+
 const About = () => {
   return (
     <>
@@ -38,7 +44,7 @@ const About = () => {
               </span>
 
               <h2 className="mt-6 text-5xl font-bold text-gray-900">
-                Adluri Laxman Kumar
+                <h2>Adluri Laxman Kumar</h2>
               </h2>
 
               <h3 className="mt-3 text-2xl font-medium text-gray-600">
@@ -72,10 +78,11 @@ const About = () => {
 
         </div>
       </section>
+      <QuickFacts />
       <ProfileTabs />
       <BiographyTimeline />
-
-      
+      <VisionLeadership />
+      {/* <LeadershipValues />   */}
 
     </>
   );

@@ -4,8 +4,10 @@ import {
   FaYoutube,
   FaLinkedinIn,
 } from "react-icons/fa";
+import leader from "../../data/leader";
 
 import { FaXTwitter } from "react-icons/fa6";
+
 
 const SocialLinks = () => {
   return (
@@ -19,8 +21,9 @@ const SocialLinks = () => {
       <div className="flex items-center gap-4">
         {/* Facebook */}
         <a
-          href="#"
-          aria-label="Facebook"
+          href={leader.social.facebook}
+          target="_blank"
+          rel="noopener noreferrer"
           className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center text-gray-700 transition-all duration-300 hover:bg-green-600 hover:text-white hover:-translate-y-1 hover:shadow-lg"
         >
           <FaFacebookF size={18} />
@@ -28,8 +31,9 @@ const SocialLinks = () => {
 
         {/* Instagram */}
         <a
-          href="#"
-          aria-label="Instagram"
+          href={leader.social.instagram}
+          target="_blank"
+          rel="noopener noreferrer"
           className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center text-gray-700 transition-all duration-300 hover:bg-green-600 hover:text-white hover:-translate-y-1 hover:shadow-lg"
         >
           <FaInstagram size={18} />
@@ -37,8 +41,9 @@ const SocialLinks = () => {
 
         {/* X (Twitter) */}
         <a
-          href="#"
-          aria-label="X"
+          href={leader.social.twitter}
+          target="_blank"
+          rel="noopener noreferrer"
           className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center text-gray-700 transition-all duration-300 hover:bg-green-600 hover:text-white hover:-translate-y-1 hover:shadow-lg"
         >
           <FaXTwitter size={18} />
@@ -46,8 +51,9 @@ const SocialLinks = () => {
 
         {/* YouTube */}
         <a
-          href="#"
-          aria-label="YouTube"
+          href={leader.social.facebook}
+          target="_blank"
+          rel="noopener noreferrer"
           className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center text-gray-700 transition-all duration-300 hover:bg-green-600 hover:text-white hover:-translate-y-1 hover:shadow-lg"
         >
           <FaYoutube size={18} />
@@ -55,8 +61,9 @@ const SocialLinks = () => {
 
         {/* LinkedIn */}
         <a
-          href="#"
-          aria-label="LinkedIn"
+          href={leader.social.instagram}
+          target="_blank"
+          rel="noopener noreferrer"
           className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center text-gray-700 transition-all duration-300 hover:bg-green-600 hover:text-white hover:-translate-y-1 hover:shadow-lg"
         >
           <FaLinkedinIn size={18} />

@@ -31,7 +31,7 @@ export default function MainLayout() {
       {/* <TopBar /> */}
       <Navbar />
 
-      <main className="min-h-screen">
+      <main className="min-h-screen py-20">
         <Outlet />
       </main>
 

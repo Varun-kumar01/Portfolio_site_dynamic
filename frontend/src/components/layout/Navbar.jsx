@@ -206,28 +206,45 @@
 // }
 
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { Menu, X } from "lucide-react";
-import { FaFacebookF, FaInstagram, FaYoutube } from "react-icons/fa";
+import { FaFacebookF, FaInstagram, FaYoutube, FaTwitter } from "react-icons/fa";
+import leader from "../../data/leader";
+
 
 const navLinks = [
   { name: "Home", path: "/" },
   { name: "About", path: "/about" },
-  { name: "Biography", path: "/biography" },
-  { name: "Development", path: "/development" },
+  // { name: "Biography", path: "/biography" },
+  { name: "Political Journey", path: "/journey" },
   { name: "Gallery", path: "/gallery" },
   { name: "News", path: "/news" },
-  { name: "Videos", path: "/videos" },
-  { name: "Articles", path: "/articles" },
+  // { name: "Videos", path: "/videos" },
+  // { name: "Articles", path: "/articles" },
   { name: "Contact", path: "/contact" },
 ];
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
 
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 50);
+    window.addEventListener("scroll", onScroll);
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
   return (
-    <header className="sticky top-0 z-40 bg-white shadow-sm">
+    <header className={`
+fixed top-0 left-0 w-full z-50 transition-all duration-500
+${
+  scrolled
+    ? "bg-white/90 backdrop-blur-xl shadow-md"
+    : "bg-white"
+}
+`}>
       <div className="max-w-7xl mx-auto">
         <div className="h-20 px-4 lg:px-8 flex items-center justify-between">
           {/* Logo */}
@@ -240,11 +257,11 @@ export default function Navbar() {
 
             <div className="hidden sm:block">
               <h1 className="text-lg font-bold text-gray-800">
-                Politician Name
+                {leader.profile.name}
               </h1>
 
               <p className="text-sm text-orange-600">
-                Public Representative
+                {leader.profile.designation}
               </p>
             </div>
           </Link>
@@ -268,16 +285,22 @@ export default function Navbar() {
 
           {/* Desktop Social Icons */}
           <div className="hidden lg:flex items-center gap-3">
-            <a href="#">
+            <a href={leader.social.facebook}
+                target="_blank"
+                rel="noopener noreferrer">
               <FaFacebookF className="text-gray-600 hover:text-orange-600 transition" />
             </a>
 
-            <a href="#">
+            <a href={leader.social.instagram}
+                target="_blank"
+                rel="noopener noreferrer">
               <FaInstagram className="text-gray-600 hover:text-orange-600 transition" />
             </a>
 
-            <a href="#">
-              <FaYoutube className="text-gray-600 hover:text-orange-600 transition" />
+            <a href={leader.social.twitter}
+                target="_blank"
+                rel="noopener noreferrer">
+              <FaTwitter className="text-gray-600 hover:text-orange-600 transition" />
             </a>
           </div>
 

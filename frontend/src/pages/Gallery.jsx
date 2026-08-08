@@ -1,191 +1,269 @@
 import { useMemo, useState } from "react";
-import { Eye, X, ChevronLeft, ChevronRight } from "lucide-react";
+import { Play, X, ArrowRight } from "lucide-react";
 import PageBanner from "../components/common/PageBanner";
 
 const galleryItems = [
-  { id: 1, image: "/gallery/gallery1.jpg", category: "Public Meetings", title: "Public Meeting" },
-  { id: 2, image: "/gallery/gallery2.jpg", category: "Development", title: "Development Work" },
-  { id: 3, image: "/gallery/gallery3.jpg", category: "Government Programs", title: "Government Programme" },
-  { id: 4, image: "/gallery/gallery4.jpg", category: "Party Events", title: "Congress Event" },
-  { id: 5, image: "/gallery/gallery5.jpg", category: "Community Outreach", title: "Community Visit" },
-  { id: 6, image: "/gallery/gallery6.jpg", category: "Public Meetings", title: "Citizens Meeting" },
-  { id: 7, image: "/gallery/gallery7.jpg", category: "Development", title: "Road Inspection" },
-  { id: 8, image: "/gallery/gallery8.jpg", category: "Government Programs", title: "Welfare Programme" },
-  { id: 9, image: "/gallery/gallery9.jpg", category: "Party Events", title: "Party Gathering" },
-  { id: 10, image: "/gallery/gallery10.jpg", category: "Community Outreach", title: "Village Visit" },
-  { id: 11, image: "/gallery/gallery11.jpg", category: "Public Meetings", title: "Public Interaction" },
-  { id: 12, image: "/gallery/gallery12.jpg", category: "Development", title: "Project Review" },
+  {
+    id: 1,
+    type: "photo",
+    category: "Public Events",
+    image: "/gallery/1.jpg",
+    title: "Public Interaction",
+  },
+  {
+    id: 2,
+    type: "photo",
+    category: "Meetings",
+    image: "/gallery/2.jpg",
+    title: "Official Meeting",
+  },
+  {
+    id: 3,
+    type: "photo",
+    category: "Constituency",
+    image: "/gallery/3.jpg",
+    title: "Constituency Visit",
+  },
+  {
+    id: 4,
+    type: "photo",
+    category: "Events",
+    image: "/gallery/4.jpg",
+    title: "Public Programme",
+  },
+  {
+    id: 5,
+    type: "photo",
+    category: "Public Events",
+    image: "/gallery/5.jpg",
+    title: "Community Interaction",
+  },
+  {
+    id: 6,
+    type: "photo",
+    category: "Meetings",
+    image: "/gallery/6.jpg",
+    title: "Leadership Meeting",
+  },
+
+  // Replace these thumbnails/URLs with actual videos later.
+  {
+    id: 7,
+    type: "video",
+    category: "Public Events",
+    image: "/gallery/video1.jpg",
+    title: "Public Programme",
+    videoUrl: "https://www.youtube.com/watch?v=YOUR_VIDEO_ID",
+  },
+  {
+    id: 8,
+    type: "video",
+    category: "Meetings",
+    image: "/gallery/video2.jpg",
+    title: "Public Interaction",
+    videoUrl: "https://www.youtube.com/watch?v=YOUR_VIDEO_ID",
+  },
 ];
 
-const filters = [
+const categories = [
   "All",
-  "Public Meetings",
-  "Development",
-  "Government Programs",
-  "Party Events",
-  "Community Outreach",
+  "Public Events",
+  "Constituency",
+  "Meetings",
+  "Events",
 ];
 
 export default function Gallery() {
-  const [activeFilter, setActiveFilter] = useState("All");
-
+  const [type, setType] = useState("photo");
+  const [category, setCategory] = useState("All");
   const [selectedImage, setSelectedImage] = useState(null);
-  const [visibleCount, setVisibleCount] = useState(9);
 
- const filteredImages = useMemo(() => {
-  if (activeFilter === "All") return galleryItems;
-  return galleryItems.filter(
-    (item) => item.category === activeFilter
-  );
-}, [activeFilter]);
+  const filteredItems = useMemo(() => {
+    return galleryItems.filter((item) => {
+      const typeMatch = item.type === type;
 
-const visibleImages = filteredImages.slice(0, visibleCount);
+      const categoryMatch =
+        category === "All" || item.category === category;
 
-const nextImage = () => {
-  const currentIndex = filteredImages.findIndex(
-    (item) => item.id === selectedImage.id
-  );
-
-  const next = filteredImages[(currentIndex + 1) % filteredImages.length];
-    setSelectedImage(next);
-  };
-
-  const prevImage = () => {
-    const currentIndex = filteredImages.findIndex(
-      (item) => item.id === selectedImage.id
-    );
-
-    const prev =
-      filteredImages[
-        (currentIndex - 1 + filteredImages.length) %
-          filteredImages.length
-      ];
-
-    setSelectedImage(prev);
-  };
+      return typeMatch && categoryMatch;
+    });
+  }, [type, category]);
 
   return (
     <>
-      <PageBanner
+      {/* <PageBanner
         title="Gallery"
-        background="/gallery-banner.jpg"
-      />
+        subtitle="Moments of public service, leadership and connection with the people."
+      /> */}
 
-      <section className="py-20 bg-gray-50">
+      <section className="bg-white py-16 lg:py-20">
 
-        <div className="max-w-7xl mx-auto px-4 lg:px-8">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8">
 
-          <div className="text-center">
+          {/* Header */}
 
-            <span className="uppercase tracking-[0.25em] text-orange-600 font-semibold">
-              Photo Gallery
-            </span>
+          <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8">
 
-            <h2 className="mt-4 text-4xl lg:text-5xl font-bold text-gray-900">
-              Moments of Public Service
-            </h2>
+            <div className="max-w-2xl">
 
-            <p className="mt-5 max-w-3xl mx-auto text-gray-600 leading-8">
-              A collection of memorable moments from constituency visits,
-              development programmes, government initiatives, public meetings,
-              and community outreach activities.
-            </p>
+              <span className="text-orange-600 text-sm font-semibold uppercase tracking-[0.25em]">
+                Media Gallery
+              </span>
+
+              <h2 className="mt-3 text-3xl md:text-4xl lg:text-5xl font-bold text-slate-900">
+                Moments of Public Service
+              </h2>
+
+              <p className="mt-4 text-gray-600 leading-8">
+                Explore photographs and videos capturing public programmes,
+                constituency visits, meetings and important events.
+              </p>
+
+            </div>
+
+            {/* Photo / Video */}
+
+            <div className="flex rounded-full bg-slate-100 p-1 w-fit">
+
+              <button
+                onClick={() => {
+                  setType("photo");
+                  setCategory("All");
+                }}
+                className={`px-6 py-2.5 rounded-full text-sm font-semibold transition ${
+                  type === "photo"
+                    ? "bg-orange-600 text-white shadow"
+                    : "text-slate-600 hover:text-orange-600"
+                }`}
+              >
+                Photos
+              </button>
+
+              <button
+                onClick={() => {
+                  setType("video");
+                  setCategory("All");
+                }}
+                className={`px-6 py-2.5 rounded-full text-sm font-semibold transition ${
+                  type === "video"
+                    ? "bg-orange-600 text-white shadow"
+                    : "text-slate-600 hover:text-orange-600"
+                }`}
+              >
+                Videos
+              </button>
+
+            </div>
 
           </div>
 
-          {/* Filters */}
+          {/* Categories */}
 
-          <div className="flex flex-wrap justify-center gap-4 mt-14">
+          <div className="flex flex-wrap gap-3 mt-10">
 
-            {filters.map((filter) => (
+            {categories.map((item) => (
 
               <button
-                key={filter}
-                onClick={() => setActiveFilter(filter)}
-                className={`px-6 py-3 rounded-full border transition font-medium ${
-                  activeFilter === filter
+                key={item}
+                onClick={() => setCategory(item)}
+                className={`px-5 py-2 rounded-full border text-sm transition ${
+                  category === item
                     ? "bg-orange-600 text-white border-orange-600"
-                    : "bg-white border-gray-300 hover:border-orange-600 hover:text-orange-600"
+                    : "bg-white border-slate-200 text-slate-600 hover:border-orange-500 hover:text-orange-600"
                 }`}
               >
-                {filter}
+                {item}
               </button>
 
             ))}
 
           </div>
 
-          {/* Gallery Grid */}
+          {/* Gallery */}
 
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 mt-16">
+          {filteredItems.length > 0 ? (
 
-            {visibleImages.map((item) => (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 mt-12">
 
-              <div
-                key={item.id}
-                className="group overflow-hidden rounded-2xl bg-white shadow hover:shadow-xl transition duration-300"
-              >
+              {filteredItems.map((item, index) => (
 
-                <div className="relative overflow-hidden">
+                <article
+                  key={item.id}
+                  className={`group relative overflow-hidden rounded-3xl ${
+                    index === 0
+                      ? "md:col-span-2 md:row-span-2"
+                      : ""
+                  }`}
+                >
 
                   <img
                     src={item.image}
                     alt={item.title}
-                    className="w-full h-72 object-cover group-hover:scale-110 transition duration-500"
+                    onClick={() =>
+                      item.type === "photo" &&
+                      setSelectedImage(item.image)
+                    }
+                    className={`w-full object-cover cursor-pointer transition duration-700 group-hover:scale-105 ${
+                      index === 0
+                        ? "h-[300px] md:h-[520px]"
+                        : "h-[220px] md:h-[250px]"
+                    }`}
                   />
 
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition duration-300 flex items-center justify-center">
+                  {/* Overlay */}
 
-                    <div className="opacity-0 group-hover:opacity-100 transition duration-300">
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent opacity-0 group-hover:opacity-100 transition duration-500 pointer-events-none">
 
-                      <button
-                        onClick={() => setSelectedImage(item)}
-                        className="w-14 h-14 rounded-full bg-white flex items-center justify-center hover:scale-110 transition"
-                      >
-                        <Eye
-                          size={22}
-                          className="text-orange-600"
-                        />
-                      </button>
+                    <div className="absolute bottom-0 left-0 right-0 p-6">
+
+                      <p className="text-white font-semibold text-lg">
+                        {item.title}
+                      </p>
+
+                      <p className="mt-1 text-white/70 text-sm">
+                        {item.category}
+                      </p>
 
                     </div>
 
                   </div>
 
-                </div>
+                  {/* Video */}
 
-                <div className="p-6">
+                  {item.type === "video" && (
 
-                  <p className="text-orange-600 text-sm font-semibold uppercase tracking-wider">
-                    {item.category}
-                  </p>
+                    <a
+                      href={item.videoUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="absolute inset-0 flex items-center justify-center"
+                    >
 
-                  <h3 className="mt-2 text-xl font-semibold text-gray-900">
-                    {item.title}
-                  </h3>
+                      <div className="w-14 h-14 rounded-full bg-white/90 flex items-center justify-center shadow-xl group-hover:scale-110 transition">
+                        <Play
+                          size={22}
+                          className="text-orange-600 ml-1"
+                          fill="currentColor"
+                        />
+                      </div>
 
-                </div>
+                    </a>
 
-              </div>
+                  )}
 
-            ))}
+                </article>
 
-          </div>
-          
-          {visibleCount < filteredImages.length && (
+              ))}
 
-            <div className="flex justify-center mt-16">
+            </div>
 
-              <button
-                onClick={() =>
-                setVisibleCount((prev) => prev + 6)
-                }
-                className="bg-orange-600 hover:bg-orange-700 text-white px-8 py-4 rounded-lg font-semibold transition"
-                >
+          ) : (
 
-                Load More
+            <div className="mt-12 py-20 text-center rounded-3xl bg-slate-50 border border-slate-100">
 
-              </button>
+              <p className="text-gray-500">
+                No {type === "photo" ? "photos" : "videos"} found in this category.
+              </p>
 
             </div>
 
@@ -195,46 +273,33 @@ const nextImage = () => {
 
       </section>
 
+      {/* Lightbox */}
+
       {selectedImage && (
 
-        <div className="fixed inset-0 bg-black/90 z-[999] flex items-center justify-center px-4">
+        <div
+          className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-5"
+          onClick={() => setSelectedImage(null)}
+        >
 
           <button
             onClick={() => setSelectedImage(null)}
-            className="absolute top-8 right-8 text-white"
-            >
-
-            <X size={34}/>
-
-          </button>
-
-          <button
-            onClick={prevImage}
-            className="absolute left-5 text-white"
-            >
-
-            <ChevronLeft size={45}/>
-
+            className="absolute top-6 right-6 w-11 h-11 rounded-full bg-white/10 text-white flex items-center justify-center hover:bg-white/20 transition"
+          >
+            <X size={24} />
           </button>
 
           <img
-            src={selectedImage.image}
-            alt=""
-            className="max-h-[85vh] rounded-xl"
+            src={selectedImage}
+            alt="Gallery preview"
+            onClick={(e) => e.stopPropagation()}
+            className="max-w-full max-h-[90vh] object-contain rounded-xl"
           />
-
-          <button
-            onClick={nextImage}
-            className="absolute right-5 text-white"
-            >
-
-            <ChevronRight size={45}/>
-
-          </button>
 
         </div>
 
       )}
+
     </>
   );
 }

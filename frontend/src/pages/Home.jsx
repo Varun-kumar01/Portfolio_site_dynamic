@@ -1,7 +1,7 @@
 import Hero from "../components/home/Hero";
 import AboutPreview from "../components/home/AboutPreview";
-import Achievements from "../components/home/Achievements";
-import Works from "../components/home/Works";
+import FocusAreas from "../components/home/FocusAreas";
+import DevelopmentHighlights from "../components/home/DevelopmentHighlights";
 import GalleryPreview from "../components/home/GalleryPreview";
 import NewsPreview from "../components/home/NewsPreview";
 import VideosPreview from "../components/home/VideosPreview";
@@ -9,28 +9,28 @@ import ContactCTA from "../components/home/ContactCTA";
 
 export default function Home(){
 
-return(
+    return(
 
-<>
+        <>
 
-<Hero/>
+            <Hero/>
 
-<AboutPreview/>
+            <AboutPreview/>
 
-<Achievements/>
+            <FocusAreas/>
 
-<Works/>
+            <DevelopmentHighlights/>
 
-<GalleryPreview/>
+            <GalleryPreview/>
 
-<NewsPreview/>
+            <NewsPreview/>
 
-<VideosPreview/>
+            {/* <VideosPreview/> */}
 
-<ContactCTA/>
+            <ContactCTA/>
 
-</>
+        </>
 
-);
+    );
 
 }

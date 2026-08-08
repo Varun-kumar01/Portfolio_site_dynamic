@@ -156,74 +156,93 @@
 
 
 
-
-
-
-import { ArrowRight, ChevronDown } from "lucide-react";
+import { ArrowRight } from "lucide-react";
+import leader from "../../data/leader"
+import { useNavigate } from "react-router-dom";
 
 export default function Hero() {
+
+  const navigate = useNavigate();
+
   return (
-    <section className="relative min-h-[82vh] lg:min-h-[85vh] overflow-hidden bg-white">
+    <section className="relative overflow-hidden bg-white">
 
       {/* Background Blur */}
 
-      <div className="absolute -top-56 -left-52 w-[500px] h-[500px] rounded-full bg-orange-200 blur-[140px] opacity-40 animate-pulse"></div>
+      <div className="absolute -top-40 -left-40 w-[320px] h-[320px] md:w-[500px] md:h-[500px] rounded-full bg-orange-200 blur-[120px] opacity-40 animate-pulse"></div>
 
-      <div className="absolute -bottom-48 -right-52 w-[500px] h-[500px] rounded-full bg-green-200 blur-[140px] opacity-40 animate-pulse"></div>
+      <div className="absolute -bottom-32 -right-40 w-[320px] h-[320px] md:w-[500px] md:h-[500px] rounded-full bg-green-200 blur-[120px] opacity-40 animate-pulse"></div>
 
-      {/* Grid */}
+      <div className="relative max-w-7xl mx-auto px-5 lg:px-10">
 
-      <div className="relative max-w-7xl mx-auto min-h-[82vh] lg:min-h-[85vh] px-6 lg:px-10">
-
-        <div className="grid lg:grid-cols-2 items-center min-h-[82vh] lg:min-h-[85vh]">
+        <div className="grid md:grid-cols-[1.1fr_0.9fr] items-center min-h-[85vh] lg:min-h-[82vh] gap-12 lg:gap-8 py-8 lg:py-0">
 
           {/* LEFT */}
 
-          <div className="z-20">
+          <div className="order-1 w-full">
 
-            <span className="inline-flex items-center px-5 py-2 rounded-full border border-orange-200 bg-orange-50 text-orange-600 text-sm font-semibold tracking-[0.25em] uppercase">
+            <span className="inline-flex items-center px-4 py-2 rounded-full border border-orange-200 bg-orange-50 text-orange-600 text-[10px] sm:text-xs font-semibold tracking-[0.22em] uppercase">
 
-              Cabinet Minister • Telangana
+              <p>{leader.profile.designation2}</p> • Telangana
 
             </span>
 
-            <h1 className="mt-6 text-5xl md:text-6xl xl:text-7xl font-black leading-[0.95] text-gray-900">
+            <div className="mt-7">
 
-              ADLURI
+          {/* Family / surname */}
+          <div
+            className="
+              text-sm
+              sm:text-base
+              lg:text-lg
+              font-bold
+              tracking-[0.45em]
+              text-slate-500
+              uppercase
+            "
+          >
+            ADLURI
+          </div>
 
-              <br />
+          {/* Full name */}
+          <h1
+            className="
+              mt-2
+              text-4xl
+              sm:text-5xl
+              lg:text-6xl
+              xl:text-7xl
+              font-semibold
+              leading-[1.05]
+              tracking-tight
+              text-slate-800
+              whitespace-nowrap
+            "
+          >
+            LAXMAN KUMAR
+          </h1>
 
-              <span className="text-orange-600">
+        </div>
 
-                LAXMAN
-
-              </span>
-
-              <br />
-
-              KUMAR
-
-            </h1>
-
-            <p className="mt-5 text-2xl font-medium text-gray-700">
+            <h2 className="mt-4 text-[1.8rem] lg:text-[2.4rem] font-semibold text-gray-800 leading-tight">
 
               Building a Better Telangana
 
-            </p>
+            </h2>
 
-            <p className="mt-6 max-w-xl text-lg leading-9 text-gray-500">
+            <p className="mt-5 w-full text-[15px] sm:text-base lg:text-lg leading-8 text-gray-500">
 
-              Committed to transparent governance,
-              inclusive growth, stronger infrastructure,
-              quality education and public welfare.
+              Committed to transparent governance, inclusive growth,
+              stronger infrastructure, quality education and public
+              welfare.
 
             </p>
 
             {/* Buttons */}
 
-            <div className="mt-8 flex flex-wrap gap-5">
+            <div className="mt-8 flex flex-wrap gap-4">
 
-              <button className="group bg-orange-600 hover:bg-orange-700 transition px-8 py-4 rounded-full text-white font-semibold flex items-center gap-3">
+              <button onClick={() => navigate("/journey")} className="group bg-orange-600 hover:bg-orange-700 transition-all duration-300 px-7 py-4 rounded-full text-white font-semibold flex items-center justify-center gap-3">
 
                 Explore Journey
 
@@ -234,7 +253,7 @@ export default function Hero() {
 
               </button>
 
-              <button className="rounded-full border border-gray-300 hover:border-orange-600 hover:text-orange-600 transition px-8 py-4 font-semibold">
+              <button className="rounded-full border border-gray-300 hover:border-orange-600 hover:text-orange-600 transition-all duration-300 px-7 py-4 font-semibold">
 
                 Development Works
 
@@ -246,84 +265,33 @@ export default function Hero() {
 
           {/* RIGHT */}
 
-          <div className="relative flex justify-center lg:justify-end">
+          <div className="relative order-2 flex justify-center md:justify-end mt-4 md:mt-0">
 
             {/* Orange Glow */}
 
-            <div className="absolute w-[430px] h-[430px] rounded-full bg-orange-300 blur-[120px] opacity-50"></div>
+            <div className="absolute w-[280px] h-[280px] sm:w-[380px] sm:h-[380px] lg:w-[420px] lg:h-[420px] rounded-full bg-orange-300/40 blur-[100px]"></div>
 
-            {/* Congress */}
+            {/* Green Glow */}
 
-            <img
-              src="/congress.png"
-              alt=""
-              className="absolute top-16 w-72 opacity-10"
-            />
+            <div className="absolute bottom-0 right-5 w-[240px] h-[240px] sm:w-[320px] sm:h-[320px] lg:w-[360px] lg:h-[360px] rounded-full bg-green-300/40 blur-[90px]"></div>
+
+            {/* Frame */}
+
+            <div className="absolute inset-8 sm:inset-6 lg:inset-5 rounded-[38px] border-[4px] border-white"></div>
 
             {/* Leader */}
 
             <img
               src="/leader.png"
               alt="Leader"
-              className="relative z-20 h-[560px] md:h-[620px] lg:h-[640px] object-contain animate-float rounded-full"
+              className="relative z-20 h-[360px] sm:h-[500px] lg:h-[640px] object-contain animate-float rounded-[32px]"
             />
-
-            {/* Glass Card */}
-
-            <div className="hidden lg:block absolute top-32 left-0 backdrop-blur-xl bg-white/70 border border-white rounded-3xl px-8 py-6 shadow-2xl">
-
-              <h3 className="text-4xl font-black text-orange-600">
-
-                2023
-
-              </h3>
-
-              <p className="text-gray-700">
-
-                Elected MLA
-
-              </p>
-
-            </div>
-
-            <div className="hidden lg:block absolute bottom-28 right-0 backdrop-blur-xl bg-white/70 border border-white rounded-3xl px-8 py-6 shadow-2xl">
-
-              <h3 className="text-4xl font-black text-green-700">
-
-                25+
-
-              </h3>
-
-              <p className="text-gray-700">
-
-                Years of Public Service
-
-              </p>
-
-            </div>
 
           </div>
 
         </div>
 
       </div>
-
-      {/* Scroll */}
-
-      {/* <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex flex-col items-center animate-bounce">
-
-        <span className="text-xs uppercase tracking-[0.35em] text-gray-500">
-
-          Scroll
-
-        </span>
-
-        <ChevronDown
-          size={24}
-          className="mt-2 text-orange-600"
-        />
-
-      </div> */}
 
     </section>
   );

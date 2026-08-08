@@ -1,113 +1,303 @@
 import { Link } from "react-router-dom";
-import { FaFacebookF, FaInstagram, FaYoutube } from "react-icons/fa";
+import {
+  Phone,
+  Mail,
+  MapPin,
+  ArrowUpRight,
+} from "lucide-react";
+import {
+  FaFacebookF,
+  FaInstagram,
+  FaYoutube,
+  FaTwitter
+} from "react-icons/fa";
+import leader from "../../data/leader";
 
-export default function Footer(){
+const links = [
+  { name: "Home", path: "/" },
+  { name: "About", path: "/about" },
+  { name: "Project Journey", path: "/journey" },
+  { name: "Gallery", path: "/gallery" },
+  { name: "News", path: "/news" },
+  { name: "Contact", path: "/contact" },
+];
 
-return(
+export default function Footer() {
+  return (
+    <footer className="bg-slate-950 text-white">
 
-<footer className="bg-gray-900 text-white">
+      <div className="max-w-7xl mx-auto px-6 lg:px-8 py-16">
 
-<div className="max-w-7xl mx-auto px-4 lg:px-8 py-20">
+        <div className="grid lg:grid-cols-4 md:grid-cols-2 gap-12">
 
-<div className="grid md:grid-cols-2 lg:grid-cols-4 gap-10">
+          {/* About */}
 
-<div>
+          <div>
 
-<h2 className="text-2xl font-bold">
-Politician Name
-</h2>
+            <img
+              src="/logo.png"
+              alt="Logo"
+              className="w-16"
+            />
 
-<p className="mt-5 text-gray-400 leading-7">
-Dedicated to transparency,
-development and public service.
-</p>
+            <h3 className="mt-5 text-2xl font-bold">
 
-<div className="flex gap-4 mt-6">
+              <h2>{leader.profile.name}</h2>
 
-<FaFacebookF/>
+            </h3>
 
-<FaInstagram/>
+            <p className="mt-2 text-orange-400">
 
-<FaYoutube/>
+              Cabinet Minister • Telangana
 
-</div>
+            </p>
 
-</div>
+            <p className="mt-6 leading-8 text-slate-400">
 
-<div>
+              Dedicated to transparent governance,
+              inclusive development and improving
+              the quality of life for every citizen.
 
-<h3 className="font-semibold text-lg">
-Quick Links
-</h3>
+            </p>
 
-<div className="flex flex-col gap-3 mt-5">
+            <div className="flex gap-4 mt-8">
 
-<Link to="/">Home</Link>
+              <a
+                href={leader.social.facebook}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-orange-600 transition"
+              >
+                <FaFacebookF />
+              </a>
 
-<Link to="/about">About</Link>
+              <a
+                href={leader.social.instagram}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-orange-600 transition"
+              >
+                <FaInstagram />
+              </a>
 
-<Link to="/gallery">Gallery</Link>
+              <a
+                href={leader.social.twitter}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-orange-600 transition"
+              >
+                <FaTwitter />
+              </a>
 
-<Link to="/contact">Contact</Link>
+            </div>
 
-</div>
+          </div>
 
-</div>
+          {/* Quick Links */}
 
-<div>
+          <div>
 
-<h3 className="font-semibold text-lg">
-Office
-</h3>
+            <h4 className="text-xl font-semibold">
 
-<div className="mt-5 space-y-3 text-gray-400">
+              Quick Links
 
-<p>Hyderabad</p>
+            </h4>
 
-<p>Telangana</p>
+            <div className="mt-6 flex flex-col gap-4">
 
-<p>+91 9876543210</p>
+              {links.map((item) => (
 
-<p>office@email.com</p>
+                <Link
+                  key={item.name}
+                  to={item.path}
+                  className="group flex items-center justify-between text-slate-400 hover:text-orange-400 transition"
+                >
 
-</div>
+                  {item.name}
 
-</div>
+                  <ArrowUpRight
+                    size={16}
+                    className="opacity-0 group-hover:opacity-100 transition"
+                  />
 
-<div>
+                </Link>
 
-<h3 className="font-semibold text-lg">
-Newsletter
-</h3>
+              ))}
 
-<input
-type="email"
-placeholder="Email Address"
-className="mt-5 w-full rounded-lg px-4 py-3 bg-gray-800 border border-gray-700 outline-none"
-/>
+            </div>
 
-<button className="mt-4 w-full bg-orange-600 py-3 rounded-lg font-semibold hover:bg-orange-700">
+          </div>
 
-Subscribe
+          {/* Contact */}
 
-</button>
+          <div>
 
-</div>
+            <h4 className="text-xl font-semibold">
 
-</div>
+              Contact
 
-<hr className="border-gray-800 my-10"/>
+            </h4>
 
-<div className="text-center text-gray-500">
+            <div className="mt-6 space-y-6">
 
-© 2026 All Rights Reserved.
+              <div className="flex gap-4">
 
-</div>
+                <Phone className="text-orange-500 mt-1" />
 
-</div>
+                <div>
 
-</footer>
+                  <p className="text-slate-300">
 
-);
+                    Phone
 
+                  </p>
+
+                  <p className="text-slate-400">
+
+                    <p>{leader.contact.phone}</p>
+
+                  </p>
+
+                </div>
+
+              </div>
+
+              <div className="flex gap-4">
+
+                <Mail className="text-orange-500 mt-1" />
+
+                <div>
+
+                  <p className="text-slate-300">
+
+                    Email
+
+                  </p>
+
+                  <p className="text-slate-400">
+
+                    <p>{leader.contact.email}</p>
+
+                  </p>
+
+                </div>
+
+              </div>
+
+              <div className="flex gap-4">
+
+                <MapPin className="text-orange-500 mt-1" />
+
+                <div>
+
+                  <p className="text-slate-300">
+
+                    Office
+
+                  </p>
+
+                  <p className="text-slate-400">
+
+                    Dharmapuri,
+                    Jagtial,
+                    Telangana
+
+                  </p>
+
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+          {/* Constituency */}
+
+          <div>
+
+            <h4 className="text-xl font-semibold">
+
+              Constituency
+
+            </h4>
+
+            <div className="mt-6 space-y-5">
+
+              <div>
+
+                <p className="text-slate-500 uppercase tracking-widest text-xs">
+
+                  Assembly Constituency
+
+                </p>
+
+                <h5 className="mt-2 text-lg">
+
+                  Dharmapuri (SC)
+
+                </h5>
+
+              </div>
+
+              <div>
+
+                <p className="text-slate-500 uppercase tracking-widest text-xs">
+
+                  District
+
+                </p>
+
+                <h5 className="mt-2 text-lg">
+
+                  Jagtial
+
+                </h5>
+
+              </div>
+
+              <div>
+
+                <p className="text-slate-500 uppercase tracking-widest text-xs">
+
+                  State
+
+                </p>
+
+                <h5 className="mt-2 text-lg">
+
+                  Telangana
+
+                </h5>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+        {/* Bottom */}
+
+        <div className="border-t border-slate-800 mt-14 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+
+          <p className="text-slate-500 text-sm">
+
+            © 2026 <h2>{leader.profile.name}</h2>. All Rights Reserved.
+
+          </p>
+
+          <p className="text-slate-500 text-sm">
+
+            Designed & Developed with ❤️
+
+          </p>
+
+        </div>
+
+      </div>
+
+    </footer>
+  );
 }
