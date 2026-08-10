@@ -35,7 +35,7 @@
 const leader = {
   profile: {
     name: "Adluri Laxman Kumar",
-    designation: "Member of Legislative Assembly",
+    designation: "Minister of Telangana State",
     designation2: "Cabinet Minister",
     constituency: "Dharmapuri (SC)",
     district: "Jagtial",

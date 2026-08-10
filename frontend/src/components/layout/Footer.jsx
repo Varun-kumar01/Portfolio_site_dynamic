@@ -40,11 +40,7 @@ export default function Footer() {
               className="w-16"
             />
 
-            <h3 className="mt-5 text-2xl font-bold">
-
-              <h2>{leader.profile.name}</h2>
-
-            </h3>
+            <h3 className="mt-5 text-2xl font-bold">{leader.profile.name}</h3>
 
             <p className="mt-2 text-orange-400">
 
@@ -152,11 +148,7 @@ export default function Footer() {
 
                   </p>
 
-                  <p className="text-slate-400">
-
-                    <p>{leader.contact.phone}</p>
-
-                  </p>
+                  <p className="text-slate-400">{leader.contact.phone}</p>
 
                 </div>
 
@@ -174,11 +166,7 @@ export default function Footer() {
 
                   </p>
 
-                  <p className="text-slate-400">
-
-                    <p>{leader.contact.email}</p>
-
-                  </p>
+                  <p className="text-slate-400">{leader.contact.email}</p>
 
                 </div>
 
@@ -282,11 +270,7 @@ export default function Footer() {
 
         <div className="border-t border-slate-800 mt-14 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
 
-          <p className="text-slate-500 text-sm">
-
-            © 2026 <h2>{leader.profile.name}</h2>. All Rights Reserved.
-
-          </p>
+          <p className="text-slate-500 text-sm">© 2026 <span className="font-semibold">{leader.profile.name}</span>. All Rights Reserved.</p>
 
           <p className="text-slate-500 text-sm">
 

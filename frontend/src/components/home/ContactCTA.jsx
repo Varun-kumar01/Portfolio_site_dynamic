@@ -91,9 +91,7 @@ export default function ContactCTA() {
                     </p>
 
                     <p className="text-white/80 text-sm">
-
-                      <p>{leader.contact.email}</p>
-                      
+                      <span>{leader.contact.email}</span>
                     </p>
 
                   </div>
