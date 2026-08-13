@@ -1,88 +1,89 @@
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Play, X } from "lucide-react";
 
-const galleryItems = [
+const galleryItemsData = [
   {
     id: 1,
     type: "photo",
-    category: "Public Events",
+    categoryKey: "publicEvents",
     image: "/gallery/1.png",
     title: "Public Meetings",
   },
   {
     id: 2,
     type: "photo",
-    category: "Meetings",
+    categoryKey: "meetings",
     image: "/gallery/2.png",
     title: "Public Meetings",
   },
   {
     id: 3,
     type: "photo",
-    category: "Constituency",
+    categoryKey: "constituency",
     image: "/gallery/3.png",
     title: "Public Meetings",
   },
   {
     id: 4,
     type: "photo",
-    category: "Events",
+    categoryKey: "events",
     image: "/gallery/4.png",
     title: "Public Meetings",
   },
   {
     id: 5,
     type: "photo",
-    category: "Public Events",
+    categoryKey: "publicEvents",
     image: "/gallery/5.png",
     title: "Public Meetings",
   },
   {
     id: 6,
     type: "photo",
-    category: "Meetings",
+    categoryKey: "meetings",
     image: "/gallery/6.png",
     title: "Public Meetings",
   },
   {
     id: 7,
     type: "photo",
-    category: "Public Events",
+    categoryKey: "publicEvents",
     image: "/gallery/7.png",
     title: "Public Interaction",
   },
   {
     id: 8,
     type: "photo",
-    category: "Meetings",
+    categoryKey: "meetings",
     image: "/gallery/8.png",
     title: "Official Meeting",
   },
   {
     id: 9,
     type: "photo",
-    category: "Constituency",
+    categoryKey: "constituency",
     image: "/gallery/9.png",
     title: "Constituency Visit",
   },
   {
     id: 10,
     type: "photo",
-    category: "Events",
+    categoryKey: "events",
     image: "/gallery/10.png",
     title: "Public Programme",
   },
   {
     id: 11,
     type: "photo",
-    category: "Public Events",
+    categoryKey: "publicEvents",
     image: "/gallery/11.png",
     title: "Community Interaction",
   },
   {
     id: 12,
     type: "photo",
-    category: "Meetings",
+    categoryKey: "meetings",
     image: "/gallery/12.png",
     title: "Leadership Meeting",
   },
@@ -91,25 +92,25 @@ const galleryItems = [
   {
     id: 13,
     type: "video",
-    category: "Public Events",
+    categoryKey: "publicEvents",
     title: "Public Programme",
     videoUrl: "https://www.youtube.com/watch?v=qFusARwKYPk",
   },
   {
     id: 14,
     type: "video",
-    category: "Meetings",
+    categoryKey: "meetings",
     title: "Public Interaction",
     videoUrl: "https://www.youtube.com/watch?v=XTZMEkK0F7s",
   },
 ];
 
-const categories = [
-  "All",
-  "Public Events",
-  "Constituency",
-  "Meetings",
-  "Events",
+const categoryKeys = [
+  "all",
+  "publicEvents",
+  "constituency",
+  "meetings",
+  "events",
 ];
 
 // Get YouTube thumbnail from video URL
@@ -124,16 +125,17 @@ const getYoutubeThumbnail = (url) => {
 };
 
 export default function Gallery() {
+  const { t } = useTranslation();
   const [type, setType] = useState("photo");
-  const [category, setCategory] = useState("All");
+  const [category, setCategory] = useState("all");
   const [selectedImage, setSelectedImage] = useState(null);
 
   const filteredItems = useMemo(() => {
-    return galleryItems.filter((item) => {
+    return galleryItemsData.filter((item) => {
       const typeMatch = item.type === type;
 
       const categoryMatch =
-        category === "All" || item.category === category;
+        category === "all" || item.categoryKey === category;
 
       return typeMatch && categoryMatch;
     });
@@ -153,16 +155,15 @@ export default function Gallery() {
             <div className="max-w-2xl">
 
               <span className="text-orange-600 text-sm font-semibold uppercase tracking-[0.25em]">
-                Media Gallery
+                {t('gallery.pageTitle')}
               </span>
 
               <h2 className="mt-3 text-3xl md:text-4xl lg:text-5xl font-bold text-slate-900">
-                Moments of Public Service
+                {t('gallery.momentsTitle')}
               </h2>
 
               <p className="mt-4 text-gray-600 leading-8">
-                Explore photographs and videos capturing public programmes,
-                constituency visits, meetings and important events.
+                {t('gallery.momentsSubtitle')}
               </p>
 
             </div>
@@ -174,7 +175,7 @@ export default function Gallery() {
               <button
                 onClick={() => {
                   setType("photo");
-                  setCategory("All");
+                  setCategory("all");
                 }}
                 className={`px-6 py-2.5 rounded-full text-sm font-semibold transition ${
                   type === "photo"
@@ -182,13 +183,13 @@ export default function Gallery() {
                     : "text-slate-600 hover:text-orange-600"
                 }`}
               >
-                Photos
+                {t('gallery.photos')}
               </button>
 
               <button
                 onClick={() => {
                   setType("video");
-                  setCategory("All");
+                  setCategory("all");
                 }}
                 className={`px-6 py-2.5 rounded-full text-sm font-semibold transition ${
                   type === "video"
@@ -196,7 +197,7 @@ export default function Gallery() {
                     : "text-slate-600 hover:text-orange-600"
                 }`}
               >
-                Videos
+                {t('gallery.videos')}
               </button>
 
             </div>
@@ -207,17 +208,17 @@ export default function Gallery() {
 
           <div className="flex flex-wrap gap-3 mt-10">
 
-            {categories.map((item) => (
+            {categoryKeys.map((key) => (
               <button
-                key={item}
-                onClick={() => setCategory(item)}
+                key={key}
+                onClick={() => setCategory(key)}
                 className={`px-5 py-2 rounded-full border text-sm transition ${
-                  category === item
+                  category === key
                     ? "bg-orange-600 text-white border-orange-600"
                     : "bg-white border-slate-200 text-slate-600 hover:border-orange-500 hover:text-orange-600"
                 }`}
               >
-                {item}
+                {t(`gallery.${key}`)}
               </button>
             ))}
 
@@ -275,7 +276,7 @@ export default function Gallery() {
                       </p>
 
                       <p className="mt-1 text-white/70 text-sm">
-                        {item.category}
+                        {t(`gallery.${item.categoryKey}`)}
                       </p>
 
                     </div>
@@ -318,7 +319,7 @@ export default function Gallery() {
             <div className="mt-12 py-20 text-center rounded-3xl bg-slate-50 border border-slate-100">
 
               <p className="text-gray-500">
-                No {type === "photo" ? "photos" : "videos"} found in this category.
+                {type === "photo" ? t('gallery.noPhotosFound') : t('gallery.noVideosFound')}
               </p>
 
             </div>

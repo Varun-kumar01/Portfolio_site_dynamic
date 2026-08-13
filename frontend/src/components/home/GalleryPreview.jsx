@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -10,7 +11,7 @@ const images = [
 ];
 
 export default function GalleryPreview() {
-
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   return (
@@ -26,22 +27,21 @@ export default function GalleryPreview() {
 
             <span className="uppercase tracking-[0.25em] text-orange-600 text-sm font-semibold">
 
-              Gallery
+              {t("home.galleryPreview.label")}
 
             </span>
 
             <h2 className="mt-4 text-3xl md:text-4xl lg:text-5xl font-bold text-slate-900">
 
-              Moments That Define
-              Public Service
+              {t("home.galleryPreview.titleLine1")}
+              <br />
+              {t("home.galleryPreview.titleLine2")}
 
             </h2>
 
             <p className="mt-5 text-gray-600 leading-8">
 
-              A glimpse into development initiatives,
-              constituency visits, public meetings,
-              celebrations and citizen engagement.
+              {t("home.galleryPreview.description")}
 
             </p>
 
@@ -49,7 +49,7 @@ export default function GalleryPreview() {
 
           <button onClick={() => navigate("/gallery")} className="inline-flex items-center gap-2 text-orange-600 font-semibold group">
 
-            View Complete Gallery
+            {t("home.galleryPreview.viewComplete")}
 
             <ArrowRight
               size={18}
@@ -80,14 +80,14 @@ export default function GalleryPreview() {
 
                 <p className="text-white text-2xl font-semibold">
 
-                  Community Development
+                  {t("home.galleryPreview.communityDev")}
 
                 </p>
 
                 <button onClick={() => navigate("/gallery")}>
                   <span className="text-white/80">
 
-                    View Photo
+                    {t("home.galleryPreview.viewPhoto")}
 
                   </span>
                 </button>
@@ -120,7 +120,7 @@ export default function GalleryPreview() {
                   <button onClick={() => navigate("/gallery")}>
                     <span className="text-white font-semibold">
 
-                      View
+                      {t("home.galleryPreview.view")}
 
                     </span>
                   </button>
@@ -156,7 +156,7 @@ export default function GalleryPreview() {
 
                 <span className="text-white font-semibold">
 
-                  View
+                  {t("home.galleryPreview.view")}
 
                 </span>
 
@@ -172,21 +172,21 @@ export default function GalleryPreview() {
 
             <p className="uppercase tracking-widest text-sm">
 
-              Gallery
+              {t("home.galleryPreview.label")}
 
             </p>
 
             <h3 className="mt-3 text-3xl font-bold">
 
-              500+
+              {t("home.galleryPreview.momentsCount")}
               <br />
-              Moments
+              {t("home.galleryPreview.momentsLabel")}
 
             </h3>
 
             <button onClick={() => navigate("/gallery")} className="mt-8 inline-flex items-center gap-2 font-semibold">
 
-              Explore Gallery
+              {t("home.galleryPreview.exploreGallery")}
 
               <ArrowRight size={18} />
 

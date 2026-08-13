@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import {
   ArrowRight,
   Phone,
@@ -6,11 +7,11 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-import leader from "../../data/leader"
+import leader from "../../data/leader";
 
 export default function ContactCTA() {
-
-    const navigate = useNavigate();
+  const navigate = useNavigate();
+  const { t } = useTranslation();
 
   return (
     <section className="pt-16 pb-20 lg:pt-20 lg:pb-24 bg-white">
@@ -33,24 +34,21 @@ export default function ContactCTA() {
 
               <span className="uppercase tracking-[0.25em] text-white/80 text-sm font-semibold">
 
-                Get In Touch
+                {t("contactCTA.label")}
 
               </span>
 
               <h2 className="mt-4 text-3xl md:text-4xl lg:text-5xl font-bold text-white leading-tight">
 
-                Together, Let's Build
+                {t("contactCTA.titleLine1")}
                 <br />
-                A Better Tomorrow
+                {t("contactCTA.titleLine2")}
 
               </h2>
 
               <p className="mt-6 text-white/90 leading-8 max-w-2xl">
 
-                Your ideas, suggestions and concerns matter.
-                Stay connected and work together towards
-                stronger communities, better development
-                and transparent governance.
+                {t("contactCTA.description")}
 
               </p>
 
@@ -64,13 +62,13 @@ export default function ContactCTA() {
 
                     <p className="text-white font-medium">
 
-                      Phone
+                      {t("contactCTA.phone")}
 
                     </p>
 
                     <p className="text-white/80 text-sm">
 
-                      +91 98765 43210
+                      {leader.contact.phone}
 
                     </p>
 
@@ -86,7 +84,7 @@ export default function ContactCTA() {
 
                     <p className="text-white font-medium">
 
-                      Email
+                      {t("contactCTA.email")}
 
                     </p>
 
@@ -106,13 +104,13 @@ export default function ContactCTA() {
 
                     <p className="text-white font-medium">
 
-                      Office
+                      {t("contactCTA.office")}
 
                     </p>
 
                     <p className="text-white/80 text-sm">
 
-                      Dharmapuri, Telangana
+                      {t("contactCTA.officeAddress")}
 
                     </p>
 
@@ -130,7 +128,7 @@ export default function ContactCTA() {
 
               <button onClick={() => navigate("/contact")} className="bg-white text-orange-600 hover:bg-slate-100 transition-all duration-300 rounded-full px-10 py-5 font-semibold inline-flex items-center gap-3 shadow-xl hover:scale-105">
 
-                Contact Office
+                {t("contactCTA.button")}
 
                 <ArrowRight size={18} />
 

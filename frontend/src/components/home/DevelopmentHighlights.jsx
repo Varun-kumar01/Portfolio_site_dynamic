@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Building2,
   GraduationCap,
@@ -8,40 +9,36 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-const developments = [
-
-  {
-    title: "Healthcare",
-    icon: HeartHandshake,
-    image: "/works/health.png",
-    description:
-      "Enhancing healthcare access through medical camps, awareness programmes and better health facilities.",
-  },
-  {
-    title: "Agriculture",
-    icon: Trees,
-    image: "/works/agriculture.png",
-    description:
-      "Working alongside farmers to encourage sustainable agriculture and rural development initiatives.",
-  },
-    {
-    title: "Infrastructure Development",
-    icon: Building2,
-    image: "/works/roads.png",
-    description:
-      "Strengthening roads, public buildings, drinking water facilities and civic infrastructure to improve connectivity and everyday life.",
-  },
-  {
-    title: "Education & Youth",
-    icon: GraduationCap,
-    image: "/works/education.png",
-    description:
-      "Supporting schools, scholarships, digital learning and opportunities that empower students and young leaders.",
-  },
-];
-
 export default function DevelopmentHighlights() {
+  const { t } = useTranslation();
   const [active, setActive] = useState(0);
+
+  const developments = [
+    {
+      title: t('home.development.initiatives.healthcare.title'),
+      icon: HeartHandshake,
+      image: "/works/health.png",
+      description: t('home.development.initiatives.healthcare.description'),
+    },
+    {
+      title: t('home.development.initiatives.agriculture.title'),
+      icon: Trees,
+      image: "/works/agriculture.png",
+      description: t('home.development.initiatives.agriculture.description'),
+    },
+    {
+      title: t('home.development.initiatives.infrastructure.title'),
+      icon: Building2,
+      image: "/works/roads.png",
+      description: t('home.development.initiatives.infrastructure.description'),
+    },
+    {
+      title: t('home.development.initiatives.education.title'),
+      icon: GraduationCap,
+      image: "/works/education.png",
+      description: t('home.development.initiatives.education.description'),
+    },
+  ];
 
   const current = developments[active];
 
@@ -57,17 +54,15 @@ export default function DevelopmentHighlights() {
         <div className="max-w-2xl">
 
           <span className="uppercase tracking-[0.25em] text-orange-600 text-sm font-semibold">
-            Development Highlights
+            {t('home.development.label')}
           </span>
 
           <h2 className="mt-4 text-3xl md:text-4xl lg:text-5xl font-bold text-slate-900">
-            Building Stronger Communities
+            {t('home.development.title')}
           </h2>
 
           <p className="mt-5 text-gray-600 leading-8">
-            Development is driven by better infrastructure,
-            quality education, healthcare and sustainable
-            opportunities that improve everyday life.
+            {t('home.development.description')}
           </p>
 
         </div>
@@ -93,7 +88,7 @@ export default function DevelopmentHighlights() {
               <current.icon size={22} />
 
               <span className="font-semibold uppercase tracking-wide">
-                Featured Initiative
+                {t('home.development.featuredInitiative')}
               </span>
 
             </div>
@@ -108,7 +103,7 @@ export default function DevelopmentHighlights() {
 
             <button onClick={() => navigate("/news")} className="mt-8 inline-flex items-center gap-2 text-orange-600 font-semibold group">
 
-              Learn More
+              {t('common.learnMore')}
 
               <ArrowRight
                 size={18}

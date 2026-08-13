@@ -1,31 +1,31 @@
+import { useTranslation } from "react-i18next";
 import { CalendarDays, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-const featured = {
-  image: "/news/news1.png",
-  date: "2 March 2026",
-  title: "Minister Calls for Reclaiming Encroached Government Land for the Poor",
-  description:
-    "Adluri Laxman Kumar directed officials to identify illegally occupied government land and redistribute eligible land to poor families while addressing a public awareness programme in Dharmaram Mandal.",
-};
-
-const news = [
-  {
-    image: "/news/news2.png",
-    date: "1 March 2026",
-    title: "Annadanam Service Inaugurated at Dharmapuri Temple",
-  },
-  {
-    image: "/news/news3.png",
-    date: "14 February 2026",
-    title: "Congress Records Complete Municipal Sweep in Dharmapuri",
-  },
-];
-
 export default function NewsPreview() {
-
+  const { t } = useTranslation();
   const navigate = useNavigate();
-  
+
+  const featured = {
+    image: "/news/news1.png",
+    date: "2 March 2026",
+    titleKey: "news.items.news1.title",
+    descriptionKey: "news.items.news1.description",
+  };
+
+  const newsItems = [
+    {
+      image: "/news/news2.png",
+      date: "1 March 2026",
+      titleKey: "news.items.news2.title",
+    },
+    {
+      image: "/news/news3.png",
+      date: "14 February 2026",
+      titleKey: "news.items.news3.title",
+    },
+  ];
+
   return (
     <section className="py-16 lg:py-20 bg-slate-50">
 
@@ -39,21 +39,19 @@ export default function NewsPreview() {
 
             <span className="uppercase tracking-[0.25em] text-orange-600 text-sm font-semibold">
 
-              Latest News
+              {t("home.newsPreview.label")}
 
             </span>
 
             <h2 className="mt-4 text-3xl md:text-4xl lg:text-5xl font-bold text-slate-900">
 
-              Recent Updates & Public Activities
+              {t("home.newsPreview.title")}
 
             </h2>
 
             <p className="mt-5 text-gray-600 leading-8">
 
-              Stay updated with recent constituency visits,
-              welfare initiatives, government programmes and
-              important public announcements.
+              {t("home.newsPreview.description")}
 
             </p>
 
@@ -61,7 +59,7 @@ export default function NewsPreview() {
 
           <button onClick={() => navigate("/news")} className="inline-flex items-center gap-2 text-orange-600 font-semibold group">
 
-            View All News
+            {t("home.newsPreview.viewAll")}
 
             <ArrowRight
               size={18}
@@ -98,19 +96,19 @@ export default function NewsPreview() {
 
               <h3 className="mt-4 text-2xl font-bold text-slate-900">
 
-                {featured.title}
+                {t(featured.titleKey)}
 
               </h3>
 
               <p className="mt-5 text-gray-600 leading-8">
 
-                {featured.description}
+                {t(featured.descriptionKey)}
 
               </p>
 
-              <button className="mt-7 inline-flex items-center gap-2 text-orange-600 font-semibold group">
+              <button onClick={() => navigate("/news")} className="mt-7 inline-flex items-center gap-2 text-orange-600 font-semibold group">
 
-                Read More
+                {t("news.readMore")}
 
                 <ArrowRight
                   size={18}
@@ -127,7 +125,7 @@ export default function NewsPreview() {
 
           <div className="space-y-6">
 
-            {news.map((item, index) => (
+            {newsItems.map((item, index) => (
 
               <article
                 key={index}
@@ -152,13 +150,13 @@ export default function NewsPreview() {
 
                   <h4 className="mt-4 text-lg font-semibold text-slate-900 leading-8">
 
-                    {item.title}
+                    {t(item.titleKey)}
 
                   </h4>
 
-                  <button className="mt-5 inline-flex items-center gap-2 text-orange-600 font-semibold group">
+                  <button onClick={() => navigate("/news")} className="mt-5 inline-flex items-center gap-2 text-orange-600 font-semibold group">
 
-                    Read More
+                    {t("news.readMore")}
 
                     <ArrowRight
                       size={16}

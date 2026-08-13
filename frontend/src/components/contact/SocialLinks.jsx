@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import {
   FaFacebookF,
   FaInstagram,
@@ -10,11 +11,13 @@ import { FaXTwitter } from "react-icons/fa6";
 
 
 const SocialLinks = () => {
+  const { t } = useTranslation();
+
   return (
     <div>
       {/* Heading */}
       <h3 className="text-2xl font-bold text-gray-900 mb-6">
-        Follow Us
+        {t("contactCard.followUs")}
       </h3>
 
       {/* Social Icons */}

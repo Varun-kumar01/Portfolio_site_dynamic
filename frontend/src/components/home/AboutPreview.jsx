@@ -1,108 +1,19 @@
-// import { ArrowRight } from "lucide-react";
-
-// export default function AboutPreview() {
-//   return (
-//     <section className="py-20 lg:py-28 bg-white">
-//       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-
-//         <div className="grid lg:grid-cols-2 gap-16 items-center">
-
-//           {/* Image */}
-
-//           <div className="relative">
-
-//             <div className="absolute -top-6 -left-6 w-44 h-44 bg-orange-100 rounded-3xl hidden lg:block"></div>
-
-//             <img
-//               src="/about.png"
-//               alt="About"
-//               className="relative rounded-3xl shadow-xl w-full object-cover"
-//             />
-
-//           </div>
-
-//           {/* Content */}
-
-//           <div>
-
-//             <span className="text-orange-600 font-semibold uppercase tracking-wider">
-//               About
-//             </span>
-
-//             <h2 className="mt-4 text-4xl lg:text-5xl font-bold text-gray-900 leading-tight">
-//               Dedicated to the Progress of Every Citizen
-//             </h2>
-
-//             <p className="mt-6 text-gray-600 leading-8">
-//               Public service is built on integrity, transparency, and
-//               commitment. Through continuous interaction with citizens and
-//               community-driven initiatives, our mission is to improve education,
-//               healthcare, employment, infrastructure, and the quality of life
-//               for every family.
-//             </p>
-
-//             <p className="mt-5 text-gray-600 leading-8">
-//               Every development initiative reflects a long-term vision of
-//               sustainable growth, accountability, and inclusive governance.
-//             </p>
-
-//             <div className="grid grid-cols-2 gap-6 mt-10">
-
-//               <div className="border rounded-xl p-5">
-//                 <h3 className="text-3xl font-bold text-orange-600">
-//                   200+
-//                 </h3>
-
-//                 <p className="mt-2 text-gray-600">
-//                   Public Projects
-//                 </p>
-//               </div>
-
-//               <div className="border rounded-xl p-5">
-//                 <h3 className="text-3xl font-bold text-orange-600">
-//                   15+
-//                 </h3>
-
-//                 <p className="mt-2 text-gray-600">
-//                   Years Experience
-//                 </p>
-//               </div>
-
-//             </div>
-
-//             <button className="mt-10 bg-orange-600 hover:bg-orange-700 text-white px-8 py-4 rounded-lg font-semibold flex items-center gap-2 transition">
-
-//               Learn More
-
-//               <ArrowRight size={18} />
-
-//             </button>
-
-//           </div>
-
-//         </div>
-
-//       </div>
-//     </section>
-//   );
-// }
-
-
+import { useTranslation } from "react-i18next";
 import { ArrowRight, CheckCircle2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-
 const features = [
-  "Transparent Governance",
-  "Infrastructure Development",
-  "Quality Education",
-  "Public Welfare",
+  "transparentGovernance",
+  "infrastructureDevelopment",
+  "qualityEducation",
+  "publicWelfare"
 ];
 
 export default function AboutPreview() {
 
+  const { t } = useTranslation();
   const navigate = useNavigate();
-  
+
   return (
     <section className="relative pt-16 pb-16 lg:pt-20 lg:pb-20 bg-white overflow-hidden">
 
@@ -120,11 +31,7 @@ export default function AboutPreview() {
 
           <div className="relative flex justify-center">
 
-            {/* Orange Glow */}
-
             <div className="absolute w-[420px] h-[420px] rounded-full bg-orange-200 blur-[120px] opacity-50"></div>
-
-            {/* Green Glow */}
 
             <div className="absolute bottom-0 right-0 w-[280px] h-[280px] rounded-full bg-green-200 blur-[120px] opacity-50"></div>
 
@@ -147,27 +54,17 @@ export default function AboutPreview() {
           <div>
 
             <span className="uppercase tracking-[0.25em] text-orange-600 font-semibold text-sm">
-
-              About
-
+              {t("home.aboutPreview.label")}
             </span>
 
             <h2 className="mt-5 text-2xl lg:text-4xl font-black leading-tight text-slate-900">
-
-              Dedicated to the
+              {t("home.aboutPreview.titleLine1")}
               <br />
-              Progress of Every Citizen
-
+              {t("home.aboutPreview.titleLine2")}
             </h2>
 
             <p className="mt-8 text-lg leading-9 text-gray-600">
-
-              Public service is built on integrity, transparency and
-              commitment. Through continuous interaction with citizens,
-              community participation and development-focused initiatives,
-              every effort is directed towards building a stronger and
-              more prosperous Telangana.
-
+              {t("home.aboutPreview.description")}
             </p>
 
             {/* Features */}
@@ -187,9 +84,7 @@ export default function AboutPreview() {
                   />
 
                   <span className="font-medium text-gray-700">
-
-                    {item}
-
+                    {t(`home.aboutPreview.features.${item}`)}
                   </span>
 
                 </div>
@@ -205,15 +100,11 @@ export default function AboutPreview() {
               <div className="rounded-3xl bg-white border border-slate-200 p-6 shadow-sm hover:-translate-y-2 hover:shadow-xl transition duration-500">
 
                 <h3 className="text-4xl font-black text-orange-600">
-
                   200+
-
                 </h3>
 
                 <p className="mt-2 text-gray-600">
-
-                  Development Projects
-
+                  {t("home.aboutPreview.stats.projects")}
                 </p>
 
               </div>
@@ -221,27 +112,24 @@ export default function AboutPreview() {
               <div className="rounded-3xl bg-white border border-slate-200 p-6 shadow-sm hover:-translate-y-2 hover:shadow-xl transition duration-500">
 
                 <h3 className="text-4xl font-black text-orange-600">
-
                   25+
-
                 </h3>
 
                 <p className="mt-2 text-gray-600">
-
-                  Years of Public Service
-
+                  {t("home.aboutPreview.stats.years")}
                 </p>
 
               </div>
 
             </div>
 
-            <button onClick={() => navigate("/about")} className="mt-12 inline-flex items-center gap-3 bg-orange-600 hover:bg-orange-700 hover:scale-105 transition-all duration-300 text-white px-8 py-4 rounded-full font-semibold shadow-lg">
-
-              Learn More
+            <button
+              onClick={() => navigate("/about")}
+              className="mt-12 inline-flex items-center gap-3 bg-orange-600 hover:bg-orange-700 hover:scale-105 transition-all duration-300 text-white px-8 py-4 rounded-full font-semibold shadow-lg"
+            >
+              {t("home.aboutPreview.button")}
 
               <ArrowRight size={18} />
-
             </button>
 
           </div>

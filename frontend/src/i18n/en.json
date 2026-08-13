@@ -1,0 +1,478 @@
+{
+  "nav": {
+    "home": "Home",
+    "about": "About",
+    "journey": "Political Journey",
+    "gallery": "Gallery",
+    "news": "News",
+    "contact": "Contact"
+  },
+
+  "common": {
+    "menu": "Menu",
+    "english": "English",
+    "telugu": "తెలుగు",
+    "sendMessage": "Send Message",
+    "learnMore": "Learn More",
+    "viewMore": "View More",
+    "search": "Search",
+    "category": "Category",
+    "date": "Date",
+    "description": "Description"
+  },
+
+  "home": {
+    "hero": {
+      "title": "Building a Better Telangana",
+      "description": "Committed to transparent governance, inclusive growth, stronger infrastructure, quality education and public welfare.",
+      "exploreJourney": "Explore Journey",
+      "developmentWorks": "Development Works"
+    },
+
+    "aboutPreview": {
+      "label": "About",
+      "titleLine1": "Dedicated to the",
+      "titleLine2": "Progress of Every Citizen",
+      "description": "Public service is built on integrity, transparency and commitment. Through continuous interaction with citizens, community participation and development-focused initiatives, every effort is directed towards building a stronger and more prosperous Telangana.",
+
+      "features": {
+        "transparentGovernance": "Transparent Governance",
+        "infrastructureDevelopment": "Infrastructure Development",
+        "qualityEducation": "Quality Education",
+        "publicWelfare": "Public Welfare"
+      },
+
+      "stats": {
+        "projects": "Development Projects",
+        "years": "Years of Public Service"
+      },
+
+      "button": "Learn More"
+    },
+
+    "focusAreas": {
+      "label": "Focus Areas",
+      "title": "Committed to Inclusive Development",
+      "description": "Focused on strengthening infrastructure, education, social welfare and citizen-centric governance to improve the quality of life across the constituency.",
+      "areas": {
+        "infrastructure": {
+          "title": "Infrastructure Development",
+          "description": "Improving roads, public facilities, drinking water systems and strengthening civic infrastructure for sustainable growth."
+        },
+        "education": {
+          "title": "Education & Youth",
+          "description": "Promoting quality education, skill development, scholarships and opportunities that empower students and young leaders."
+        },
+        "welfare": {
+          "title": "SC & Tribal Welfare",
+          "description": "Committed to the welfare, empowerment and inclusive development of Scheduled Castes and Tribal communities."
+        },
+        "governance": {
+          "title": "Citizen-Centric Governance",
+          "description": "Delivering transparent, accessible and accountable governance while addressing the needs of every citizen."
+        }
+      }
+    },
+
+    "development": {
+      "label": "Development Highlights",
+      "title": "Building Stronger Communities",
+      "description": "Development is driven by better infrastructure, quality education, healthcare and sustainable opportunities that improve everyday life.",
+      "featuredInitiative": "Featured Initiative",
+      "initiatives": {
+        "healthcare": {
+          "title": "Healthcare",
+          "description": "Enhancing healthcare access through medical camps, awareness programmes and better health facilities."
+        },
+        "agriculture": {
+          "title": "Agriculture",
+          "description": "Working alongside farmers to encourage sustainable agriculture and rural development initiatives."
+        },
+        "infrastructure": {
+          "title": "Infrastructure Development",
+          "description": "Strengthening roads, public buildings, drinking water facilities and civic infrastructure to improve connectivity and everyday life."
+        },
+        "education": {
+          "title": "Education & Youth",
+          "description": "Supporting schools, scholarships, digital learning and opportunities that empower students and young leaders."
+        }
+      }
+    },
+
+    "galleryPreview": {
+      "label": "Gallery",
+      "titleLine1": "Moments That Define",
+      "titleLine2": "Public Service",
+      "description": "A glimpse into development initiatives, constituency visits, public meetings, celebrations and citizen engagement.",
+      "viewComplete": "View Complete Gallery",
+      "communityDev": "Community Development",
+      "viewPhoto": "View Photo",
+      "view": "View",
+      "momentsCount": "500+",
+      "momentsLabel": "Moments",
+      "exploreGallery": "Explore Gallery"
+    },
+
+    "newsPreview": {
+      "label": "Latest News",
+      "title": "Recent Updates & Public Activities",
+      "description": "Stay updated with recent constituency visits, welfare initiatives, government programmes and important public announcements.",
+      "viewAll": "View All News"
+    }
+  },
+
+  "about": {
+    "pageTitle": "About the Public Leadership Journey",
+    "pageSubtitle": "A profile grounded in service, responsibility, and public trust.",
+
+    "label": "About",
+
+    "name": "Adluri Laxman Kumar",
+
+    "designation": "Minister for SC, ST, Minority, Disabled, Senior Citizens Welfare & Transgender Empowerment",
+
+    "paragraph1": {
+      "part1": "is an Indian politician from the",
+      "inc": "Indian National Congress (INC)",
+      "part2": "who serves as the",
+      "minister": "Minister for SC, ST, Minority, Disabled, Senior Citizens Welfare, and Transgender Empowerment",
+      "part3": "in the Telangana State Cabinet."
+    },
+
+    "paragraph2": {
+      "part1": "He represents the",
+      "constituency": "Dharmapuri Assembly Constituency (Scheduled Castes Reserved)",
+      "part2": "in",
+      "location": "Jagtial District, Telangana",
+      "part3": "He is committed to social justice, inclusive governance, welfare initiatives, and the empowerment of marginalized communities."
+    }
+  },
+
+  "contact": {
+    "pageTitle": "Contact",
+    "title": "Send Us a Message",
+    "form": {
+      "name": "Your Name",
+      "email": "Your Email",
+      "subject": "Subject",
+      "message": "Your Message",
+      "submit": "Send Message"
+    }
+  },
+
+  "gallery": {
+    "pageTitle": "Gallery",
+    "momentsTitle": "Moments of Public Service",
+    "momentsSubtitle": "Explore photographs and videos capturing public programmes, constituency visits, meetings and important events.",
+    "photos": "Photos",
+    "videos": "Videos",
+    "all": "All",
+    "publicEvents": "Public Events",
+    "meetings": "Meetings",
+    "constituency": "Constituency",
+    "events": "Events",
+    "noPhotosFound": "No photos found in this category.",
+    "noVideosFound": "No videos found in this category."
+  },
+
+  "news": {
+    "pageLabel": "Latest Updates",
+    "pageTitle": "News & Announcements",
+    "pageDescription": "Follow the latest public programmes, constituency activities, welfare initiatives and important announcements.",
+    "all": "All",
+    "government": "Government",
+    "public": "Public",
+    "healthcare": "Healthcare",
+    "education": "Education",
+    "agriculture": "Agriculture",
+    "search": "Search news...",
+    "showing": "Showing",
+    "updates": "updates",
+    "update": "update",
+    "readMore": "Read More",
+    "noNewsFound": "No news found",
+    "tryAnother": "Try another search term or category.",
+    "clearFilters": "Clear Filters",
+    "items": {
+      "news1": {
+        "title": "Development Review Meeting Conducted Successfully",
+        "description": "Review meeting conducted to monitor ongoing infrastructure and welfare projects."
+      },
+      "news2": {
+        "title": "Village Development Programme",
+        "description": "Interaction with local citizens regarding drinking water and road development."
+      },
+      "news3": {
+        "title": "Health Camp Inaugurated",
+        "description": "Large scale medical camp organized for citizens across the constituency."
+      },
+      "news4": {
+        "title": "Education Support Initiative",
+        "description": "Scholarship and educational assistance programme launched."
+      },
+      "news5": {
+        "title": "Farmer Welfare Meeting",
+        "description": "Interaction with farmers regarding irrigation and welfare schemes."
+      },
+      "news6": {
+        "title": "Public Grievance Programme",
+        "description": "Meeting with citizens to discuss and address constituency issues."
+      }
+    }
+  },
+
+  "journey": {
+    "pageLabel": "Political Journey",
+    "pageTitle": "Political Career",
+    "pageDescription": "A journey of public service, leadership, social justice and inclusive development spanning more than two decades of dedicated service to the people of Telangana.",
+    "careerJourney": [
+      {
+        "year": "Early Career",
+        "date": "Political Beginning",
+        "title": "Joined the Indian National Congress",
+        "label": "Beginning of Political Career",
+        "description": "Began his political journey as a dedicated worker of the Indian National Congress and gradually became involved in youth and public-oriented activities."
+      },
+      {
+        "year": "1996 - 2001",
+        "date": "Youth Congress",
+        "title": "General Secretary, Andhra Pradesh Youth Congress",
+        "label": "Youth Leadership",
+        "description": "Served as General Secretary of the Andhra Pradesh Youth Congress, working to strengthen the youth wing and encourage young people to participate in public service."
+      },
+      {
+        "year": "2006 - 2011",
+        "date": "Local Governance",
+        "title": "ZPTC Member, Dharmaram Constituency",
+        "label": "Rural Development",
+        "description": "Elected as a ZPTC Member from Dharmaram Constituency and worked on rural development, local governance and public welfare initiatives."
+      },
+      {
+        "year": "2010 - 2012",
+        "date": "District Administration",
+        "title": "Chairman, Karimnagar Zilla Parishad",
+        "label": "District Leadership",
+        "description": "Served as Chairman of the Karimnagar Zilla Parishad, overseeing district-level administration and development projects."
+      },
+      {
+        "year": "2013 - 2014",
+        "date": "Social Welfare",
+        "title": "Chairman, State Scheduled Castes Corporation",
+        "label": "Social Justice",
+        "description": "Led the State Scheduled Castes Corporation and worked towards implementing welfare and empowerment programs for Scheduled Caste communities."
+      },
+      {
+        "year": "2009 - 2018",
+        "date": "Assembly Elections",
+        "title": "Contested Dharmapuri Assembly Constituency",
+        "label": "Electoral Journey",
+        "description": "Contested the Dharmapuri Assembly Constituency several times in 2009, the 2010 by-election, 2014 and 2018, demonstrating perseverance and commitment to public service."
+      },
+      {
+        "year": "2018",
+        "date": "Assembly Election",
+        "title": "Narrow Electoral Defeat",
+        "label": "Perseverance",
+        "description": "In the 2018 Assembly Election, he lost by a very narrow margin of 441 votes, reflecting strong public support and a closely contested election."
+      },
+      {
+        "year": "2023",
+        "date": "Telangana Assembly Election",
+        "title": "Historic Assembly Victory",
+        "label": "Major Milestone",
+        "description": "Achieved a decisive victory in the 2023 Telangana Assembly Election by securing 91,393 votes and defeating the BRS candidate Koppula Eshwar by 22,039 votes."
+      },
+      {
+        "year": "December 2023",
+        "date": "Legislative Assembly",
+        "title": "Member of Telangana Legislative Assembly",
+        "label": "MLA, Dharmapuri",
+        "description": "Became a Member of the Telangana Legislative Assembly representing the Dharmapuri (SC Reserved) Constituency."
+      },
+      {
+        "year": "2023 - 2025",
+        "date": "Legislative Leadership",
+        "title": "Government Chief Whip",
+        "label": "Government Responsibility",
+        "description": "Served as Government Chief Whip in the Telangana Legislative Assembly, responsible for coordination between the government and ruling party legislators."
+      },
+      {
+        "year": "8 June 2025",
+        "date": "Cabinet Formation",
+        "title": "Sworn In as Cabinet Minister",
+        "label": "Cabinet Minister",
+        "description": "Sworn in as a Cabinet Minister in the Telangana Government led by Chief Minister Revanth Reddy, taking responsibility for important welfare and empowerment portfolios."
+      },
+      {
+        "year": "2025 - Present",
+        "date": "Government Portfolios",
+        "title": "Welfare and Empowerment Responsibilities",
+        "label": "Ministerial Portfolios",
+        "description": "Entrusted with portfolios including Scheduled Castes Development, Tribal Welfare, Minorities Welfare, Empowerment of Persons with Disabilities, Senior Citizens Welfare and Transgender Persons Welfare."
+      },
+      {
+        "year": "12 June 2025",
+        "date": "District Administration",
+        "title": "In-charge Minister for Nalgonda District",
+        "label": "District Development",
+        "description": "Appointed as the In-charge Minister for Nalgonda District, responsible for monitoring government programs and supporting district development."
+      },
+      {
+        "year": "Public Service",
+        "date": "Continuing Commitment",
+        "title": "Focus on Inclusive Development",
+        "label": "Vision for Society",
+        "description": "Throughout his political career, his work has focused on social justice, welfare of marginalized communities, rural development, education and inclusive governance."
+      }
+    ]
+  },
+
+  "journeyStats": {
+    "yearsExperience": "Years Experience",
+    "assemblyVictory": "Assembly Victory",
+    "cabinetMinister": "Cabinet Minister",
+    "keyHighlight": "Key Highlight",
+    "highlightTitle": "From Youth Leadership to Cabinet Responsibility",
+    "highlightDesc": "With more than 25 years of political experience, his journey reflects a continued focus on public service, social justice, welfare and inclusive development.",
+    "votesSecured": "Votes secured in 2023",
+    "victoryMargin": "Victory margin"
+  },
+
+  "quickFacts": {
+    "label": "QUICK PROFILE",
+    "title": "At a Glance",
+    "description": "A quick overview of the public profile, leadership role and constituency represented.",
+    "facts": {
+      "position": "Current Position",
+      "party": "Political Party",
+      "constituency": "Assembly Constituency",
+      "experience": "Public Service"
+    },
+    "values": {
+      "position": "Cabinet Minister",
+      "party": "Indian National Congress",
+      "constituency": "Dharmapuri (SC)",
+      "experience": "40+ Years"
+    }
+  },
+
+  "profileTabs": {
+    "earlyLife": "Early Life",
+    "education": "Education",
+    "politicalJourney": "Political Journey",
+    "leadership": "Leadership",
+    "vision": "Vision",
+    "learnMore": "Learn more about the life and leadership journey.",
+    "tabs": {
+      "earlyLife": {
+        "birthdate": "Birthdate: April 1, 1968",
+        "birthplace": "Birthplace: Peddapalli, Telangana",
+        "parents": "Parents: Adluri Nagaiah and Lakshmi",
+        "community": "Community: Scheduled Caste (Madiga)",
+        "description": "Grew up in a humble family where his father worked in Singareni Collieries."
+      },
+      "education": {
+        "schooling": "Schooling: Government Junior College, Godavarikhani (1978–1982)",
+        "iti": "ITI Diploma: Government ITI College, Peddapalli (1982–1985)",
+        "association": "Strong academic association through his family."
+      },
+      "politicalJourney": {
+        "point1": "Started as NSUI President in 1982.",
+        "point2": "Served in NSUI and Youth Congress.",
+        "point3": "Won ZPTC election in 2006.",
+        "point4": "Karimnagar Zilla Parishad Chairman (2010–2012).",
+        "point5": "SC Corporation Chairman (2013–2014).",
+        "point6": "Minister in Telangana Cabinet (2025)."
+      },
+      "leadership": {
+        "point1": "Grassroots leadership.",
+        "point2": "People-first governance.",
+        "point3": "Implements SC Sub Plan.",
+        "point4": "Supports over 1.5 lakh students."
+      },
+      "vision": {
+        "point1": "Empower marginalized communities.",
+        "point2": "Digital governance.",
+        "point3": "Quality education for all."
+      }
+    }
+  },
+
+  "biographyTimeline": {
+    "label": "Biography",
+    "title": "About His Journey",
+    "paragraph1": "Adluri Laxman Kumar is a prominent Indian politician from Telangana currently serving as the State Minister for Scheduled Castes Development, Tribal Welfare, and Minorities Welfare. He is an elected Member of the Legislative Assembly (MLA) representing the Dharmapuri Assembly constituency under the Indian National Congress (INC) banner. Known for his extensive grassroots leadership, he has emerged as a key advocate for marginalized communities and progressive welfare models in Telangana.",
+    "paragraph2": "Born on April 1, 1968, in Peddapalli, Telangana, Kumar was raised in a humble family by his parents, Adluri Nagaiah and Lakshmi. He belongs to the Scheduled Caste (Madiga) community, an identity that heavily shaped his outlook on social inequality. Growing up in the combined Karimnagar district, he completed his early education locally before pursuing higher secondary studies. His early life in a rural ecosystem instilled a deep-seated determination to fight for the socio-economic upliftment of downtrodden classes.",
+    "paragraph3": "Kumar's political journey began during his student days in 1982, when he served as the National Students' Union of India (NSUI) president at Junior College Godavarikhani. Over the next few decades, he systematically climbed the political ladder by working diligently within the Youth Congress. His consistent dedication led to prominent leadership roles, including serving as the Karimnagar Zilla Parishad (ZP) Chairman and the District Congress President. These grassroots roles allowed him to build a robust, loyal support base across the region.",
+    "paragraph4": "After facing electoral challenges in previous political cycles, Kumar achieved a landmark victory in the 2023 Telangana Legislative Assembly election. He won the reserved Dharmapuri constituency by defeating his political opponents with a notable mandate. Following his victory, he initially served as a government whip before his administrative capabilities caught the attention of the state leadership. This legislative milestone firmly established him as a frontline leader within the state's ruling Congress party.",
+    "paragraph5": "In June 2025, Chief Minister A. Revanth Reddy expanded his cabinet and inducted Kumar as a cabinet minister. He assumed charge of critical portfolios overseeing SC, ST, and Minorities welfare. In his ministerial role, Kumar has actively championed digital governance tools to accelerate the distribution of welfare funds and has prioritized academic excellence through institutions like the Telangana Social Welfare Residential Educational Institutions Society. He continues to implement impactful social welfare reforms aimed at making Telangana a benchmark for inclusive growth."
+  },
+
+  "visionLeadership": {
+    "label": "Vision & Leadership",
+    "titleLine1": "Committed to Building",
+    "titleLine2": "a Better Telangana",
+    "description1": "Leadership is not merely about holding office. It is about listening to people, understanding their challenges, and delivering meaningful, long-term solutions that improve lives.",
+    "description2": "Every initiative is guided by transparency, inclusive development, social justice and accountable governance for every citizen.",
+    "values": {
+      "governance": "Transparent & Accountable Governance",
+      "justice": "Inclusive Social Justice",
+      "infrastructure": "Infrastructure & Rural Development",
+      "youth": "Youth Empowerment & Employment",
+      "administration": "Citizen-Centric Administration"
+    },
+    "cards": {
+      "visionTitle": "Vision",
+      "visionDesc": "Sustainable development through inclusive governance.",
+      "commitmentTitle": "Commitment",
+      "commitmentDesc": "Transparent public service with accountability.",
+      "peopleFirstTitle": "People First",
+      "peopleFirstDesc": "Every decision is driven by the welfare of citizens, equal opportunity, stronger communities and a vision for a progressive Telangana."
+    }
+  },
+
+  "contactCard": {
+    "label": "Contact Information",
+    "title": "Let's Stay Connected",
+    "email": "Email",
+    "phone": "Phone",
+    "address": "Office Address",
+    "hours": "Office Hours",
+    "location": "Hyderabad, Telangana, India",
+    "mondayToSaturday": "Monday – Saturday",
+    "officeTime": "9:00 AM – 6:00 PM",
+    "followUs": "Follow Us"
+  },
+
+  "footer": {
+    "designation": "Cabinet Minister • Telangana",
+    "bio": "Dedicated to transparent governance, inclusive development and improving the quality of life for every citizen.",
+    "quickLinks": "Quick Links",
+    "contact": "Contact",
+    "phone": "Phone",
+    "email": "Email",
+    "office": "Office",
+    "officeAddress": "Dharmapuri, Jagtial, Telangana",
+    "constituency": "Constituency",
+    "assemblyConstituency": "Assembly Constituency",
+    "dharmapuriSc": "Dharmapuri (SC)",
+    "district": "District",
+    "jagtial": "Jagtial",
+    "state": "State",
+    "telangana": "Telangana",
+    "rights": "All Rights Reserved.",
+    "designed": "Designed & Developed with ❤️"
+  },
+
+  "contactCTA": {
+    "label": "Get In Touch",
+    "titleLine1": "Together, Let's Build",
+    "titleLine2": "A Better Tomorrow",
+    "description": "Your ideas, suggestions and concerns matter. Stay connected and work together towards stronger communities, better development and transparent governance.",
+    "phone": "Phone",
+    "email": "Email",
+    "office": "Office",
+    "officeAddress": "Dharmapuri, Telangana",
+    "button": "Contact Office"
+  }
+}

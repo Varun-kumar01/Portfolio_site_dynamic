@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import {
   Phone,
@@ -8,21 +9,22 @@ import {
 import {
   FaFacebookF,
   FaInstagram,
-  FaYoutube,
   FaTwitter
 } from "react-icons/fa";
 import leader from "../../data/leader";
 
 const links = [
-  { name: "Home", path: "/" },
-  { name: "About", path: "/about" },
-  { name: "Project Journey", path: "/journey" },
-  { name: "Gallery", path: "/gallery" },
-  { name: "News", path: "/news" },
-  { name: "Contact", path: "/contact" },
+  { key: "home", path: "/" },
+  { key: "about", path: "/about" },
+  { key: "journey", path: "/journey" },
+  { key: "gallery", path: "/gallery" },
+  { key: "news", path: "/news" },
+  { key: "contact", path: "/contact" },
 ];
 
 export default function Footer() {
+  const { t } = useTranslation();
+
   return (
     <footer className="bg-slate-950 text-white">
 
@@ -40,19 +42,17 @@ export default function Footer() {
               className="w-16"
             />
 
-            <h3 className="mt-5 text-2xl font-bold">{leader.profile.name}</h3>
+            <h3 className="mt-5 text-2xl font-bold">{t("about.name")}</h3>
 
             <p className="mt-2 text-orange-400">
 
-              Cabinet Minister • Telangana
+              {t("footer.designation")}
 
             </p>
 
             <p className="mt-6 leading-8 text-slate-400">
 
-              Dedicated to transparent governance,
-              inclusive development and improving
-              the quality of life for every citizen.
+              {t("footer.bio")}
 
             </p>
 
@@ -95,7 +95,7 @@ export default function Footer() {
 
             <h4 className="text-xl font-semibold">
 
-              Quick Links
+              {t("footer.quickLinks")}
 
             </h4>
 
@@ -104,12 +104,12 @@ export default function Footer() {
               {links.map((item) => (
 
                 <Link
-                  key={item.name}
+                  key={item.key}
                   to={item.path}
                   className="group flex items-center justify-between text-slate-400 hover:text-orange-400 transition"
                 >
 
-                  {item.name}
+                  {t(`nav.${item.key}`)}
 
                   <ArrowUpRight
                     size={16}
@@ -130,7 +130,7 @@ export default function Footer() {
 
             <h4 className="text-xl font-semibold">
 
-              Contact
+              {t("footer.contact")}
 
             </h4>
 
@@ -144,7 +144,7 @@ export default function Footer() {
 
                   <p className="text-slate-300">
 
-                    Phone
+                    {t("footer.phone")}
 
                   </p>
 
@@ -162,7 +162,7 @@ export default function Footer() {
 
                   <p className="text-slate-300">
 
-                    Email
+                    {t("footer.email")}
 
                   </p>
 
@@ -180,15 +180,13 @@ export default function Footer() {
 
                   <p className="text-slate-300">
 
-                    Office
+                    {t("footer.office")}
 
                   </p>
 
                   <p className="text-slate-400">
 
-                    Dharmapuri,
-                    Jagtial,
-                    Telangana
+                    {t("footer.officeAddress")}
 
                   </p>
 
@@ -206,7 +204,7 @@ export default function Footer() {
 
             <h4 className="text-xl font-semibold">
 
-              Constituency
+              {t("footer.constituency")}
 
             </h4>
 
@@ -216,13 +214,13 @@ export default function Footer() {
 
                 <p className="text-slate-500 uppercase tracking-widest text-xs">
 
-                  Assembly Constituency
+                  {t("footer.assemblyConstituency")}
 
                 </p>
 
                 <h5 className="mt-2 text-lg">
 
-                  Dharmapuri (SC)
+                  {t("footer.dharmapuriSc")}
 
                 </h5>
 
@@ -232,13 +230,13 @@ export default function Footer() {
 
                 <p className="text-slate-500 uppercase tracking-widest text-xs">
 
-                  District
+                  {t("footer.district")}
 
                 </p>
 
                 <h5 className="mt-2 text-lg">
 
-                  Jagtial
+                  {t("footer.jagtial")}
 
                 </h5>
 
@@ -248,13 +246,13 @@ export default function Footer() {
 
                 <p className="text-slate-500 uppercase tracking-widest text-xs">
 
-                  State
+                  {t("footer.state")}
 
                 </p>
 
                 <h5 className="mt-2 text-lg">
 
-                  Telangana
+                  {t("footer.telangana")}
 
                 </h5>
 
@@ -270,11 +268,11 @@ export default function Footer() {
 
         <div className="border-t border-slate-800 mt-14 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
 
-          <p className="text-slate-500 text-sm">© 2026 <span className="font-semibold">{leader.profile.name}</span>. All Rights Reserved.</p>
+          <p className="text-slate-500 text-sm">© 2026 <span className="font-semibold">{t("about.name")}</span>. {t("footer.rights")}</p>
 
           <p className="text-slate-500 text-sm">
 
-            Designed & Developed with ❤️
+            {t("footer.designed")}
 
           </p>
 

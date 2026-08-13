@@ -117,6 +117,7 @@
 
 
 
+import { useTranslation } from "react-i18next";
 import {
   FaEnvelope,
   FaLocationDot,
@@ -128,16 +129,18 @@ import leader from "../../data/leader";
 import SocialLinks from "./SocialLinks";
 
 const ContactCard = () => {
+  const { t } = useTranslation();
+
   return (
     <div className="bg-white rounded-2xl p-8 shadow-lg">
 
       {/* Heading */}
       <span className="text-green-700 font-semibold uppercase tracking-wider">
-        Contact Information
+        {t("contactCard.label")}
       </span>
 
       <h2 className="text-4xl font-bold mt-2 mb-8 text-gray-900">
-        Let's Stay Connected
+        {t("contactCard.title")}
       </h2>
 
       {/* Contact Information - 2 x 2 Grid */}
@@ -151,7 +154,7 @@ const ContactCard = () => {
 
           <div className="min-w-0">
             <h4 className="font-semibold text-lg text-gray-900">
-              Email
+              {t("contactCard.email")}
             </h4>
 
             <a
@@ -171,7 +174,7 @@ const ContactCard = () => {
 
           <div>
             <h4 className="font-semibold text-lg text-gray-900">
-              Phone
+              {t("contactCard.phone")}
             </h4>
 
             <a
@@ -191,15 +194,11 @@ const ContactCard = () => {
 
           <div>
             <h4 className="font-semibold text-lg text-gray-900">
-              Office Address
+              {t("contactCard.address")}
             </h4>
 
             <p className="text-gray-600 leading-7">
-              Hyderabad
-              <br />
-              Telangana
-              <br />
-              India
+              {t("footer.officeAddress")}
             </p>
           </div>
         </div>
@@ -212,13 +211,13 @@ const ContactCard = () => {
 
           <div>
             <h4 className="font-semibold text-lg text-gray-900">
-              Office Hours
+              {t("contactCard.hours")}
             </h4>
 
             <p className="text-gray-600 leading-7">
-              Monday – Saturday
+              {t("contactCard.mondayToSaturday")}
               <br />
-              9:00 AM – 6:00 PM
+              {t("contactCard.officeTime")}
             </p>
           </div>
         </div>

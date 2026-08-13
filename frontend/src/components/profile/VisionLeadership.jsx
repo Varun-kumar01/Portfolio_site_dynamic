@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import {
   CheckCircle2,
   Target,
@@ -6,12 +7,14 @@ import {
 } from "lucide-react";
 
 export default function VisionLeadership() {
+  const { t } = useTranslation();
+
   const values = [
-    "Transparent & Accountable Governance",
-    "Inclusive Social Justice",
-    "Infrastructure & Rural Development",
-    "Youth Empowerment & Employment",
-    "Citizen-Centric Administration",
+    t("visionLeadership.values.governance"),
+    t("visionLeadership.values.justice"),
+    t("visionLeadership.values.infrastructure"),
+    t("visionLeadership.values.youth"),
+    t("visionLeadership.values.administration"),
   ];
 
   return (
@@ -27,46 +30,41 @@ export default function VisionLeadership() {
 
             <span className="uppercase tracking-[0.3em] text-orange-600 font-semibold text-sm">
 
-              Vision & Leadership
+              {t("visionLeadership.label")}
 
             </span>
 
             <h2 className="mt-4 text-4xl lg:text-5xl font-bold text-slate-900 leading-tight">
 
-              Committed to Building
+              {t("visionLeadership.titleLine1")}
               <br />
-              a Better Telangana
+              {t("visionLeadership.titleLine2")}
 
             </h2>
 
             <p className="mt-6 text-gray-600 leading-8">
 
-              Leadership is not merely about holding office.
-              It is about listening to people, understanding
-              their challenges, and delivering meaningful,
-              long-term solutions that improve lives.
+              {t("visionLeadership.description1")}
 
             </p>
 
             <p className="mt-5 text-gray-600 leading-8">
 
-              Every initiative is guided by transparency,
-              inclusive development, social justice and
-              accountable governance for every citizen.
+              {t("visionLeadership.description2")}
 
             </p>
 
             <div className="mt-10 space-y-5">
 
-              {values.map((item) => (
+              {values.map((item, idx) => (
 
                 <div
-                  key={item}
+                  key={idx}
                   className="flex items-start gap-4"
                 >
 
                   <CheckCircle2
-                    className="text-orange-600 mt-1"
+                    className="text-orange-600 mt-1 shrink-0"
                     size={22}
                   />
 
@@ -105,14 +103,13 @@ export default function VisionLeadership() {
 
                   <h4 className="mt-5 font-semibold text-xl">
 
-                    Vision
+                    {t("visionLeadership.cards.visionTitle")}
 
                   </h4>
 
                   <p className="mt-3 text-gray-600 leading-7">
 
-                    Sustainable development through
-                    inclusive governance.
+                    {t("visionLeadership.cards.visionDesc")}
 
                   </p>
 
@@ -127,14 +124,13 @@ export default function VisionLeadership() {
 
                   <h4 className="mt-5 font-semibold text-xl">
 
-                    Commitment
+                    {t("visionLeadership.cards.commitmentTitle")}
 
                   </h4>
 
                   <p className="mt-3 text-gray-600 leading-7">
 
-                    Transparent public service
-                    with accountability.
+                    {t("visionLeadership.cards.commitmentDesc")}
 
                   </p>
 
@@ -146,16 +142,13 @@ export default function VisionLeadership() {
 
                   <h4 className="mt-5 text-2xl font-bold">
 
-                    People First
+                    {t("visionLeadership.cards.peopleFirstTitle")}
 
                   </h4>
 
                   <p className="mt-4 text-orange-100 leading-8">
 
-                    Every decision is driven by the
-                    welfare of citizens, equal opportunity,
-                    stronger communities and a vision
-                    for a progressive Telangana.
+                    {t("visionLeadership.cards.peopleFirstDesc")}
 
                   </p>
 

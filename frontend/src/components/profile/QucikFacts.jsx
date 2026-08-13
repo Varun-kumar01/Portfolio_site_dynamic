@@ -5,32 +5,34 @@ import {
   Clock3,
 } from "lucide-react";
 
-import leader from "../../data/leader";
-
-const facts = [
-  {
-    icon: BriefcaseBusiness,
-    value: leader.profile.designation2,
-    label: "Current Position",
-  },
-  {
-    icon: Landmark,
-    value: leader.profile.party,
-    label: "Political Party",
-  },
-  {
-    icon: MapPinned,
-    value: leader.profile.constituency,
-    label: "Assembly Constituency",
-  },
-  {
-    icon: Clock3,
-    value: leader.profile.experience,
-    label: "Public Service",
-  },
-];
+import { useTranslation } from "react-i18next";
 
 export default function QuickFacts() {
+  const { t } = useTranslation();
+
+  const facts = [
+    {
+      icon: BriefcaseBusiness,
+      value: t("quickFacts.values.position"),
+      label: t("quickFacts.facts.position"),
+    },
+    {
+      icon: Landmark,
+      value: t("quickFacts.values.party"),
+      label: t("quickFacts.facts.party"),
+    },
+    {
+      icon: MapPinned,
+      value: t("quickFacts.values.constituency"),
+      label: t("quickFacts.facts.constituency"),
+    },
+    {
+      icon: Clock3,
+      value: t("quickFacts.values.experience"),
+      label: t("quickFacts.facts.experience"),
+    },
+  ];
+
   return (
     <section className="py-16 lg:py-20 bg-slate-50">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
@@ -38,16 +40,15 @@ export default function QuickFacts() {
         <div className="text-center max-w-3xl mx-auto">
 
           <span className="text-orange-600 uppercase tracking-[0.3em] font-semibold text-sm">
-            QUICK PROFILE
+            {t("quickFacts.label")}
           </span>
 
           <h2 className="mt-4 text-3xl md:text-4xl font-bold text-slate-900">
-            At a Glance
+            {t("quickFacts.title")}
           </h2>
 
           <p className="mt-4 text-gray-600 leading-8">
-            A quick overview of the public profile, leadership role and
-            constituency represented.
+            {t("quickFacts.description")}
           </p>
 
         </div>

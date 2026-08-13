@@ -149,7 +149,7 @@
 
 
 
-
+import { useTranslation } from "react-i18next";
 import { ArrowRight } from "lucide-react";
 import leader from "../../data/leader"
 import { useNavigate } from "react-router-dom";
@@ -157,6 +157,7 @@ import { useNavigate } from "react-router-dom";
 export default function Hero() {
 
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   return (
     <section className="relative overflow-hidden bg-white">
@@ -219,37 +220,31 @@ export default function Hero() {
         </div>
 
             <h2 className="mt-4 text-[1.8rem] lg:text-[2.4rem] font-semibold text-gray-800 leading-tight">
-
-              Building a Better Telangana
-
+              {t("home.hero.title")}
             </h2>
 
             <p className="mt-5 w-full text-[15px] sm:text-base lg:text-lg leading-8 text-gray-500">
-
-              Committed to transparent governance, inclusive growth,
-              stronger infrastructure, quality education and public
-              welfare.
-
+              {t("home.hero.description")}
             </p>
 
             {/* Buttons */}
 
             <div className="mt-8 flex flex-wrap gap-4">
 
-              <button onClick={() => navigate("/journey")} className="group bg-orange-600 hover:bg-orange-700 transition-all duration-300 px-7 py-4 rounded-full text-white font-semibold flex items-center justify-center gap-3">
+              <button
+  onClick={() => navigate("/journey")}
+  className="group bg-orange-600 hover:bg-orange-700 transition-all duration-300 px-7 py-4 rounded-full text-white font-semibold flex items-center justify-center gap-3"
+>
+  {t("home.hero.exploreJourney")}
 
-                Explore Journey
-
-                <ArrowRight
-                  size={18}
-                  className="group-hover:translate-x-1 transition"
-                />
-
-              </button>
-
+  <ArrowRight
+    size={18}
+    className="group-hover:translate-x-1 transition"
+  />
+</button>
               <button onClick={() => navigate("/news")} className="rounded-full border border-gray-300 hover:border-orange-600 hover:text-orange-600 transition-all duration-300 px-7 py-4 font-semibold">
 
-                Development Works
+                {t("home.hero.developmentWorks")}     
 
               </button>
 

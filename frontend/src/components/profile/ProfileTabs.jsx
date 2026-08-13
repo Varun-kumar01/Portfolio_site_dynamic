@@ -1,105 +1,84 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 export default function ProfileTabs() {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState("early-life");
 
   const tabs = [
     {
       id: "early-life",
-      title: "Early Life",
+      title: t("profileTabs.earlyLife"),
       image: "/images/early-life.jpg.jpg",
       content: (
-        <>
-          <ul className="space-y-3 text-gray-700 leading-8">
-            <li><strong>Birthdate:</strong> April 1, 1968</li>
-            <li><strong>Birthplace:</strong> Peddapalli, Telangana</li>
-            <li><strong>Parents:</strong> Adluri Nagaiah and Lakshmi</li>
-            <li><strong>Community:</strong> Scheduled Caste (Madiga)</li>
-            <li>
-              Grew up in a humble family where his father worked in
-              Singareni Collieries.
-            </li>
-          </ul>
-        </>
+        <ul className="space-y-3 text-gray-700 leading-8">
+          <li>{t("profileTabs.tabs.earlyLife.birthdate")}</li>
+          <li>{t("profileTabs.tabs.earlyLife.birthplace")}</li>
+          <li>{t("profileTabs.tabs.earlyLife.parents")}</li>
+          <li>{t("profileTabs.tabs.earlyLife.community")}</li>
+          <li>{t("profileTabs.tabs.earlyLife.description")}</li>
+        </ul>
       ),
     },
 
     {
       id: "education",
-      title: "Education",
+      title: t("profileTabs.education"),
       image: "/images/education.jpg.jpg",
       content: (
-        <>
-          <ul className="space-y-3 text-gray-700 leading-8">
-            <li>
-              <strong>Schooling:</strong> Government Junior College,
-              Godavarikhani (1978–1982)
-            </li>
-
-            <li>
-              <strong>ITI Diploma:</strong> Government ITI College,
-              Peddapalli (1982–1985)
-            </li>
-
-            <li>
-              Strong academic association through his family.
-            </li>
-          </ul>
-        </>
+        <ul className="space-y-3 text-gray-700 leading-8">
+          <li>{t("profileTabs.tabs.education.schooling")}</li>
+          <li>{t("profileTabs.tabs.education.iti")}</li>
+          <li>{t("profileTabs.tabs.education.association")}</li>
+        </ul>
       ),
     },
 
     {
       id: "politics",
-      title: "Political Journey",
+      title: t("profileTabs.politicalJourney"),
       image: "/images/politics.jpg.jpg",
       content: (
-        <>
-          <ul className="space-y-3 text-gray-700 leading-8">
-            <li>Started as NSUI President in 1982.</li>
-            <li>Served in NSUI and Youth Congress.</li>
-            <li>Won ZPTC election in 2006.</li>
-            <li>Karimnagar Zilla Parishad Chairman (2010–2012).</li>
-            <li>SC Corporation Chairman (2013–2014).</li>
-            <li>Minister in Telangana Cabinet (2025).</li>
-          </ul>
-        </>
+        <ul className="space-y-3 text-gray-700 leading-8">
+          <li>{t("profileTabs.tabs.politicalJourney.point1")}</li>
+          <li>{t("profileTabs.tabs.politicalJourney.point2")}</li>
+          <li>{t("profileTabs.tabs.politicalJourney.point3")}</li>
+          <li>{t("profileTabs.tabs.politicalJourney.point4")}</li>
+          <li>{t("profileTabs.tabs.politicalJourney.point5")}</li>
+          <li>{t("profileTabs.tabs.politicalJourney.point6")}</li>
+        </ul>
       ),
     },
 
     {
       id: "leadership",
-      title: "Leadership",
+      title: t("profileTabs.leadership"),
       image: "/images/leadership.jpg.jpg",
       content: (
-        <>
-          <ul className="space-y-3 text-gray-700 leading-8">
-            <li>Grassroots leadership.</li>
-            <li>People-first governance.</li>
-            <li>Implements SC Sub Plan.</li>
-            <li>Supports over 1.5 lakh students.</li>
-          </ul>
-        </>
+        <ul className="space-y-3 text-gray-700 leading-8">
+          <li>{t("profileTabs.tabs.leadership.point1")}</li>
+          <li>{t("profileTabs.tabs.leadership.point2")}</li>
+          <li>{t("profileTabs.tabs.leadership.point3")}</li>
+          <li>{t("profileTabs.tabs.leadership.point4")}</li>
+        </ul>
       ),
     },
 
     {
       id: "vision",
-      title: "Vision",
+      title: t("profileTabs.vision"),
       image: "/images/vision.jpg.jpg",
       content: (
-        <>
-          <ul className="space-y-3 text-gray-700 leading-8">
-            <li>Empower marginalized communities.</li>
-            <li>Digital governance.</li>
-            <li>Quality education for all.</li>
-          </ul>
-        </>
+        <ul className="space-y-3 text-gray-700 leading-8">
+          <li>{t("profileTabs.tabs.vision.point1")}</li>
+          <li>{t("profileTabs.tabs.vision.point2")}</li>
+          <li>{t("profileTabs.tabs.vision.point3")}</li>
+        </ul>
       ),
     },
   ];
 
-  const current = tabs.find((tab) => tab.id === activeTab);
+  const current = tabs.find((tab) => tab.id === activeTab) || tabs[0];
 
   return (
     <section className="py-10 bg-gray-50">
@@ -107,12 +86,8 @@ export default function ProfileTabs() {
       <div className="max-w-7xl mx-auto px-6">
 
         <div className="text-center mb-12">
-          {/* <span className="bg-green-700 text-white px-5 py-2 rounded-full uppercase tracking-widest text-sm">
-            Profile
-          </span> */}
-
           <p className="text-gray-600 mt-4">
-            Learn more about the life and leadership journey.
+            {t("profileTabs.learnMore")}
           </p>
         </div>
 

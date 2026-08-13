@@ -1,89 +1,93 @@
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { CalendarDays, Search, ArrowRight } from "lucide-react";
 import PageBanner from "../components/common/PageBanner";
 
-const newsData = [
+const newsDataRaw = [
   {
     id: 1,
-    title: "Development Review Meeting Conducted Successfully",
+    titleKey: "news.items.news1.title",
+    descriptionKey: "news.items.news1.description",
+    categoryKey: "government",
     image: "/news/news1.png",
-    category: "Government",
     date: "20 August 2026",
-    description:
-      "Review meeting conducted to monitor ongoing infrastructure and welfare projects.",
     link: "https://hyderabadnewshunt.com/minister-adluri-laxman-kumar-reviews-village-development-works/",  
   },
   {
     id: 2,
-    title: "Village Development Programme",
+    titleKey: "news.items.news2.title",
+    descriptionKey: "news.items.news2.description",
+    categoryKey: "public",
     image: "/news/news2.png",
-    category: "Public",
     date: "18 August 2026",
-    description:
-      "Interaction with local citizens regarding drinking water and road development.",
     link: "https://www.facebook.com/61557986352577/videos/the-true-measure-of-governance-lies-in-ensuring-that-every-welfare-initiative-re/1388621763113437/",  
   },
   {
     id: 3,
-    title: "Health Camp Inaugurated",
+    titleKey: "news.items.news3.title",
+    descriptionKey: "news.items.news3.description",
+    categoryKey: "healthcare",
     image: "/news/news3.png",
-    category: "Healthcare",
     date: "16 August 2026",
-    description:
-      "Large scale medical camp organized for citizens across the constituency.",
     link: "https://www.facebook.com/smsghm/videos/honble-minister-for-minorities-welfare-telangana-sri-adluri-laxman-kumar-praised/1596232714869992/",  
   },
   {
     id: 4,
-    title: "Education Support Initiative",
+    titleKey: "news.items.news4.title",
+    descriptionKey: "news.items.news4.description",
+    categoryKey: "education",
     image: "/news/news4.png",
-    category: "Education",
     date: "14 August 2026",
-    description:
-      "Scholarship and educational assistance programme launched.",
     link: "https://timesofindia.indiatimes.com/city/hyderabad/t-urges-centre-to-release-450cr-scholarship-dues-for-tribal-students/articleshow/133035186.cms",  
   },
   {
     id: 5,
-    title: "Farmer Welfare Meeting",
+    titleKey: "news.items.news5.title",
+    descriptionKey: "news.items.news5.description",
+    categoryKey: "agriculture",
     image: "/news/news5.png",
-    category: "Agriculture",
     date: "10 August 2026",
-    description:
-      "Interaction with farmers regarding irrigation and welfare schemes.",
     link: "https://www.facebook.com/IPRTelangana/posts/minister-adluri-laxman-kumar-assures-village-level-problem-resolutiontelangana-s/1399975242161476/",  
   },
   {
     id: 6,
-    title: "Public Grievance Programme",
+    titleKey: "news.items.news6.title",
+    descriptionKey: "news.items.news6.description",
+    categoryKey: "public",
     image: "/news/news6.png",
-    category: "Public",
     date: "08 August 2026",
-    description:
-      "Meeting with citizens to discuss and address constituency issues.",
     link: "https://www.thehansindia.com/news/cities/hyderabad/laxman-assures-support-to-differently-abled-employees-1101729",  
   },
 ];
 
-const categories = [
-  "All",
-  "Government",
-  "Public",
-  "Healthcare",
-  "Education",
-  "Agriculture",
+const categoryKeys = [
+  "all",
+  "government",
+  "public",
+  "healthcare",
+  "education",
+  "agriculture",
 ];
 
 export default function News() {
-  const [category, setCategory] = useState("All");
+  const { t } = useTranslation();
+  const [category, setCategory] = useState("all");
   const [search, setSearch] = useState("");
+
+  // Build newsData with translated values
+  const newsData = newsDataRaw.map(item => ({
+    ...item,
+    title: t(item.titleKey),
+    description: t(item.descriptionKey),
+    category: t(`news.${item.categoryKey}`),
+  }));
 
   const filteredNews = useMemo(() => {
     const query = search.trim().toLowerCase();
 
     return newsData.filter((item) => {
       const categoryMatch =
-        category === "All" || item.category === category;
+        category === "all" || item.categoryKey === category;
 
       const searchMatch =
         !query ||
@@ -92,7 +96,7 @@ export default function News() {
 
       return categoryMatch && searchMatch;
     });
-  }, [category, search]);
+  }, [category, search, newsData]);
 
   return (
     <>
@@ -111,16 +115,15 @@ export default function News() {
             <div className="max-w-2xl">
 
               <span className="text-orange-600 text-sm font-semibold uppercase tracking-[0.25em]">
-                Latest Updates
+                {t('news.pageLabel')}
               </span>
 
               <h1 className="mt-3 text-3xl md:text-4xl lg:text-5xl font-bold text-slate-900">
-                News & Announcements
+                {t('news.pageTitle')}
               </h1>
 
               <p className="mt-4 text-gray-600 leading-8">
-                Follow the latest public programmes, constituency activities,
-                welfare initiatives and important announcements.
+                {t('news.pageDescription')}
               </p>
 
             </div>
@@ -138,7 +141,7 @@ export default function News() {
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search news..."
+                placeholder={t('news.search')}
                 className="
                   w-full
                   rounded-2xl
@@ -164,11 +167,11 @@ export default function News() {
 
           <div className="flex flex-wrap gap-3 mt-10">
 
-            {categories.map((item) => (
+            {categoryKeys.map((key) => (
 
               <button
-                key={item}
-                onClick={() => setCategory(item)}
+                key={key}
+                onClick={() => setCategory(key)}
                 className={`
                   rounded-full
                   border
@@ -178,13 +181,13 @@ export default function News() {
                   font-medium
                   transition
                   ${
-                    category === item
+                    category === key
                       ? "border-orange-600 bg-orange-600 text-white"
                       : "border-slate-200 bg-white text-slate-600 hover:border-orange-500 hover:text-orange-600"
                   }
                 `}
               >
-                {item}
+                {t(`news.${key}`)}
               </button>
 
             ))}
@@ -196,11 +199,11 @@ export default function News() {
           <div className="mt-10 flex items-center justify-between">
 
             <p className="text-sm text-gray-500">
-              Showing{" "}
+              {t('news.showing')}{" "}
               <span className="font-semibold text-slate-900">
                 {filteredNews.length}
               </span>{" "}
-              {filteredNews.length === 1 ? "update" : "updates"}
+              {filteredNews.length === 1 ? t('news.update') : t('news.updates')}
             </p>
 
           </div>
@@ -272,25 +275,13 @@ export default function News() {
                       {item.description}
                     </p>
 
-                    {/* <button className="mt-6 inline-flex items-center gap-2 font-semibold text-orange-600">
-
-                      Read More
-
-                      <ArrowRight
-                        size={17}
-                        className="transition group-hover:translate-x-1"
-                      />
-
-                    </button> */}
-
-
                     <a
                       href={item.link}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="mt-6 inline-flex items-center gap-2 font-semibold text-orange-600"
                     >
-                      Read More
+                      {t('news.readMore')}
 
                       <ArrowRight
                         size={17}
@@ -316,21 +307,21 @@ export default function News() {
               />
 
               <h3 className="mt-4 text-xl font-semibold text-slate-900">
-                No news found
+                {t('news.noNewsFound')}
               </h3>
 
               <p className="mt-2 text-gray-500">
-                Try another search term or category.
+                {t('news.tryAnother')}
               </p>
 
               <button
                 onClick={() => {
                   setSearch("");
-                  setCategory("All");
+                  setCategory("all");
                 }}
                 className="mt-6 rounded-full bg-orange-600 px-6 py-3 text-sm font-semibold text-white hover:bg-orange-700 transition"
               >
-                Clear Filters
+                {t('news.clearFilters')}
               </button>
 
             </div>

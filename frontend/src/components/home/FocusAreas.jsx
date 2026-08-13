@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import {
   Building2,
   GraduationCap,
@@ -5,34 +6,36 @@ import {
   Landmark,
 } from "lucide-react";
 
-const focusAreas = [
-  {
-    icon: Building2,
-    title: "Infrastructure Development",
-    description:
-      "Improving roads, public facilities, drinking water systems and strengthening civic infrastructure for sustainable growth.",
-  },
-  {
-    icon: GraduationCap,
-    title: "Education & Youth",
-    description:
-      "Promoting quality education, skill development, scholarships and opportunities that empower students and young leaders.",
-  },
-  {
-    icon: HeartHandshake,
-    title: "SC & Tribal Welfare",
-    description:
-      "Committed to the welfare, empowerment and inclusive development of Scheduled Castes and Tribal communities.",
-  },
-  {
-    icon: Landmark,
-    title: "Citizen-Centric Governance",
-    description:
-      "Delivering transparent, accessible and accountable governance while addressing the needs of every citizen.",
-  },
-];
-
 export default function FocusAreas() {
+  const { t } = useTranslation();
+
+  const focusAreas = [
+    {
+      icon: Building2,
+      key: "infrastructure",
+      title: t('home.focusAreas.areas.infrastructure.title'),
+      description: t('home.focusAreas.areas.infrastructure.description'),
+    },
+    {
+      icon: GraduationCap,
+      key: "education",
+      title: t('home.focusAreas.areas.education.title'),
+      description: t('home.focusAreas.areas.education.description'),
+    },
+    {
+      icon: HeartHandshake,
+      key: "welfare",
+      title: t('home.focusAreas.areas.welfare.title'),
+      description: t('home.focusAreas.areas.welfare.description'),
+    },
+    {
+      icon: Landmark,
+      key: "governance",
+      title: t('home.focusAreas.areas.governance.title'),
+      description: t('home.focusAreas.areas.governance.description'),
+    },
+  ];
+
   return (
     <section className="relative py-16 lg:py-20 bg-[#fafafa] overflow-hidden">
 
@@ -50,21 +53,19 @@ export default function FocusAreas() {
 
           <span className="uppercase tracking-[0.3em] text-orange-600 font-semibold text-sm">
 
-            Focus Areas
+            {t('home.focusAreas.label')}
 
           </span>
 
           <h2 className="mt-5 text-2xl lg:text-4xl font-black text-slate-900 leading-tight">
 
-            Committed to Inclusive Development
+            {t('home.focusAreas.title')}
 
           </h2>
 
           <p className="mt-8 text-lg leading-9 text-gray-600">
 
-            Focused on strengthening infrastructure, education,
-            social welfare and citizen-centric governance to improve
-            the quality of life across the constituency.
+            {t('home.focusAreas.description')}
 
           </p>
 

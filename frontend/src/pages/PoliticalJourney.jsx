@@ -1,149 +1,5 @@
+import { useTranslation } from "react-i18next";
 import SectionTitle from "../components/common/SectionTitle";
-
-
-const careerJourney = [
-  {
-    year: 'Early Career',
-    date: 'Political Beginning',
-    title: 'Joined the Indian National Congress',
-    label: 'Beginning of Political Career',
-    description:
-      'Began his political journey as a dedicated worker of the Indian National Congress and gradually became involved in youth and public-oriented activities.',
-    image: '/images/career1.jpeg',
-  },
-
-  {
-    year: '1996 - 2001',
-    date: 'Youth Congress',
-    title: 'General Secretary, Andhra Pradesh Youth Congress',
-    label: 'Youth Leadership',
-    description:
-      'Served as General Secretary of the Andhra Pradesh Youth Congress, working to strengthen the youth wing and encourage young people to participate in public service.',
-    image: '/images/career2.jpeg',
-  },
-
-  {
-    year: '2006 - 2011',
-    date: 'Local Governance',
-    title: 'ZPTC Member, Dharmaram Constituency',
-    label: 'Rural Development',
-    description:
-      'Elected as a ZPTC Member from Dharmaram Constituency and worked on rural development, local governance and public welfare initiatives.',
-    image: '/images/career3.jpeg',
-  },
-
-  {
-    year: '2010 - 2012',
-    date: 'District Administration',
-    title: 'Chairman, Karimnagar Zilla Parishad',
-    label: 'District Leadership',
-    description:
-      'Served as Chairman of the Karimnagar Zilla Parishad, overseeing district-level administration and development projects.',
-    image: '/images/career4.jpeg',
-  },
-
-  {
-    year: '2013 - 2014',
-    date: 'Social Welfare',
-    title: 'Chairman, State Scheduled Castes Corporation',
-    label: 'Social Justice',
-    description:
-      'Led the State Scheduled Castes Corporation and worked towards implementing welfare and empowerment programs for Scheduled Caste communities.',
-    image: '/images/career5.jpeg',
-  },
-
-  {
-    year: '2009 - 2018',
-    date: 'Assembly Elections',
-    title: 'Contested Dharmapuri Assembly Constituency',
-    label: 'Electoral Journey',
-    description:
-      'Contested the Dharmapuri Assembly Constituency several times in 2009, the 2010 by-election, 2014 and 2018, demonstrating perseverance and commitment to public service.',
-    image: '/images/career6.jpeg',
-  },
-
-  {
-    year: '2018',
-    date: 'Assembly Election',
-    title: 'Narrow Electoral Defeat',
-    label: 'Perseverance',
-    description:
-      'In the 2018 Assembly Election, he lost by a very narrow margin of 441 votes, reflecting strong public support and a closely contested election.',
-    image: '/images/career7.jpeg',
-  },
-
-  {
-    year: '2023',
-    date: 'Telangana Assembly Election',
-    title: 'Historic Assembly Victory',
-    label: 'Major Milestone',
-    highlight: true,
-    description:
-      'Achieved a decisive victory in the 2023 Telangana Assembly Election by securing 91,393 votes and defeating the BRS candidate Koppula Eshwar by 22,039 votes.',
-    image: '/images/career8.jpeg',
-  },
-
-  {
-    year: 'December 2023',
-    date: 'Legislative Assembly',
-    title: 'Member of Telangana Legislative Assembly',
-    label: 'MLA, Dharmapuri',
-    description:
-      'Became a Member of the Telangana Legislative Assembly representing the Dharmapuri (SC Reserved) Constituency.',
-    image: '/images/career9.jpeg',
-  },
-
-  {
-    year: '2023 - 2025',
-    date: 'Legislative Leadership',
-    title: 'Government Chief Whip',
-    label: 'Government Responsibility',
-    description:
-      'Served as Government Chief Whip in the Telangana Legislative Assembly, responsible for coordination between the government and ruling party legislators.',
-    image: '/images/career10.jpeg',
-  },
-
-  {
-    year: '8 June 2025',
-    date: 'Cabinet Formation',
-    title: 'Sworn In as Cabinet Minister',
-    label: 'Cabinet Minister',
-    highlight: true,
-    description:
-      'Sworn in as a Cabinet Minister in the Telangana Government led by Chief Minister Revanth Reddy, taking responsibility for important welfare and empowerment portfolios.',
-    image: '/images/career11.jpeg',
-  },
-
-  {
-    year: '2025 - Present',
-    date: 'Government Portfolios',
-    title: 'Welfare and Empowerment Responsibilities',
-    label: 'Ministerial Portfolios',
-    description:
-      'Entrusted with portfolios including Scheduled Castes Development, Tribal Welfare, Minorities Welfare, Empowerment of Persons with Disabilities, Senior Citizens Welfare and Transgender Persons Welfare.',
-    image: '/images/career12.jpeg',
-  },
-
-  {
-    year: '12 June 2025',
-    date: 'District Administration',
-    title: 'In-charge Minister for Nalgonda District',
-    label: 'District Development',
-    description:
-      'Appointed as the In-charge Minister for Nalgonda District, responsible for monitoring government programs and supporting district development.',
-    image: '/images/career13.jpeg',
-  },
-
-  {
-    year: 'Public Service',
-    date: 'Continuing Commitment',
-    title: 'Focus on Inclusive Development',
-    label: 'Vision for Society',
-    description:
-      'Throughout his political career, his work has focused on social justice, welfare of marginalized communities, rural development, education and inclusive governance.',
-    image: '/images/career14.jpeg',
-  },
-]
 
 
 /* =========================================================
@@ -410,6 +266,22 @@ const CareerImage = ({ item }) => {
 ========================================================= */
 
 const PoliticalJourney = () => {
+  const { t } = useTranslation();
+
+  // Build career journey array from i18n data
+  const careerJourneyRaw = t("journey.careerJourney", { returnObjects: true });
+  const careerJourney = Array.isArray(careerJourneyRaw)
+    ? careerJourneyRaw.map((item, index) => ({
+        year: item.year,
+        date: item.date,
+        title: item.title,
+        label: item.label,
+        description: item.description,
+        image: `/images/career${index + 1}.jpeg`,
+        highlight: index === 7 || index === 10,
+      }))
+    : [];
+
   return (
     <div className="min-h-screen bg-white">
 
@@ -448,7 +320,7 @@ const PoliticalJourney = () => {
 
                 <span className="text-xs font-bold uppercase tracking-[0.25em] text-orange-500">
 
-                  Political Journey
+                  {t("journey.pageLabel")}
 
                 </span>
 
@@ -469,7 +341,7 @@ const PoliticalJourney = () => {
                   lg:text-5xl
                 "
               >
-                Political Career
+                {t("journey.pageTitle")}
               </h1>
 
               {/* SUBTITLE */}
@@ -488,9 +360,7 @@ const PoliticalJourney = () => {
                   lg:leading-8
                 "
               >
-                A journey of public service, leadership, social justice and
-                inclusive development spanning more than two decades of
-                dedicated service to the people of Telangana.
+                {t("journey.pageDescription")}
               </p>
 
             </div>
@@ -511,7 +381,7 @@ const PoliticalJourney = () => {
 
                 <p className="mt-2 text-xs uppercase tracking-[0.18em] text-slate-500">
 
-                  Years Experience
+                  {t("journeyStats.yearsExperience")}
 
                 </p>
 
@@ -531,7 +401,7 @@ const PoliticalJourney = () => {
 
                   <p className="mt-2 text-xs uppercase tracking-[0.15em] text-slate-500">
 
-                    Assembly Victory
+                    {t("journeyStats.assemblyVictory")}
 
                   </p>
 
@@ -547,7 +417,7 @@ const PoliticalJourney = () => {
 
                   <p className="mt-2 text-xs uppercase tracking-[0.15em] text-slate-500">
 
-                    Cabinet Minister
+                    {t("journeyStats.cabinetMinister")}
 
                   </p>
 
@@ -612,7 +482,7 @@ const PoliticalJourney = () => {
 
 
             {/* =================================================
-                ALL 14 CAREER ITEMS
+                ALL CAREER ITEMS
             ================================================= */}
 
             {careerJourney.map((item, index) => {
@@ -787,7 +657,7 @@ const PoliticalJourney = () => {
                   sm:text-xs
                 "
               >
-                Key Highlight
+                {t("journeyStats.keyHighlight")}
               </div>
 
 
@@ -804,7 +674,7 @@ const PoliticalJourney = () => {
                   lg:text-4xl
                 "
               >
-                From Youth Leadership to Cabinet Responsibility
+                {t("journeyStats.highlightTitle")}
               </h2>
 
 
@@ -820,9 +690,7 @@ const PoliticalJourney = () => {
                   sm:leading-6
                 "
               >
-                With more than 25 years of political experience, his
-                journey reflects a continued focus on public service,
-                social justice, welfare and inclusive development.
+                {t("journeyStats.highlightDesc")}
               </p>
 
             </div>
@@ -877,7 +745,7 @@ const PoliticalJourney = () => {
                     sm:text-xs
                   "
                 >
-                  Votes secured in 2023
+                  {t("journeyStats.votesSecured")}
                 </div>
 
               </div>
@@ -918,7 +786,7 @@ const PoliticalJourney = () => {
                     sm:text-xs
                   "
                 >
-                  Victory margin
+                  {t("journeyStats.victoryMargin")}
                 </div>
 
               </div>
