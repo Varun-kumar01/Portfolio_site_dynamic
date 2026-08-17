@@ -1,108 +1,6 @@
-import { useMemo, useState } from "react";
-import { Play, X } from "lucide-react";
+import { useEffect, useState } from "react";
 
-const galleryItems = [
-  {
-    id: 1,
-    type: "photo",
-    category: "Public Events",
-    image: "/gallery/1.png",
-    title: "Public Meetings",
-  },
-  {
-    id: 2,
-    type: "photo",
-    category: "Meetings",
-    image: "/gallery/2.png",
-    title: "Public Meetings",
-  },
-  {
-    id: 3,
-    type: "photo",
-    category: "Constituency",
-    image: "/gallery/3.png",
-    title: "Public Meetings",
-  },
-  {
-    id: 4,
-    type: "photo",
-    category: "Events",
-    image: "/gallery/4.png",
-    title: "Public Meetings",
-  },
-  {
-    id: 5,
-    type: "photo",
-    category: "Public Events",
-    image: "/gallery/5.png",
-    title: "Public Meetings",
-  },
-  {
-    id: 6,
-    type: "photo",
-    category: "Meetings",
-    image: "/gallery/6.png",
-    title: "Public Meetings",
-  },
-  {
-    id: 7,
-    type: "photo",
-    category: "Public Events",
-    image: "/gallery/7.png",
-    title: "Public Interaction",
-  },
-  {
-    id: 8,
-    type: "photo",
-    category: "Meetings",
-    image: "/gallery/8.png",
-    title: "Official Meeting",
-  },
-  {
-    id: 9,
-    type: "photo",
-    category: "Constituency",
-    image: "/gallery/9.png",
-    title: "Constituency Visit",
-  },
-  {
-    id: 10,
-    type: "photo",
-    category: "Events",
-    image: "/gallery/10.png",
-    title: "Public Programme",
-  },
-  {
-    id: 11,
-    type: "photo",
-    category: "Public Events",
-    image: "/gallery/11.png",
-    title: "Community Interaction",
-  },
-  {
-    id: 12,
-    type: "photo",
-    category: "Meetings",
-    image: "/gallery/12.png",
-    title: "Leadership Meeting",
-  },
-
-  // Videos
-  {
-    id: 13,
-    type: "video",
-    category: "Public Events",
-    title: "Public Programme",
-    videoUrl: "https://www.youtube.com/watch?v=qFusARwKYPk",
-  },
-  {
-    id: 14,
-    type: "video",
-    category: "Meetings",
-    title: "Public Interaction",
-    videoUrl: "https://www.youtube.com/watch?v=XTZMEkK0F7s",
-  },
-];
+const API_BASE_URL = "http://localhost:5000";
 
 const categories = [
   "All",
@@ -112,249 +10,317 @@ const categories = [
   "Events",
 ];
 
-// Get YouTube thumbnail from video URL
-const getYoutubeThumbnail = (url) => {
-  const match = url.match(
-    /(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&?/]+)/
-  );
-
-  return match
-    ? `https://img.youtube.com/vi/${match[1]}/hqdefault.jpg`
-    : "";
-};
-
 export default function Gallery() {
-  const [type, setType] = useState("photo");
-  const [category, setCategory] = useState("All");
-  const [selectedImage, setSelectedImage] = useState(null);
+  const [gallery, setGallery] = useState([]);
+  const [activeCategory, setActiveCategory] = useState("All");
+  const [activeType, setActiveType] = useState("Photos");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  const filteredItems = useMemo(() => {
-    return galleryItems.filter((item) => {
-      const typeMatch = item.type === type;
+  useEffect(() => {
+    fetchGallery();
+  }, []);
 
-      const categoryMatch =
-        category === "All" || item.category === category;
+  const fetchGallery = async () => {
+    try {
+      setLoading(true);
+      setError("");
 
-      return typeMatch && categoryMatch;
-    });
-  }, [type, category]);
+      const response = await fetch(`${API_BASE_URL}/api/gallery`);
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch gallery");
+      }
+
+      const data = await response.json();
+
+      console.log("Gallery API response:", data);
+
+      if (Array.isArray(data)) {
+        setGallery(data);
+      } else {
+        setGallery([]);
+      }
+    } catch (err) {
+      console.error("Gallery loading error:", err);
+      setError("Unable to load gallery images.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Build complete image URL
+  const getImageUrl = (imagePath) => {
+    if (!imagePath) return "";
+
+    // Already a complete URL
+    if (imagePath.startsWith("http")) {
+      return imagePath;
+    }
+
+    // Backend stores paths like:
+    // /uploads/gallery/image.jpg
+    return `${API_BASE_URL}${imagePath.startsWith("/") ? "" : "/"}${imagePath}`;
+  };
+
+  // Filter images according to category
+  const filteredGallery =
+    activeCategory === "All"
+      ? gallery
+      : gallery.filter(
+          (item) =>
+            String(item.category || "").toLowerCase() ===
+            activeCategory.toLowerCase()
+        );
 
   return (
-    <>
-      {/* Gallery Section */}
+    <div className="min-h-screen bg-white">
 
-      <section className="bg-white py-16 lg:py-20">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
+      {/* ================= HERO ================= */}
+      <section className="mx-auto max-w-7xl px-6 pt-16 pb-8 md:px-10 lg:px-12">
 
-          {/* Header */}
+        <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
 
-          <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8">
+          {/* Heading */}
+          <div className="max-w-3xl">
 
-            <div className="max-w-2xl">
+            <p className="mb-4 text-sm font-semibold uppercase tracking-[0.35em] text-orange-600">
+              Media Gallery
+            </p>
 
-              <span className="text-orange-600 text-sm font-semibold uppercase tracking-[0.25em]">
-                Media Gallery
-              </span>
+            <h1 className="text-4xl font-bold tracking-tight text-slate-900 md:text-5xl lg:text-6xl">
+              Moments of Public Service
+            </h1>
 
-              <h2 className="mt-3 text-3xl md:text-4xl lg:text-5xl font-bold text-slate-900">
-                Moments of Public Service
-              </h2>
-
-              <p className="mt-4 text-gray-600 leading-8">
-                Explore photographs and videos capturing public programmes,
-                constituency visits, meetings and important events.
-              </p>
-
-            </div>
-
-            {/* Photo / Video */}
-
-            <div className="flex rounded-full bg-slate-100 p-1 w-fit">
-
-              <button
-                onClick={() => {
-                  setType("photo");
-                  setCategory("All");
-                }}
-                className={`px-6 py-2.5 rounded-full text-sm font-semibold transition ${
-                  type === "photo"
-                    ? "bg-orange-600 text-white shadow"
-                    : "text-slate-600 hover:text-orange-600"
-                }`}
-              >
-                Photos
-              </button>
-
-              <button
-                onClick={() => {
-                  setType("video");
-                  setCategory("All");
-                }}
-                className={`px-6 py-2.5 rounded-full text-sm font-semibold transition ${
-                  type === "video"
-                    ? "bg-orange-600 text-white shadow"
-                    : "text-slate-600 hover:text-orange-600"
-                }`}
-              >
-                Videos
-              </button>
-
-            </div>
+            <p className="mt-5 max-w-2xl text-base leading-8 text-slate-600 md:text-lg">
+              Explore photographs and videos capturing public programmes,
+              constituency visits, meetings and important events.
+            </p>
 
           </div>
 
-          {/* Categories */}
+          {/* Photos / Videos */}
+          <div className="flex w-fit rounded-full bg-slate-100 p-1">
 
-          <div className="flex flex-wrap gap-3 mt-10">
+            <button
+              onClick={() => setActiveType("Photos")}
+              className={`rounded-full px-7 py-3 text-sm font-semibold transition ${
+                activeType === "Photos"
+                  ? "bg-orange-600 text-white shadow-md"
+                  : "text-slate-600 hover:text-slate-900"
+              }`}
+            >
+              Photos
+            </button>
 
-            {categories.map((item) => (
-              <button
-                key={item}
-                onClick={() => setCategory(item)}
-                className={`px-5 py-2 rounded-full border text-sm transition ${
-                  category === item
-                    ? "bg-orange-600 text-white border-orange-600"
-                    : "bg-white border-slate-200 text-slate-600 hover:border-orange-500 hover:text-orange-600"
+            <button
+              onClick={() => setActiveType("Videos")}
+              className={`rounded-full px-7 py-3 text-sm font-semibold transition ${
+                activeType === "Videos"
+                  ? "bg-orange-600 text-white shadow-md"
+                  : "text-slate-600 hover:text-slate-900"
+              }`}
+            >
+              Videos
+            </button>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      {/* ================= FILTERS ================= */}
+      <section className="mx-auto max-w-7xl px-6 pb-8 md:px-10 lg:px-12">
+
+        <div className="flex flex-wrap gap-3">
+
+          {categories.map((category) => (
+            <button
+              key={category}
+              onClick={() => setActiveCategory(category)}
+              className={`rounded-full border px-6 py-2.5 text-sm font-medium transition ${
+                activeCategory === category
+                  ? "border-orange-600 bg-orange-600 text-white"
+                  : "border-slate-200 bg-white text-slate-600 hover:border-orange-400 hover:text-orange-600"
+              }`}
+            >
+              {category}
+            </button>
+          ))}
+
+        </div>
+
+      </section>
+
+
+      {/* ================= GALLERY ================= */}
+      <section className="mx-auto max-w-7xl px-6 pb-20 md:px-10 lg:px-12">
+
+        {/* Error */}
+        {error && (
+          <div className="mb-8 rounded-xl border border-red-200 bg-red-50 px-6 py-5 text-red-600">
+            {error}
+          </div>
+        )}
+
+
+        {/* Loading */}
+        {loading && (
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+
+            {Array.from({ length: 8 }).map((_, index) => (
+              <div
+                key={index}
+                className={`animate-pulse rounded-3xl bg-slate-200 ${
+                  index === 0
+                    ? "col-span-2 row-span-2 h-[500px]"
+                    : "h-[240px]"
                 }`}
-              >
-                {item}
-              </button>
+              />
+            ))}
+
+          </div>
+        )}
+
+
+        {/* No images */}
+        {!loading && filteredGallery.length === 0 && (
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 py-20 text-center">
+
+            <h3 className="text-xl font-semibold text-slate-800">
+              No images found
+            </h3>
+
+            <p className="mt-2 text-slate-500">
+              There are no gallery images in this category.
+            </p>
+
+          </div>
+        )}
+
+
+        {/* Images */}
+        {!loading && filteredGallery.length > 0 && activeType === "Photos" && (
+
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+
+            {filteredGallery.map((item, index) => (
+
+              <GalleryCard
+                key={item.id || index}
+                item={item}
+                index={index}
+                getImageUrl={getImageUrl}
+              />
+
             ))}
 
           </div>
 
-          {/* Gallery */}
+        )}
 
-          {filteredItems.length > 0 ? (
 
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 mt-12">
+        {/* Videos */}
+        {!loading && activeType === "Videos" && (
 
-              {filteredItems.map((item, index) => (
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 py-20 text-center">
 
-                <article
-                  key={item.id}
-                  className={`group relative overflow-hidden rounded-3xl ${
-                    index === 0
-                      ? "md:col-span-2 md:row-span-2"
-                      : ""
-                  }`}
-                >
-
-                  {/* Image / Video Thumbnail */}
-
-                  <img
-                    src={
-                      item.type === "video"
-                        ? getYoutubeThumbnail(item.videoUrl)
-                        : item.image
-                    }
-                    alt={item.title}
-                    onClick={() =>
-                      item.type === "photo" &&
-                      setSelectedImage(item.image)
-                    }
-                    className={`w-full object-cover transition duration-700 group-hover:scale-105 ${
-                      item.type === "photo"
-                        ? "cursor-pointer"
-                        : ""
-                    } ${
-                      index === 0
-                        ? "h-[300px] md:h-[520px]"
-                        : "h-[220px] md:h-[250px]"
-                    }`}
-                  />
-
-                  {/* Overlay */}
-
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent opacity-0 group-hover:opacity-100 transition duration-500 pointer-events-none">
-
-                    <div className="absolute bottom-0 left-0 right-0 p-6">
-
-                      <p className="text-white font-semibold text-lg">
-                        {item.title}
-                      </p>
-
-                      <p className="mt-1 text-white/70 text-sm">
-                        {item.category}
-                      </p>
-
-                    </div>
-
-                  </div>
-
-                  {/* Video */}
-
-                  {item.type === "video" && (
-
-                    <a
-                      href={item.videoUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="absolute inset-0 flex items-center justify-center"
-                    >
-
-                      <div className="w-14 h-14 rounded-full bg-white/90 flex items-center justify-center shadow-xl group-hover:scale-110 transition">
-
-                        <Play
-                          size={22}
-                          className="text-orange-600 ml-1"
-                          fill="currentColor"
-                        />
-
-                      </div>
-
-                    </a>
-
-                  )}
-
-                </article>
-
-              ))}
-
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-orange-100 text-2xl">
+              ▶
             </div>
 
-          ) : (
+            <h3 className="text-xl font-semibold text-slate-800">
+              Videos
+            </h3>
 
-            <div className="mt-12 py-20 text-center rounded-3xl bg-slate-50 border border-slate-100">
+            <p className="mt-2 text-slate-500">
+              Video gallery will be available here.
+            </p>
 
-              <p className="text-gray-500">
-                No {type === "photo" ? "photos" : "videos"} found in this category.
-              </p>
+          </div>
 
-            </div>
+        )}
 
-          )}
-
-        </div>
       </section>
 
-      {/* Lightbox */}
+    </div>
+  );
+}
 
-      {selectedImage && (
 
+/* =========================================================
+   GALLERY CARD
+========================================================= */
+
+function GalleryCard({ item, index, getImageUrl }) {
+  const [imageError, setImageError] = useState(false);
+
+  const imageUrl = getImageUrl(item.image_path);
+
+  return (
+    <div
+      className={`group relative overflow-hidden rounded-3xl bg-slate-200 ${
+        index === 0
+          ? "sm:col-span-2 sm:row-span-2"
+          : ""
+      }`}
+    >
+
+      {/* Image */}
+      {!imageError && imageUrl ? (
+        <img
+          src={imageUrl}
+          alt={item.title || "Gallery image"}
+          onError={() => {
+            console.error("Image failed:", imageUrl);
+            setImageError(true);
+          }}
+          className={`w-full object-cover transition duration-500 group-hover:scale-105 ${
+            index === 0
+              ? "h-[420px] sm:h-[500px]"
+              : "h-[240px] sm:h-[250px]"
+          }`}
+        />
+      ) : (
         <div
-          className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-5"
-          onClick={() => setSelectedImage(null)}
+          className={`flex w-full items-center justify-center bg-slate-200 text-slate-500 ${
+            index === 0
+              ? "h-[420px] sm:h-[500px]"
+              : "h-[240px] sm:h-[250px]"
+          }`}
         >
-
-          <button
-            onClick={() => setSelectedImage(null)}
-            className="absolute top-6 right-6 w-11 h-11 rounded-full bg-white/10 text-white flex items-center justify-center hover:bg-white/20 transition"
-          >
-            <X size={24} />
-          </button>
-
-          <img
-            src={selectedImage}
-            alt="Gallery preview"
-            onClick={(e) => e.stopPropagation()}
-            className="max-w-full max-h-[90vh] object-contain rounded-xl"
-          />
-
+          Image not available
         </div>
-
       )}
 
-    </>
+
+      {/* Gradient */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-transparent opacity-90" />
+
+
+      {/* Text */}
+      <div className="absolute bottom-0 left-0 right-0 p-5 text-white">
+
+        <h3 className="text-lg font-semibold md:text-xl">
+          {item.title || "Public Service"}
+        </h3>
+
+        {item.category && (
+          <p className="mt-1 text-sm text-white/80">
+            {item.category}
+          </p>
+        )}
+
+        {item.caption && (
+          <p className="mt-2 line-clamp-2 text-sm text-white/80">
+            {item.caption}
+          </p>
+        )}
+
+      </div>
+
+    </div>
   );
 }

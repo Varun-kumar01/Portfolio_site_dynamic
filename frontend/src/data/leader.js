@@ -42,11 +42,13 @@ const leader = {
     state: "Telangana",
     party: "Indian National Congress",
     experience: "40+ Years",
+
+    image: "/assets/leader.png",
   },
 
   contact: {
-    email: "office@email.com", // Replace with actual office email
-    phone: "+91 9876543210",   // Replace with actual office phone
+    email: "office@email.com",
+    phone: "+91 9876543210",
     address: "Dharmapuri, Jagtial, Telangana",
   },
 

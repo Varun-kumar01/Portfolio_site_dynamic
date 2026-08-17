@@ -7,7 +7,7 @@ const leader = {
 
   constituency: "Dharmapuri Assembly Constituency",
 
-  district: "Jagtial",
+  district: "Jagtial",    
 
   state: "Telangana",
 
