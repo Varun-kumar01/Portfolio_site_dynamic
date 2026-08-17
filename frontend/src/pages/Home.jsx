@@ -1,36 +1,226 @@
+import {
+  useEffect,
+  useState,
+} from "react";
+
 import Hero from "../components/home/Hero";
 import AboutPreview from "../components/home/AboutPreview";
 import FocusAreas from "../components/home/FocusAreas";
 import DevelopmentHighlights from "../components/home/DevelopmentHighlights";
 import GalleryPreview from "../components/home/GalleryPreview";
 import NewsPreview from "../components/home/NewsPreview";
-import VideosPreview from "../components/home/VideosPreview";
 import ContactCTA from "../components/home/ContactCTA";
 
-export default function Home(){
+const Home = () => {
 
-    return(
+  const [
+    content,
+    setContent,
+  ] = useState(null);
 
-        <>
+  const [
+    loading,
+    setLoading,
+  ] = useState(true);
 
-            <Hero/>
+  const [
+    error,
+    setError,
+  ] = useState("");
 
-            <AboutPreview/>
+  // =====================================
+  // LOAD WEBSITE CONTENT
+  // =====================================
 
-            <FocusAreas/>
+  useEffect(() => {
 
-            <DevelopmentHighlights/>
+    const loadWebsiteContent =
+      async () => {
 
-            <GalleryPreview/>
+        try {
 
-            <NewsPreview/>
+          setLoading(true);
 
-            {/* <VideosPreview/> */}
+          setError("");
 
-            <ContactCTA/>
+          const response =
+            await fetch(
+              "http://localhost:5000/api/content",
+              {
+                method:
+                  "GET",
 
-        </>
+                headers: {
+                  "Cache-Control":
+                    "no-cache",
+                },
+
+                cache:
+                  "no-store",
+              }
+            );
+
+          if (
+            !response.ok
+          ) {
+
+            throw new Error(
+              `Failed to load website content. Status: ${response.status}`
+            );
+
+          }
+
+          const data =
+            await response.json();
+
+          console.log(
+            "LATEST WEBSITE CONTENT:",
+            data
+          );
+
+          setContent(
+            data
+          );
+
+        } catch (
+          error
+        ) {
+
+          console.error(
+            "Error loading website content:",
+            error
+          );
+
+          setError(
+            error.message
+          );
+
+        } finally {
+
+          setLoading(
+            false
+          );
+
+        }
+
+      };
+
+    loadWebsiteContent();
+
+  }, []);
+
+  // =====================================
+  // LOADING
+  // =====================================
+
+  if (
+    loading
+  ) {
+
+    return (
+
+      <div className="min-h-screen flex items-center justify-center">
+
+        <p className="text-slate-600">
+          Loading website...
+        </p>
+
+      </div>
 
     );
 
-}
+  }
+
+  // =====================================
+  // ERROR
+  // =====================================
+
+  if (
+    error
+  ) {
+
+    return (
+
+      <div className="min-h-screen flex items-center justify-center">
+
+        <p className="text-red-600">
+
+          {error}
+
+        </p>
+
+      </div>
+
+    );
+
+  }
+
+  // =====================================
+  // SAFETY CHECK
+  // =====================================
+
+  if (
+    !content
+  ) {
+
+    return (
+
+      <div className="min-h-screen flex items-center justify-center">
+
+        <p className="text-slate-600">
+          No website content found.
+        </p>
+
+      </div>
+
+    );
+
+  }
+
+  // =====================================
+  // WEBSITE
+  // =====================================
+
+  return (
+
+    <>
+
+      {/* HERO */}
+
+      <Hero
+        content={content}
+      />
+
+      {/* ABOUT PREVIEW */}
+
+      <AboutPreview
+        content={content}
+      />
+
+      {/* FOCUS AREAS */}
+
+      <FocusAreas />
+
+      {/* DEVELOPMENT HIGHLIGHTS */}
+
+      <DevelopmentHighlights />
+
+      {/* GALLERY PREVIEW */}
+
+      <GalleryPreview />
+
+      {/* NEWS PREVIEW */}
+
+      <NewsPreview />
+
+      {/* CONTACT CTA */}
+
+      <ContactCTA />
+
+    </>
+
+  );
+
+};
+
+export default Home;

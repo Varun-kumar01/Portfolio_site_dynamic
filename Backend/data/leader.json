@@ -1,0 +1,150 @@
+{
+  "profile": {
+    "name": "Adluri Laxman Kumar",
+    "designation": "Minister of Telangana State",
+    "designation2": "Cabinet Minister",
+    "constituency": "Dharmapuri (SC)",
+    "district": "Jagtial",
+    "state": "Telangana",
+    "party": "Indian National Congress",
+    "experience": "40+ Years"
+  },
+  "contact": {
+    "email": "office@email.com",
+    "phone": "+91 9876543210",
+    "address": "Dharmapuri, Jagtial, Telangana",
+    "officeHours": ""
+  },
+  "quote": "True leadership is measured by service, integrity and the positive change we create for people.",
+  "social": {
+    "facebook": "https://www.facebook.com/people/Laxman-Kumar-Adluri/100090504308403/",
+    "instagram": "https://www.instagram.com/adluri_laxman_kumar_official/?hl=en",
+    "twitter": "https://x.com/minister_adluri?lang=en",
+    "youtube": "https://ertyh#",
+    "linkedin": "https://www.linkedin.com/in/mudiganti-ruchitha/"
+  },
+  "stats": {
+    "experience": "40+",
+    "constituency": "Dharmapuri",
+    "state": "Telangana"
+  },
+  "home": {
+    "heroTitle": "LAXMAN KUMAR",
+    "heroSubtitle": "Building a Better Telangana",
+    "heroDescription": "Committed to transparent governance, inclusive growth, stronger infrastructure, quality education and public welfare.",
+    "heroImage": "/leader.png",
+    "aboutHeading": "Dedicated to the Progress of Every Citizen",
+    "aboutDescription": "Public service is built on integrity, transparency and commitment. Through continuous interaction with citizens, community participation and development-focused initiatives, every effort is directed towards building a stronger and more prosperous Telangana.",
+    "features": [
+      "Transparent Governance",
+      "Infrastructure Development",
+      "Quality Education",
+      "Public Welfare"
+    ],
+    "stats": [
+      {
+        "number": "200+",
+        "text": "Development Projects"
+      },
+      {
+        "number": "25+",
+        "text": "Years of Public Service"
+      }
+    ],
+    "focusAreas": {
+      "label": "Focus Areas",
+      "heading": "Committed to Inclusive Development",
+      "description": "Focused on strengthening infrastructure, education, social welfare and citizen-centric governance to improve the quality of life across the constituency.",
+      "items": [
+        {
+          "title": "Infrastructure Development",
+          "description": "Improving roads, public facilities, drinking water systems and strengthening civic infrastructure for sustainable growth."
+        },
+        {
+          "title": "Education & Youth",
+          "description": "Promoting quality education, skill development, scholarships and opportunities that empower students and young leaders."
+        },
+        {
+          "title": "SC & Tribal Welfare",
+          "description": "Committed to the welfare, empowerment and inclusive development of Scheduled Castes and Tribal communities."
+        },
+        {
+          "title": "Citizen-Centric Governance",
+          "description": "Delivering transparent, accessible and accountable governance while addressing the needs of every citizen."
+        }
+      ]
+    },
+    "developmentHighlights": {
+      "label": "Development Highlights",
+      "heading": "Building Stronger Communities",
+      "description": "Development is driven by better infrastructure, quality education, healthcare and sustainable opportunities that improve everyday life.",
+      "items": [
+        {
+          "title": "Healthcare",
+          "description": "Enhancing healthcare access through medical camps, awareness programmes and better health facilities.",
+          "image": ""
+        },
+        {
+          "title": "Agriculture",
+          "description": "Working alongside farmers to encourage sustainable agriculture and rural development initiatives.",
+          "image": ""
+        },
+        {
+          "title": "Infrastructure Development",
+          "description": "Strengthening roads, public buildings, drinking water facilities and civic infrastructure to improve connectivity and everyday life.",
+          "image": ""
+        },
+        {
+          "title": "Education & Youth",
+          "description": "Supporting schools, scholarships, digital learning and opportunities that empower students and young leaders.",
+          "image": ""
+        }
+      ]
+    },
+    "galleryPreview": {
+      "label": "Gallery",
+      "heading": "Moments That Define Public Service",
+      "description": "A glimpse into public meetings, development activities, community interactions and important moments of service.",
+      "mainTitle": "Community Development",
+      "momentsNumber": "500+",
+      "momentsText": "Moments",
+      "images": [
+        "http://localhost:5000/uploads/1786864922195-45077911.png",
+        "http://localhost:5000/uploads/1786864922230-991655599.png",
+        "http://localhost:5000/uploads/1786864922235-245642756.png",
+        "http://localhost:5000/uploads/1786864922257-146872032.png",
+        "http://localhost:5000/uploads/1786864922265-761723142.png"
+      ]
+    },
+    "newsPreview": {
+      "label": "Latest News",
+      "heading": "Recent Updates & Public Activities",
+      "description": "Stay updated with recent constituency visits, welfare initiatives, government programmes and important public announcements.",
+      "featured": {
+        "image": "/news/news1.png",
+        "date": "2 March 2026",
+        "title": "Minister Calls for Reclaiming Encroached Government Land for the Poor",
+        "description": "Adluri Laxman Kumar directed officials to identify illegally occupied government land and redistribute eligible land to poor families while addressing a public awareness programme in Dharmaram Mandal."
+      },
+      "items": [
+        {
+          "image": "/news/news2.png",
+          "date": "1 March 2026",
+          "title": "Annadanam Service Inaugurated at Dharmapuri Temple"
+        },
+        {
+          "image": "/news/news3.png",
+          "date": "14 February 2026",
+          "title": "Congress Records Complete Municipal Sweep in Dharmapuri"
+        }
+      ]
+    },
+    "contactCTA": {
+      "label": "Get In Touch",
+      "headingLine1": "Together, Let's Build",
+      "headingLine2": "A Better Tomorrow",
+      "description": "Your ideas, suggestions and concerns matter. Stay connected and work together towards stronger communities, better development and transparent governance.",
+      "buttonText": "Contact Office"
+    }
+  }
+}
