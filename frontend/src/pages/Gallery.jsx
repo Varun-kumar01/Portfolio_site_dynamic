@@ -1,501 +1,16 @@
-// import { useMemo, useState } from "react";
-// import { Play, X } from "lucide-react";
-
-// const galleryItems = [
-//   {
-//     id: 1,
-//     type: "photo",
-//     category: "Public Events",
-//     image: "/gallery/1.png",
-//     title: "Public Meetings",
-//   },
-//   {
-//     id: 2,
-//     type: "photo",
-//     category: "Meetings",
-//     image: "/gallery/2.png",
-//     title: "Public Meetings",
-//   },
-//   {
-//     id: 3,
-//     type: "photo",
-//     category: "Constituency",
-//     image: "/gallery/3.png",
-//     title: "Public Meetings",
-//   },
-//   {
-//     id: 4,
-//     type: "photo",
-//     category: "Events",
-//     image: "/gallery/4.png",
-//     title: "Public Meetings",
-//   },
-//   {
-//     id: 5,
-//     type: "photo",
-//     category: "Public Events",
-//     image: "/gallery/5.png",
-//     title: "Public Meetings",
-//   },
-//   {
-//     id: 6,
-//     type: "photo",
-//     category: "Meetings",
-//     image: "/gallery/6.png",
-//     title: "Public Meetings",
-//   },
-//   {
-//     id: 7,
-//     type: "photo",
-//     category: "Public Events",
-//     image: "/gallery/7.png",
-//     title: "Public Interaction",
-//   },
-//   {
-//     id: 8,
-//     type: "photo",
-//     category: "Meetings",
-//     image: "/gallery/8.png",
-//     title: "Official Meeting",
-//   },
-//   {
-//     id: 9,
-//     type: "photo",
-//     category: "Constituency",
-//     image: "/gallery/9.png",
-//     title: "Constituency Visit",
-//   },
-//   {
-//     id: 10,
-//     type: "photo",
-//     category: "Events",
-//     image: "/gallery/10.png",
-//     title: "Public Programme",
-//   },
-//   {
-//     id: 11,
-//     type: "photo",
-//     category: "Public Events",
-//     image: "/gallery/11.png",
-//     title: "Community Interaction",
-//   },
-//   {
-//     id: 12,
-//     type: "photo",
-//     category: "Meetings",
-//     image: "/gallery/12.png",
-//     title: "Leadership Meeting",
-//   },
-
-//   // Videos
-//   {
-//     id: 13,
-//     type: "video",
-//     category: "Public Events",
-//     title: "Public Programme",
-//     videoUrl: "https://www.youtube.com/watch?v=qFusARwKYPk",
-//   },
-//   {
-//     id: 14,
-//     type: "video",
-//     category: "Meetings",
-//     title: "Public Interaction",
-//     videoUrl: "https://www.youtube.com/watch?v=XTZMEkK0F7s",
-//   },
-// ];
-
-// const categories = [
-//   "All",
-//   "Public Events",
-//   "Constituency",
-//   "Meetings",
-//   "Events",
-// ];
-
-// // Get YouTube thumbnail from video URL
-// const getYoutubeThumbnail = (url) => {
-//   const match = url.match(
-//     /(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&?/]+)/
-//   );
-
-//   return match
-//     ? `https://img.youtube.com/vi/${match[1]}/hqdefault.jpg`
-//     : "";
-// };
-
-// export default function Gallery() {
-//   const [type, setType] = useState("photo");
-//   const [category, setCategory] = useState("All");
-//   const [selectedImage, setSelectedImage] = useState(null);
-
-//   const filteredItems = useMemo(() => {
-//     return galleryItems.filter((item) => {
-//       const typeMatch = item.type === type;
-
-//       const categoryMatch =
-//         category === "All" || item.category === category;
-
-//       return typeMatch && categoryMatch;
-//     });
-//   }, [type, category]);
-
-//   return (
-//     <>
-//       {/* Gallery Section */}
-
-//       <section className="bg-white py-16 lg:py-20">
-//         <div className="max-w-7xl mx-auto px-6 lg:px-8">
-
-//           {/* Header */}
-
-//           <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8">
-
-//             <div className="max-w-2xl">
-
-//               <span className="text-orange-600 text-sm font-semibold uppercase tracking-[0.25em]">
-//                 Media Gallery
-//               </span>
-
-//               <h2 className="mt-3 text-3xl md:text-4xl lg:text-5xl font-bold text-slate-900">
-//                 Moments of Public Service
-//               </h2>
-
-//               <p className="mt-4 text-gray-600 leading-8">
-//                 Explore photographs and videos capturing public programmes,
-//                 constituency visits, meetings and important events.
-//               </p>
-
-//             </div>
-
-//             {/* Photo / Video */}
-
-//             <div className="flex rounded-full bg-slate-100 p-1 w-fit">
-
-//               <button
-//                 onClick={() => {
-//                   setType("photo");
-//                   setCategory("All");
-//                 }}
-//                 className={`px-6 py-2.5 rounded-full text-sm font-semibold transition ${
-//                   type === "photo"
-//                     ? "bg-orange-600 text-white shadow"
-//                     : "text-slate-600 hover:text-orange-600"
-//                 }`}
-//               >
-//                 Photos
-//               </button>
-
-//               <button
-//                 onClick={() => {
-//                   setType("video");
-//                   setCategory("All");
-//                 }}
-//                 className={`px-6 py-2.5 rounded-full text-sm font-semibold transition ${
-//                   type === "video"
-//                     ? "bg-orange-600 text-white shadow"
-//                     : "text-slate-600 hover:text-orange-600"
-//                 }`}
-//               >
-//                 Videos
-//               </button>
-
-//             </div>
-
-//           </div>
-
-//           {/* Categories */}
-
-//           <div className="flex flex-wrap gap-3 mt-10">
-
-//             {categories.map((item) => (
-//               <button
-//                 key={item}
-//                 onClick={() => setCategory(item)}
-//                 className={`px-5 py-2 rounded-full border text-sm transition ${
-//                   category === item
-//                     ? "bg-orange-600 text-white border-orange-600"
-//                     : "bg-white border-slate-200 text-slate-600 hover:border-orange-500 hover:text-orange-600"
-//                 }`}
-//               >
-//                 {item}
-//               </button>
-//             ))}
-
-//           </div>
-
-//           {/* Gallery */}
-
-//           {filteredItems.length > 0 ? (
-
-//             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 mt-12">
-
-//               {filteredItems.map((item, index) => (
-
-//                 <article
-//                   key={item.id}
-//                   className={`group relative overflow-hidden rounded-3xl ${
-//                     index === 0
-//                       ? "md:col-span-2 md:row-span-2"
-//                       : ""
-//                   }`}
-//                 >
-
-//                   {/* Image / Video Thumbnail */}
-
-//                   <img
-//                     src={
-//                       item.type === "video"
-//                         ? getYoutubeThumbnail(item.videoUrl)
-//                         : item.image
-//                     }
-//                     alt={item.title}
-//                     onClick={() =>
-//                       item.type === "photo" &&
-//                       setSelectedImage(item.image)
-//                     }
-//                     className={`w-full object-cover transition duration-700 group-hover:scale-105 ${
-//                       item.type === "photo"
-//                         ? "cursor-pointer"
-//                         : ""
-//                     } ${
-//                       index === 0
-//                         ? "h-[300px] md:h-[520px]"
-//                         : "h-[220px] md:h-[250px]"
-//                     }`}
-//                   />
-
-//                   {/* Overlay */}
-
-//                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent opacity-0 group-hover:opacity-100 transition duration-500 pointer-events-none">
-
-//                     <div className="absolute bottom-0 left-0 right-0 p-6">
-
-//                       <p className="text-white font-semibold text-lg">
-//                         {item.title}
-//                       </p>
-
-//                       <p className="mt-1 text-white/70 text-sm">
-//                         {item.category}
-//                       </p>
-
-//                     </div>
-
-//                   </div>
-
-//                   {/* Video */}
-
-//                   {item.type === "video" && (
-
-//                     <a
-//                       href={item.videoUrl}
-//                       target="_blank"
-//                       rel="noopener noreferrer"
-//                       className="absolute inset-0 flex items-center justify-center"
-//                     >
-
-//                       <div className="w-14 h-14 rounded-full bg-white/90 flex items-center justify-center shadow-xl group-hover:scale-110 transition">
-
-//                         <Play
-//                           size={22}
-//                           className="text-orange-600 ml-1"
-//                           fill="currentColor"
-//                         />
-
-//                       </div>
-
-//                     </a>
-
-//                   )}
-
-//                 </article>
-
-//               ))}
-
-//             </div>
-
-//           ) : (
-
-//             <div className="mt-12 py-20 text-center rounded-3xl bg-slate-50 border border-slate-100">
-
-//               <p className="text-gray-500">
-//                 No {type === "photo" ? "photos" : "videos"} found in this category.
-//               </p>
-
-//             </div>
-
-//           )}
-
-//         </div>
-//       </section>
-
-//       {/* Lightbox */}
-
-//       {selectedImage && (
-
-//         <div
-//           className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-5"
-//           onClick={() => setSelectedImage(null)}
-//         >
-
-//           <button
-//             onClick={() => setSelectedImage(null)}
-//             className="absolute top-6 right-6 w-11 h-11 rounded-full bg-white/10 text-white flex items-center justify-center hover:bg-white/20 transition"
-//           >
-//             <X size={24} />
-//           </button>
-
-//           <img
-//             src={selectedImage}
-//             alt="Gallery preview"
-//             onClick={(e) => e.stopPropagation()}
-//             className="max-w-full max-h-[90vh] object-contain rounded-xl"
-//           />
-
-//         </div>
-
-//       )}
-
-//     </>
-//   );
-// }
-
-
-
-
-
-
 import { useEffect, useMemo, useState } from "react";
 import { Play, X } from "lucide-react";
 
 /* =========================================================
-   DYNAMIC VIDEO API
+   API CONFIGURATION
 ========================================================= */
 
-const API_URL = "http://localhost:5000/api/videos";
-const CACHE_KEY = "gallery_videos_cache";
+const API_BASE_URL = "http://localhost:5000";
 
-/* =========================================================
-   OLD PHOTO DATA
-   Your existing photos are kept unchanged
-========================================================= */
+const PHOTO_API_URL = `${API_BASE_URL}/api/gallery`;
+const VIDEO_API_URL = `${API_BASE_URL}/api/videos`;
 
-const photoItems = [
-  {
-    id: 1,
-    type: "photo",
-    category: "Public Events",
-    image: "/gallery/1.png",
-    title: "Public Meetings",
-  },
-  {
-    id: 2,
-    type: "photo",
-    category: "Meetings",
-    image: "/gallery/2.png",
-    title: "Public Meetings",
-  },
-  {
-    id: 3,
-    type: "photo",
-    category: "Constituency",
-    image: "/gallery/3.png",
-    title: "Public Meetings",
-  },
-  {
-    id: 4,
-    type: "photo",
-    category: "Events",
-    image: "/gallery/4.png",
-    title: "Public Meetings",
-  },
-  {
-    id: 5,
-    type: "photo",
-    category: "Public Events",
-    image: "/gallery/5.png",
-    title: "Public Meetings",
-  },
-  {
-    id: 6,
-    type: "photo",
-    category: "Meetings",
-    image: "/gallery/6.png",
-    title: "Public Meetings",
-  },
-  {
-    id: 7,
-    type: "photo",
-    category: "Public Events",
-    image: "/gallery/7.png",
-    title: "Public Interaction",
-  },
-  {
-    id: 8,
-    type: "photo",
-    category: "Meetings",
-    image: "/gallery/8.png",
-    title: "Official Meeting",
-  },
-  {
-    id: 9,
-    type: "photo",
-    category: "Constituency",
-    image: "/gallery/9.png",
-    title: "Constituency Visit",
-  },
-  {
-    id: 10,
-    type: "photo",
-    category: "Events",
-    image: "/gallery/10.png",
-    title: "Public Programme",
-  },
-  {
-    id: 11,
-    type: "photo",
-    category: "Public Events",
-    image: "/gallery/11.png",
-    title: "Community Interaction",
-  },
-  {
-    id: 12,
-    type: "photo",
-    category: "Meetings",
-    image: "/gallery/12.png",
-    title: "Leadership Meeting",
-  },
-];
-
-/* =========================================================
-   FALLBACK VIDEOS
-
-   These are only used if:
-   - backend is unavailable
-   - no cached videos exist
-
-   You can remove these later if you don't want fallback videos.
-========================================================= */
-
-const fallbackVideos = [
-  {
-    id: "old-1",
-    type: "video",
-    category: "Public Events",
-    title: "Public Programme",
-    description: "",
-    videoUrl: "https://www.youtube.com/watch?v=qFusARwKYPk",
-    thumbnailUrl: "",
-  },
-  {
-    id: "old-2",
-    type: "video",
-    category: "Meetings",
-    title: "Public Interaction",
-    description: "",
-    videoUrl: "https://www.youtube.com/watch?v=XTZMEkK0F7s",
-    thumbnailUrl: "",
-  },
-];
+const VIDEO_CACHE_KEY = "gallery_videos_cache";
 
 /* =========================================================
    CATEGORIES
@@ -507,14 +22,167 @@ const categories = [
   "Constituency",
   "Meetings",
   "Events",
-  "Government",
-  "Public",
-  "Development",
-  "Video",
 ];
 
 /* =========================================================
-   YOUTUBE HELPERS
+   EXISTING STATIC PHOTOS
+   ---------------------------------------------------------
+   These are your old gallery photos.
+
+   They will continue showing even if the backend
+   does not contain them.
+========================================================= */
+
+const existingPhotos = [
+  {
+    id: "static-1",
+    type: "photo",
+    category: "Public Events",
+    image: "/gallery/1.png",
+    title: "Public Meetings",
+    caption: "",
+    isStatic: true,
+  },
+
+  {
+    id: "static-2",
+    type: "photo",
+    category: "Meetings",
+    image: "/gallery/2.png",
+    title: "Public Meetings",
+    caption: "",
+    isStatic: true,
+  },
+
+  {
+    id: "static-3",
+    type: "photo",
+    category: "Constituency",
+    image: "/gallery/3.png",
+    title: "Public Meetings",
+    caption: "",
+    isStatic: true,
+  },
+
+  {
+    id: "static-4",
+    type: "photo",
+    category: "Events",
+    image: "/gallery/4.png",
+    title: "Public Meetings",
+    caption: "",
+    isStatic: true,
+  },
+
+  {
+    id: "static-5",
+    type: "photo",
+    category: "Public Events",
+    image: "/gallery/5.png",
+    title: "Public Meetings",
+    caption: "",
+    isStatic: true,
+  },
+
+  {
+    id: "static-6",
+    type: "photo",
+    category: "Meetings",
+    image: "/gallery/6.png",
+    title: "Public Meetings",
+    caption: "",
+    isStatic: true,
+  },
+
+  {
+    id: "static-7",
+    type: "photo",
+    category: "Public Events",
+    image: "/gallery/7.png",
+    title: "Public Interaction",
+    caption: "",
+    isStatic: true,
+  },
+
+  {
+    id: "static-8",
+    type: "photo",
+    category: "Meetings",
+    image: "/gallery/8.png",
+    title: "Official Meeting",
+    caption: "",
+    isStatic: true,
+  },
+
+  {
+    id: "static-9",
+    type: "photo",
+    category: "Constituency",
+    image: "/gallery/9.png",
+    title: "Constituency Visit",
+    caption: "",
+    isStatic: true,
+  },
+
+  {
+    id: "static-10",
+    type: "photo",
+    category: "Events",
+    image: "/gallery/10.png",
+    title: "Public Programme",
+    caption: "",
+    isStatic: true,
+  },
+
+  {
+    id: "static-11",
+    type: "photo",
+    category: "Public Events",
+    image: "/gallery/11.png",
+    title: "Community Interaction",
+    caption: "",
+    isStatic: true,
+  },
+
+  {
+    id: "static-12",
+    type: "photo",
+    category: "Meetings",
+    image: "/gallery/12.png",
+    title: "Leadership Meeting",
+    caption: "",
+    isStatic: true,
+  },
+];
+
+/* =========================================================
+   FALLBACK VIDEOS
+========================================================= */
+
+const fallbackVideos = [
+  {
+    id: "old-video-1",
+    type: "video",
+    category: "Public Events",
+    title: "Public Programme",
+    description: "",
+    videoUrl: "https://www.youtube.com/watch?v=qFusARwKYPk",
+    thumbnailUrl: "",
+  },
+
+  {
+    id: "old-video-2",
+    type: "video",
+    category: "Meetings",
+    title: "Public Interaction",
+    description: "",
+    videoUrl: "https://www.youtube.com/watch?v=XTZMEkK0F7s",
+    thumbnailUrl: "",
+  },
+];
+
+/* =========================================================
+   YOUTUBE CHECK
 ========================================================= */
 
 function isYoutube(url) {
@@ -527,6 +195,10 @@ function isYoutube(url) {
     url.includes("youtu.be")
   );
 }
+
+/* =========================================================
+   YOUTUBE THUMBNAIL
+========================================================= */
 
 function youtubeThumbnail(url) {
   if (!url) {
@@ -545,12 +217,86 @@ function youtubeThumbnail(url) {
 }
 
 /* =========================================================
-   LOCAL STORAGE CACHE
+   IMAGE URL HELPER
+========================================================= */
+
+function getImageUrl(imagePath) {
+  if (!imagePath) {
+    return "";
+  }
+
+  const cleanPath = String(imagePath).trim();
+
+  if (!cleanPath) {
+    return "";
+  }
+
+  /* Already a complete URL */
+
+  if (
+    cleanPath.startsWith("http://") ||
+    cleanPath.startsWith("https://")
+  ) {
+    return cleanPath;
+  }
+
+  /* Frontend public image */
+
+  if (
+    cleanPath.startsWith("/gallery/") ||
+    cleanPath.startsWith("/images/")
+  ) {
+    return cleanPath;
+  }
+
+  /* Backend upload */
+
+  return `${API_BASE_URL}${
+    cleanPath.startsWith("/") ? "" : "/"
+  }${cleanPath}`;
+}
+
+/* =========================================================
+   CACHE-BUST IMAGE URL
+
+   Important when admin replaces an image with another
+   image having the same filename.
+========================================================= */
+
+function getFreshImageUrl(imageUrl, updatedAt = "") {
+  if (!imageUrl) {
+    return "";
+  }
+
+  /*
+    Static public images do not need cache busting.
+  */
+
+  if (
+    imageUrl.startsWith("/gallery/") ||
+    imageUrl.startsWith("/images/")
+  ) {
+    return imageUrl;
+  }
+
+  const separator = imageUrl.includes("?")
+    ? "&"
+    : "?";
+
+  return `${imageUrl}${separator}v=${
+    updatedAt || Date.now()
+  }`;
+}
+
+/* =========================================================
+   GET CACHED VIDEOS
 ========================================================= */
 
 function getCachedVideos() {
   try {
-    const saved = localStorage.getItem(CACHE_KEY);
+    const saved = localStorage.getItem(
+      VIDEO_CACHE_KEY
+    );
 
     if (!saved) {
       return [];
@@ -558,11 +304,106 @@ function getCachedVideos() {
 
     const parsed = JSON.parse(saved);
 
-    return Array.isArray(parsed) ? parsed : [];
+    return Array.isArray(parsed)
+      ? parsed
+      : [];
   } catch (error) {
-    console.error("CACHE ERROR:", error);
+    console.error(
+      "VIDEO CACHE ERROR:",
+      error
+    );
+
     return [];
   }
+}
+
+/* =========================================================
+   REMOVE DUPLICATE PHOTOS
+========================================================= */
+
+function mergePhotos(
+  backendPhotos,
+  staticPhotos
+) {
+  const result = [];
+
+  const backendImageSet = new Set();
+
+  /* -------------------------------------------------------
+     FIRST: BACKEND PHOTOS
+     Backend photos get priority.
+  ------------------------------------------------------- */
+
+  backendPhotos.forEach((photo) => {
+    if (!photo.image) {
+      return;
+    }
+
+    const normalized = photo.image
+      .split("?")[0]
+      .toLowerCase()
+      .trim();
+
+    if (!normalized) {
+      return;
+    }
+
+    /*
+      Do not add same backend image twice.
+    */
+
+    if (backendImageSet.has(normalized)) {
+      return;
+    }
+
+    backendImageSet.add(normalized);
+
+    result.push(photo);
+  });
+
+  /* -------------------------------------------------------
+     SECOND: OLD STATIC PHOTOS
+
+     Add only if the same path/image is NOT already
+     coming from the backend.
+  ------------------------------------------------------- */
+
+  staticPhotos.forEach((photo) => {
+    const staticPath = photo.image
+      .toLowerCase()
+      .trim();
+
+    const alreadyExists =
+      backendPhotos.some((backendPhoto) => {
+        const backendOriginalPath = String(
+          backendPhoto.image_path || ""
+        )
+          .toLowerCase()
+          .trim();
+
+        const backendImage = String(
+          backendPhoto.image || ""
+        )
+          .split("?")[0]
+          .toLowerCase()
+          .trim();
+
+        return (
+          backendOriginalPath ===
+            staticPath ||
+          backendImage === staticPath ||
+          backendImage.endsWith(
+            staticPath
+          )
+        );
+      });
+
+    if (!alreadyExists) {
+      result.push(photo);
+    }
+  });
+
+  return result;
 }
 
 /* =========================================================
@@ -570,14 +411,43 @@ function getCachedVideos() {
 ========================================================= */
 
 export default function Gallery() {
+  /* =======================================================
+     TYPE
+  ======================================================= */
+
   const [type, setType] = useState("photo");
-  const [category, setCategory] = useState("All");
 
-  const [selectedImage, setSelectedImage] = useState(null);
+  /* =======================================================
+     CATEGORY
+  ======================================================= */
 
-  /* ---------------------------------------------------------
-     DYNAMIC VIDEOS
-  --------------------------------------------------------- */
+  const [category, setCategory] =
+    useState("All");
+
+  /* =======================================================
+     LIGHTBOX
+  ======================================================= */
+
+  const [selectedImage, setSelectedImage] =
+    useState(null);
+
+  /* =======================================================
+     PHOTOS
+  ======================================================= */
+
+  const [photos, setPhotos] = useState(
+    existingPhotos
+  );
+
+  const [loadingPhotos, setLoadingPhotos] =
+    useState(false);
+
+  const [photoError, setPhotoError] =
+    useState("");
+
+  /* =======================================================
+     VIDEOS
+  ======================================================= */
 
   const [videos, setVideos] = useState(() => {
     const cached = getCachedVideos();
@@ -589,25 +459,251 @@ export default function Gallery() {
     return fallbackVideos;
   });
 
-  const [loadingVideos, setLoadingVideos] = useState(false);
-  const [usingCache, setUsingCache] = useState(false);
+  const [loadingVideos, setLoadingVideos] =
+    useState(false);
 
-  /* =========================================================
-     LOAD VIDEOS FROM BACKEND
-  ========================================================= */
+  const [
+    usingVideoCache,
+    setUsingVideoCache,
+  ] = useState(false);
+
+  /* =======================================================
+     LOAD PHOTOS
+  ======================================================= */
+
+  async function loadPhotos() {
+    try {
+      setLoadingPhotos(true);
+
+      setPhotoError("");
+
+      console.log(
+        "================================"
+      );
+
+      console.log(
+        "LOADING GALLERY PHOTOS"
+      );
+
+      console.log(
+        "API:",
+        PHOTO_API_URL
+      );
+
+      console.log(
+        "================================"
+      );
+
+      const response = await fetch(
+        `${PHOTO_API_URL}?t=${Date.now()}`,
+        {
+          method: "GET",
+          cache: "no-store",
+        }
+      );
+
+      const text =
+        await response.text();
+
+      let result;
+
+      try {
+        result = JSON.parse(text);
+      } catch (error) {
+        console.error(
+          "INVALID JSON:",
+          text
+        );
+
+        throw new Error(
+          "Backend returned invalid gallery data."
+        );
+      }
+
+      if (!response.ok) {
+        throw new Error(
+          result.message ||
+            `Server returned ${response.status}`
+        );
+      }
+
+      /* ---------------------------------------------------
+         SUPPORT:
+
+         [
+           {...}
+         ]
+
+         OR
+
+         {
+           success: true,
+           data: [...]
+         }
+      --------------------------------------------------- */
+
+      const galleryData =
+        Array.isArray(result)
+          ? result
+          : Array.isArray(result.data)
+            ? result.data
+            : [];
+
+      console.log(
+        "BACKEND PHOTO COUNT:",
+        galleryData.length
+      );
+
+      /* ---------------------------------------------------
+         FORMAT PHOTOS
+      --------------------------------------------------- */
+
+      const formattedPhotos =
+        galleryData
+          .map((item, index) => {
+            const originalImagePath =
+              item.image_path ||
+              item.image ||
+              item.image_url ||
+              item.photo ||
+              item.photo_url ||
+              "";
+
+            const baseImageUrl =
+              getImageUrl(
+                originalImagePath
+              );
+
+            return {
+              id:
+                item.id ??
+                `backend-photo-${index}`,
+
+              type: "photo",
+
+              category:
+                item.category ||
+                item.section ||
+                "Public Events",
+
+              image_path:
+                originalImagePath,
+
+              image:
+                getFreshImageUrl(
+                  baseImageUrl,
+                  item.updated_at ||
+                    item.updatedAt ||
+                    item.created_at ||
+                    Date.now()
+                ),
+
+              title:
+                item.title ||
+                "Public Service",
+
+              caption:
+                item.caption ||
+                item.description ||
+                "",
+
+              created_at:
+                item.created_at || "",
+
+              updated_at:
+                item.updated_at || "",
+
+              isStatic: false,
+            };
+          })
+          .filter(
+            (item) => item.image
+          );
+
+      console.log(
+        "FORMATTED BACKEND PHOTOS:",
+        formattedPhotos
+      );
+
+      /* ---------------------------------------------------
+         MERGE BACKEND + EXISTING STATIC
+      --------------------------------------------------- */
+
+      const allPhotos = mergePhotos(
+        formattedPhotos,
+        existingPhotos
+      );
+
+      console.log(
+        "================================"
+      );
+
+      console.log(
+        "FINAL PHOTO COUNT:",
+        allPhotos.length
+      );
+
+      console.log(
+        "BACKEND PHOTO COUNT:",
+        formattedPhotos.length
+      );
+
+      console.log(
+        "STATIC PHOTO COUNT:",
+        existingPhotos.length
+      );
+
+      console.log(
+        "================================"
+      );
+
+      setPhotos(allPhotos);
+
+      setPhotoError("");
+    } catch (error) {
+      console.error(
+        "GALLERY PHOTO ERROR:",
+        error
+      );
+
+      /*
+        IMPORTANT:
+
+        If backend fails, don't remove the old
+        gallery.
+
+        Keep static photos visible.
+      */
+
+      setPhotos(existingPhotos);
+
+      setPhotoError(
+        error.message ||
+          "Unable to load gallery images."
+      );
+    } finally {
+      setLoadingPhotos(false);
+    }
+  }
+
+  /* =======================================================
+     LOAD VIDEOS
+  ======================================================= */
 
   async function loadVideos() {
     try {
       setLoadingVideos(true);
 
       const response = await fetch(
-        `${API_URL}?t=${Date.now()}`,
+        `${VIDEO_API_URL}?t=${Date.now()}`,
         {
+          method: "GET",
           cache: "no-store",
         }
       );
 
-      const text = await response.text();
+      const text =
+        await response.text();
 
       let result;
 
@@ -626,95 +722,152 @@ export default function Gallery() {
         );
       }
 
-      if (!result.success) {
-        throw new Error(
-          result.message ||
-            "Unable to load videos."
-        );
-      }
+      /*
+        Support success/data response.
+      */
 
-      /* -------------------------------------------------------
-         Convert backend data into gallery format
-      ------------------------------------------------------- */
+      const videoData =
+        Array.isArray(result)
+          ? result
+          : Array.isArray(result.data)
+            ? result.data
+            : [];
 
-      const latestVideos = Array.isArray(result.data)
-        ? result.data.map((item, index) => ({
-            id: item.id ?? `video-${index}`,
+      const latestVideos =
+        videoData.map(
+          (item, index) => ({
+            id:
+              item.id ??
+              `video-${index}`,
+
             type: "video",
-            category: item.category || "Video",
-            title: item.title || "Video",
-            description: item.description || "",
-            videoUrl: item.video_url || "",
-            thumbnailUrl: item.thumbnail_url || "",
-            link: item.link || "",
-            publishedDate: item.published_date || "",
-          }))
-        : [];
+
+            category:
+              item.category ||
+              "Video",
+
+            title:
+              item.title ||
+              "Video",
+
+            description:
+              item.description ||
+              "",
+
+            videoUrl:
+              item.video_url ||
+              item.videoUrl ||
+              item.url ||
+              "",
+
+            thumbnailUrl:
+              item.thumbnail_url ||
+              item.thumbnailUrl ||
+              "",
+
+            link:
+              item.link ||
+              "",
+
+            publishedDate:
+              item.published_date ||
+              "",
+          })
+        );
+
+      /*
+        If backend successfully responds but has zero
+        videos, don't use old fallback videos.
+      */
 
       setVideos(latestVideos);
 
-      /* -------------------------------------------------------
-         Save latest videos in localStorage
-      ------------------------------------------------------- */
-
       localStorage.setItem(
-        CACHE_KEY,
-        JSON.stringify(latestVideos)
+        VIDEO_CACHE_KEY,
+        JSON.stringify(
+          latestVideos
+        )
       );
 
-      setUsingCache(false);
+      setUsingVideoCache(false);
     } catch (error) {
       console.error(
         "GALLERY VIDEO ERROR:",
         error
       );
 
-      /* -------------------------------------------------------
-         Backend failed
-         Try cached videos
-      ------------------------------------------------------- */
-
-      const cached = getCachedVideos();
+      const cached =
+        getCachedVideos();
 
       if (cached.length > 0) {
         setVideos(cached);
-        setUsingCache(true);
-      } else {
-        /* -----------------------------------------------------
-           No cache → use fallback videos
-        ----------------------------------------------------- */
 
-        setVideos(fallbackVideos);
-        setUsingCache(false);
+        setUsingVideoCache(true);
+      } else {
+        setVideos(
+          fallbackVideos
+        );
+
+        setUsingVideoCache(false);
       }
     } finally {
       setLoadingVideos(false);
     }
   }
 
-  /* =========================================================
-     INITIAL VIDEO LOAD
-  ========================================================= */
+  /* =======================================================
+     INITIAL LOAD
+  ======================================================= */
 
   useEffect(() => {
+    loadPhotos();
+
     loadVideos();
   }, []);
 
-  /* =========================================================
-     REFRESH WHEN ADMIN UPDATES VIDEOS
-
-     The admin page can dispatch:
-
-     window.dispatchEvent(
-       new Event("videos-updated")
-     );
-
-  ========================================================= */
+  /* =======================================================
+     REFRESH WHEN ADMIN CHANGES GALLERY
+  ======================================================= */
 
   useEffect(() => {
+    /* ---------------------------------------------------
+       ADMIN GALLERY UPDATE
+    --------------------------------------------------- */
+
+    function refreshPhotos() {
+      console.log(
+        "Gallery update detected."
+      );
+
+      loadPhotos();
+    }
+
+    /* ---------------------------------------------------
+       ADMIN VIDEO UPDATE
+    --------------------------------------------------- */
+
     function refreshVideos() {
+      console.log(
+        "Video update detected."
+      );
+
       loadVideos();
     }
+
+    /* ---------------------------------------------------
+       REFRESH EVERYTHING
+    --------------------------------------------------- */
+
+    function refreshEverything() {
+      loadPhotos();
+
+      loadVideos();
+    }
+
+    window.addEventListener(
+      "gallery-updated",
+      refreshPhotos
+    );
 
     window.addEventListener(
       "videos-updated",
@@ -723,10 +876,15 @@ export default function Gallery() {
 
     window.addEventListener(
       "focus",
-      refreshVideos
+      refreshEverything
     );
 
     return () => {
+      window.removeEventListener(
+        "gallery-updated",
+        refreshPhotos
+      );
+
       window.removeEventListener(
         "videos-updated",
         refreshVideos
@@ -734,64 +892,96 @@ export default function Gallery() {
 
       window.removeEventListener(
         "focus",
-        refreshVideos
+        refreshEverything
       );
     };
   }, []);
 
-  /* =========================================================
-     COMBINE PHOTOS + DYNAMIC VIDEOS
-  ========================================================= */
-
-  const galleryItems = useMemo(() => {
-    return [
-      ...photoItems,
-      ...videos,
-    ];
-  }, [videos]);
-
-  /* =========================================================
+  /* =======================================================
      FILTER
-  ========================================================= */
+  ======================================================= */
 
   const filteredItems = useMemo(() => {
-    return galleryItems.filter((item) => {
-      const typeMatch = item.type === type;
+    const currentItems =
+      type === "photo"
+        ? photos
+        : videos;
 
-      const categoryMatch =
-        category === "All" ||
-        item.category === category;
+    return currentItems.filter(
+      (item) => {
+        const itemCategory =
+          String(
+            item.category || ""
+          )
+            .trim()
+            .toLowerCase();
 
-      return typeMatch && categoryMatch;
-    });
+        const selectedCategory =
+          String(
+            category
+          )
+            .trim()
+            .toLowerCase();
+
+        return (
+          category === "All" ||
+          itemCategory ===
+            selectedCategory
+        );
+      }
+    );
   }, [
-    galleryItems,
     type,
     category,
+    photos,
+    videos,
   ]);
 
-  /* =========================================================
-     CHANGE PHOTO / VIDEO
-  ========================================================= */
+  /* =======================================================
+     CHANGE TYPE
+  ======================================================= */
 
   function changeType(newType) {
     setType(newType);
+
     setCategory("All");
+
+    if (newType === "photo") {
+      loadPhotos();
+    }
 
     if (newType === "video") {
       loadVideos();
     }
   }
 
-  /* =========================================================
+  /* =======================================================
+     LOADING
+  ======================================================= */
+
+  const isLoading =
+    type === "photo"
+      ? loadingPhotos
+      : loadingVideos;
+
+  /* =======================================================
+     ERROR
+  ======================================================= */
+
+  const currentError =
+    type === "photo"
+      ? photoError
+      : "";
+
+  /* =======================================================
      UI
-  ========================================================= */
+  ======================================================= */
 
   return (
     <>
-      {/* =====================================================
+      {/* ===================================================
           GALLERY SECTION
-      ===================================================== */}
+      =================================================== */}
 
       <section className="bg-white py-16 lg:py-20">
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
@@ -813,9 +1003,10 @@ export default function Gallery() {
               </h2>
 
               <p className="mt-4 leading-8 text-gray-600">
-                Explore photographs and videos capturing
-                public programmes, constituency visits,
-                meetings and important events.
+                Explore photographs and videos
+                capturing public programmes,
+                constituency visits, meetings
+                and important events.
               </p>
 
             </div>
@@ -859,27 +1050,16 @@ export default function Gallery() {
           </div>
 
           {/* =================================================
-              CACHE MESSAGE
+              VIDEO CACHE MESSAGE
           ================================================= */}
 
           {type === "video" &&
-            usingCache && (
+            usingVideoCache && (
               <div className="mt-6 rounded-xl border border-yellow-200 bg-yellow-50 px-4 py-3 text-sm text-yellow-700">
-                Showing the latest saved video
-                information because the backend is
-                unavailable.
+                Showing saved video information
+                because the video backend is
+                temporarily unavailable.
               </div>
-            )}
-
-          {/* =================================================
-              LOADING MESSAGE
-          ================================================= */}
-
-          {type === "video" &&
-            loadingVideos && (
-              <p className="mt-5 text-sm text-gray-500">
-                Updating videos...
-              </p>
             )}
 
           {/* =================================================
@@ -888,303 +1068,408 @@ export default function Gallery() {
 
           <div className="mt-10 flex flex-wrap gap-3">
 
-            {categories.map((item) => (
-              <button
-                key={item}
-                type="button"
-                onClick={() =>
-                  setCategory(item)
-                }
-                className={`rounded-full border px-5 py-2 text-sm font-medium transition ${
-                  category === item
-                    ? "border-orange-600 bg-orange-600 text-white"
-                    : "border-slate-200 bg-white text-slate-600 hover:border-orange-500 hover:text-orange-600"
-                }`}
-              >
-                {item}
-              </button>
-            ))}
+            {categories.map(
+              (item) => (
+                <button
+                  key={item}
+                  type="button"
+                  onClick={() =>
+                    setCategory(item)
+                  }
+                  className={`rounded-full border px-5 py-2 text-sm font-medium transition ${
+                    category === item
+                      ? "border-orange-600 bg-orange-600 text-white"
+                      : "border-slate-200 bg-white text-slate-600 hover:border-orange-500 hover:text-orange-600"
+                  }`}
+                >
+                  {item}
+                </button>
+              )
+            )}
 
           </div>
+
+          {/* =================================================
+              LOADING
+          ================================================= */}
+
+          {isLoading && (
+            <div className="mt-12 flex min-h-[250px] items-center justify-center">
+
+              <div className="text-center">
+
+                <div className="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-4 border-slate-200 border-t-orange-600" />
+
+                <p className="text-sm text-gray-500">
+                  {type === "photo"
+                    ? "Loading gallery photos..."
+                    : "Loading videos..."}
+                </p>
+
+              </div>
+
+            </div>
+          )}
+
+          {/* =================================================
+              ERROR
+          ================================================= */}
+
+          {!isLoading &&
+            currentError && (
+              <div className="mt-10 rounded-2xl border border-yellow-200 bg-yellow-50 p-6">
+
+                <p className="text-yellow-700">
+                  {currentError}
+                </p>
+
+                <p className="mt-2 text-sm text-yellow-600">
+                  Existing gallery photos are
+                  still being displayed.
+                </p>
+
+                <button
+                  type="button"
+                  onClick={
+                    loadPhotos
+                  }
+                  className="mt-4 rounded-lg bg-orange-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-orange-700"
+                >
+                  Try Again
+                </button>
+
+              </div>
+            )}
+
+          {/* =================================================
+              PHOTO COUNT
+
+              Helpful for checking whether all images
+              are actually being returned.
+          ================================================= */}
+
+          {!isLoading &&
+            type === "photo" &&
+            !currentError && (
+              <div className="mt-8 text-sm text-gray-500">
+                Showing{" "}
+                <span className="font-semibold text-gray-800">
+                  {filteredItems.length}
+                </span>{" "}
+                photo
+                {filteredItems.length !==
+                1
+                  ? "s"
+                  : ""}
+                {category !==
+                  "All" &&
+                  ` in ${category}`}
+              </div>
+            )}
 
           {/* =================================================
               GALLERY GRID
           ================================================= */}
 
-          {filteredItems.length > 0 ? (
+          {!isLoading &&
+            !currentError &&
+            filteredItems.length >
+              0 && (
 
-            <div className="mt-12 grid grid-cols-2 gap-5 md:grid-cols-3 lg:grid-cols-4">
+              <div className="mt-6 grid grid-cols-2 gap-5 md:grid-cols-3 lg:grid-cols-4">
 
-              {filteredItems.map(
-                (item, index) => {
+                {filteredItems.map(
+                  (
+                    item,
+                    index
+                  ) => {
 
-                  /* -----------------------------------------
-                     CHECK VIDEO TYPES
-                  ----------------------------------------- */
+                    /* ---------------------------------------
+                       VIDEO CHECK
+                    --------------------------------------- */
 
-                  const video =
-                    item.type === "video";
+                    const video =
+                      item.type ===
+                      "video";
 
-                  const youtube =
-                    video &&
-                    isYoutube(
-                      item.videoUrl
-                    );
+                    const youtube =
+                      video &&
+                      isYoutube(
+                        item.videoUrl
+                      );
 
-                  const localVideo =
-                    video &&
-                    item.videoUrl &&
-                    !youtube;
+                    const localVideo =
+                      video &&
+                      item.videoUrl &&
+                      !youtube;
 
-                  const featured =
-                    index === 0;
+                    const featured =
+                      index === 0;
 
-                  /* -----------------------------------------
-                     THUMBNAIL
+                    /* ---------------------------------------
+                       THUMBNAIL
+                    --------------------------------------- */
 
-                     Priority:
-                     1. Admin uploaded thumbnail
-                     2. YouTube thumbnail
-                     3. Placeholder
-                  ----------------------------------------- */
+                    const thumbnail =
+                      item.thumbnailUrl ||
+                      (youtube
+                        ? youtubeThumbnail(
+                            item.videoUrl
+                          )
+                        : "");
 
-                  const thumbnail =
-                    item.thumbnailUrl ||
-                    (youtube
-                      ? youtubeThumbnail(
-                          item.videoUrl
-                        )
-                      : "");
+                    return (
+                      <article
+                        key={`${item.type}-${item.id}`}
+                        className={`group relative overflow-hidden rounded-3xl bg-black ${
+                          featured
+                            ? "md:col-span-2 md:row-span-2"
+                            : ""
+                        }`}
+                      >
 
-                  return (
-                    <article
-                      key={item.id}
-                      className={`relative overflow-hidden rounded-3xl bg-black ${
-                        featured
-                          ? "md:col-span-2 md:row-span-2"
-                          : ""
-                      }`}
-                    >
+                        {/* =================================
+                            LOCAL VIDEO
+                        ================================= */}
 
-                      {/* =================================================
-                          LOCAL UPLOADED VIDEO
-                      ================================================= */}
+                        {localVideo ? (
+                          <div className="bg-black">
 
-                      {localVideo ? (
-
-                        <div className="bg-black">
-
-                          <video
-                            key={
-                              item.videoUrl
-                            }
-                            src={
-                              item.videoUrl
-                            }
-                            controls
-                            playsInline
-                            preload="metadata"
-                            poster={
-                              thumbnail ||
-                              undefined
-                            }
-                            className={`block w-full bg-black object-contain ${
-                              featured
-                                ? "h-[300px] md:h-[520px]"
-                                : "h-[220px] md:h-[250px]"
-                            }`}
-                            onError={(
-                              event
-                            ) => {
-                              console.error(
-                                "VIDEO PLAY ERROR:",
-                                item.videoUrl,
+                            <video
+                              key={
+                                item.videoUrl
+                              }
+                              src={
+                                item.videoUrl
+                              }
+                              controls
+                              playsInline
+                              preload="metadata"
+                              poster={
+                                thumbnail ||
+                                undefined
+                              }
+                              className={`block w-full bg-black object-contain ${
+                                featured
+                                  ? "h-[300px] md:h-[520px]"
+                                  : "h-[220px] md:h-[250px]"
+                              }`}
+                              onError={(
                                 event
-                              );
-                            }}
-                          />
+                              ) => {
+                                console.error(
+                                  "VIDEO ERROR:",
+                                  item.videoUrl,
+                                  event
+                                );
+                              }}
+                            />
 
-                          {/* VIDEO DETAILS */}
+                            <div className="bg-slate-950 px-4 py-4">
 
-                          <div className="bg-slate-950 px-4 py-4">
-
-                            <p className="text-base font-semibold text-white">
-                              {item.title}
-                            </p>
-
-                            <p className="mt-1 text-sm text-white/60">
-                              {item.category}
-                            </p>
-
-                            {item.description && (
-                              <p className="mt-2 text-sm leading-6 text-white/70">
+                              <p className="text-base font-semibold text-white">
                                 {
-                                  item.description
+                                  item.title
                                 }
                               </p>
-                            )}
 
-                          </div>
+                              <p className="mt-1 text-sm text-white/60">
+                                {
+                                  item.category
+                                }
+                              </p>
 
-                        </div>
-
-                      ) : (
-
-                        <>
-                          {/* =================================================
-                              PHOTO / YOUTUBE THUMBNAIL
-                          ================================================= */}
-
-                          <img
-                            src={
-                              item.type ===
-                              "photo"
-                                ? item.image
-                                : thumbnail ||
-                                  "/gallery/placeholder.png"
-                            }
-                            alt={
-                              item.title
-                            }
-                            onClick={() => {
-
-                              /* PHOTO → LIGHTBOX */
-
-                              if (
-                                item.type ===
-                                "photo"
-                              ) {
-                                setSelectedImage(
-                                  item.image
-                                );
-                              }
-
-                              /* YOUTUBE → OPEN */
-
-                              if (
-                                youtube
-                              ) {
-                                window.open(
-                                  item.videoUrl,
-                                  "_blank",
-                                  "noopener,noreferrer"
-                                );
-                              }
-                            }}
-                            className={`w-full object-cover transition duration-700 hover:scale-105 ${
-                              item.type ===
-                              "photo"
-                                ? "cursor-pointer"
-                                : ""
-                            } ${
-                              featured
-                                ? "h-[300px] md:h-[520px]"
-                                : "h-[220px] md:h-[250px]"
-                            }`}
-                          />
-
-                          {/* =================================================
-                              PHOTO OVERLAY
-                          ================================================= */}
-
-                          {item.type ===
-                            "photo" && (
-
-                            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent opacity-0 transition duration-500 group-hover:opacity-100">
-
-                              <div className="absolute bottom-0 left-0 right-0 p-6">
-
-                                <p className="text-lg font-semibold text-white">
+                              {item.description && (
+                                <p className="mt-2 text-sm leading-6 text-white/70">
                                   {
-                                    item.title
+                                    item.description
                                   }
                                 </p>
-
-                                <p className="mt-1 text-sm text-white/70">
-                                  {
-                                    item.category
-                                  }
-                                </p>
-
-                              </div>
+                              )}
 
                             </div>
 
-                          )}
+                          </div>
+                        ) : (
+                          <>
+                            {/* =============================
+                                PHOTO / YOUTUBE IMAGE
+                            ============================== */}
 
-                          {/* =================================================
-                              YOUTUBE PLAY BUTTON
-                          ================================================= */}
-
-                          {youtube && (
-
-                            <button
-                              type="button"
-                              onClick={() =>
-                                window.open(
-                                  item.videoUrl,
-                                  "_blank",
-                                  "noopener,noreferrer"
-                                )
+                            <img
+                              src={
+                                item.type ===
+                                "photo"
+                                  ? item.image
+                                  : thumbnail ||
+                                    "/gallery/placeholder.png"
                               }
-                              className="absolute inset-0 flex items-center justify-center"
-                              aria-label={`Play ${item.title}`}
-                            >
+                              alt={
+                                item.title ||
+                                "Gallery item"
+                              }
+                              loading="lazy"
+                              onClick={() => {
 
-                              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-white/90 shadow-xl transition hover:scale-110">
+                                /* PHOTO */
 
-                                <Play
-                                  size={22}
-                                  className="ml-1 text-orange-600"
-                                  fill="currentColor"
-                                />
+                                if (
+                                  item.type ===
+                                  "photo"
+                                ) {
+                                  setSelectedImage(
+                                    item.image
+                                  );
+                                }
+
+                                /* YOUTUBE */
+
+                                if (
+                                  youtube
+                                ) {
+                                  window.open(
+                                    item.videoUrl,
+                                    "_blank",
+                                    "noopener,noreferrer"
+                                  );
+                                }
+                              }}
+                              onError={(
+                                event
+                              ) => {
+                                console.error(
+                                  "IMAGE LOAD ERROR:",
+                                  item.image
+                                );
+
+                                /*
+                                  Don't break the entire
+                                  gallery if one image fails.
+                                */
+
+                                event.currentTarget.src =
+                                  "/gallery/placeholder.png";
+                              }}
+                              className={`w-full object-cover transition duration-700 group-hover:scale-105 ${
+                                item.type ===
+                                "photo"
+                                  ? "cursor-pointer"
+                                  : ""
+                              } ${
+                                featured
+                                  ? "h-[300px] md:h-[520px]"
+                                  : "h-[220px] md:h-[250px]"
+                              }`}
+                            />
+
+                            {/* =============================
+                                PHOTO OVERLAY
+                            ============================== */}
+
+                            {item.type ===
+                              "photo" && (
+                              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent opacity-0 transition duration-500 group-hover:opacity-100">
+
+                                <div className="absolute bottom-0 left-0 right-0 p-6">
+
+                                  <p className="text-lg font-semibold text-white">
+                                    {
+                                      item.title
+                                    }
+                                  </p>
+
+                                  <p className="mt-1 text-sm text-white/70">
+                                    {
+                                      item.category
+                                    }
+                                  </p>
+
+                                  {item.caption && (
+                                    <p className="mt-2 text-sm text-white/70">
+                                      {
+                                        item.caption
+                                      }
+                                    </p>
+                                  )}
+
+                                </div>
 
                               </div>
+                            )}
 
-                            </button>
+                            {/* =============================
+                                YOUTUBE PLAY
+                            ============================== */}
 
-                          )}
+                            {youtube && (
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  window.open(
+                                    item.videoUrl,
+                                    "_blank",
+                                    "noopener,noreferrer"
+                                  )
+                                }
+                                className="absolute inset-0 flex items-center justify-center"
+                                aria-label={`Play ${item.title}`}
+                              >
 
-                        </>
+                                <div className="flex h-14 w-14 items-center justify-center rounded-full bg-white/90 shadow-xl transition hover:scale-110">
 
-                      )}
+                                  <Play
+                                    size={22}
+                                    className="ml-1 text-orange-600"
+                                    fill="currentColor"
+                                  />
 
-                    </article>
-                  );
-                }
-              )}
+                                </div>
 
-            </div>
+                              </button>
+                            )}
 
-          ) : (
+                          </>
+                        )}
 
-            /* =================================================
-               NO RESULTS
-            ================================================= */
+                      </article>
+                    );
+                  }
+                )}
 
-            <div className="mt-12 rounded-3xl border border-slate-100 bg-slate-50 py-20 text-center">
+              </div>
+            )}
 
-              <p className="text-gray-500">
-                No{" "}
-                {type === "photo"
-                  ? "photos"
-                  : "videos"}{" "}
-                found in this category.
-              </p>
+          {/* =================================================
+              NO RESULTS
+          ================================================= */}
 
-            </div>
+          {!isLoading &&
+            !currentError &&
+            filteredItems.length ===
+              0 && (
+              <div className="mt-12 rounded-3xl border border-slate-100 bg-slate-50 py-20 text-center">
 
-          )}
+                <p className="text-gray-500">
+                  No{" "}
+                  {type ===
+                  "photo"
+                    ? "photos"
+                    : "videos"}{" "}
+                  found in this
+                  category.
+                </p>
+
+              </div>
+            )}
 
         </div>
       </section>
 
-      {/* =====================================================
+      {/* ===================================================
           PHOTO LIGHTBOX
-      ===================================================== */}
+      =================================================== */}
 
       {selectedImage && (
-
         <div
           className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-5"
           onClick={() =>
@@ -1192,7 +1477,7 @@ export default function Gallery() {
           }
         >
 
-          {/* CLOSE BUTTON */}
+          {/* CLOSE */}
 
           <button
             type="button"
@@ -1205,7 +1490,7 @@ export default function Gallery() {
             <X size={24} />
           </button>
 
-          {/* LARGE IMAGE */}
+          {/* IMAGE */}
 
           <img
             src={selectedImage}
@@ -1217,10 +1502,7 @@ export default function Gallery() {
           />
 
         </div>
-
       )}
-
     </>
   );
 }
-

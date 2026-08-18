@@ -30,7 +30,7 @@
   },
   "home": {
     "heroTitle": "LAXMAN KUMAR",
-    "heroSubtitle": "Building a Better Telangana",
+    "heroSubtitle": "Building a Better Telanganaa",
     "heroDescription": "Committed to transparent governance, inclusive growth, stronger infrastructure, quality education and public welfare.",
     "heroImage": "/leader.png",
     "aboutHeading": "Dedicated to the Progress of Every Citizen",
@@ -126,25 +126,25 @@
         "title": "Minister Calls for Reclaiming Encroached Government Land for the Poor",
         "description": "Adluri Laxman Kumar directed officials to identify illegally occupied government land and redistribute eligible land to poor families while addressing a public awareness programme in Dharmaram Mandal."
       },
-      "items": [
+      "news": [
         {
-          "image": "/news/news2.png",
-          "date": "1 March 2026",
-          "title": "Annadanam Service Inaugurated at Dharmapuri Temple"
+          "image": "",
+          "date": "",
+          "title": ""
         },
         {
-          "image": "/news/news3.png",
-          "date": "14 February 2026",
-          "title": "Congress Records Complete Municipal Sweep in Dharmapuri"
+          "image": "",
+          "date": "",
+          "title": ""
         }
       ]
     },
     "contactCTA": {
       "label": "Get In Touch",
-      "headingLine1": "Together, Let's Build",
-      "headingLine2": "A Better Tomorrow",
+      "heading": "",
       "description": "Your ideas, suggestions and concerns matter. Stay connected and work together towards stronger communities, better development and transparent governance.",
       "buttonText": "Contact Office"
-    }
+    },
+    "aboutImage": ""
   }
 }

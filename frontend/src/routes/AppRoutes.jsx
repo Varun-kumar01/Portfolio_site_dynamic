@@ -49,6 +49,10 @@ import EditContact from "../pages/EditContact";
 // POLITICAL CAREER ADMIN
 import AdminPoliticalCareer from "../pages/AdminPoliticalCareer";
 
+//Gallery
+// GALLERY ADMIN
+import AdminGallery from "../pages/AdminGallery";
+
 // NEWS ADMIN
 import AdminNews from "../pages/AdminNews";
 
@@ -224,6 +228,15 @@ export default function AppRoutes() {
         path="/admin/articles"
         element={<AdminArticles />}
       />
+
+      {/* =====================================================
+    GALLERY ADMIN
+===================================================== */}
+
+<Route
+  path="/admin/gallery"
+  element={<AdminGallery />}
+/>
 
 
       {/* =====================================================
