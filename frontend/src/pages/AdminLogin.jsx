@@ -25,7 +25,7 @@ const AdminLogin = () => {
       setLoading(true);
 
       const response = await fetch(
-        "http://localhost:5000/api/admin/login",
+        "http://localhost:5000/api/secure/admin/login",
         {
           method: "POST",
           headers: {
@@ -57,7 +57,7 @@ const AdminLogin = () => {
       localStorage.setItem("adminLoggedIn", "true");
 
       // Go to admin dashboard
-      navigate("/secure/admin", { replace: true });
+      navigate("/secure/admin/dashboard", { replace: true });
     } catch (error) {
       console.error("LOGIN ERROR:", error);
 

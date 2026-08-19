@@ -166,7 +166,7 @@ const EditAbout = () => {
           <div className="flex gap-3">
 
             <button
-              onClick={() => navigate("/admin/about")}
+              onClick={() => navigate("/secure/admin/about")}
               className="flex items-center gap-2 border border-slate-300 bg-white px-5 py-3 rounded-xl hover:bg-slate-100 transition"
             >
               <ArrowLeft size={18} />
@@ -174,7 +174,7 @@ const EditAbout = () => {
             </button>
 
             <button
-              onClick={() => navigate("/admin")}
+              onClick={() => navigate("/secure/admin/dashboard")}
               className="flex items-center gap-2 border border-slate-300 bg-white px-5 py-3 rounded-xl hover:bg-slate-100 transition"
             >
               <LayoutDashboard size={18} />
@@ -274,7 +274,7 @@ const EditAbout = () => {
 
             <button
               type="button"
-              onClick={() => navigate("/admin/about")}
+              onClick={() => navigate("/secure/admin/about")}
               className="px-6 py-3 border border-slate-300 rounded-xl hover:bg-slate-100 transition"
             >
               Cancel

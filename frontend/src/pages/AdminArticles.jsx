@@ -445,7 +445,7 @@ export default function AdminArticles() {
           <button
             type="button"
             onClick={() =>
-              navigate("/admin")
+              navigate("/secure/admin/dashboard")
             }
             className="rounded-lg border border-gray-300 bg-white px-5 py-3 text-sm font-semibold text-gray-700 hover:bg-gray-50"
           >

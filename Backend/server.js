@@ -1,18 +1,19 @@
+require("dotenv").config();
+
 const express = require("express");
-const  pool  = require("./config/db");
+const pool = require("./config/db");
 const cors = require("cors");
 const multer = require("multer");
 const fs = require("fs");
 const path = require("path");
-const dotenv = require("dotenv");
-
-dotenv.config();
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
 
 const app = express();
 
-const PORT = 5000;
-
-
+const PORT = process.env.PORT || 5000;
+const authRoutes = require("./routes/authRoutes");
+const contactRoutes = require("./routes/ContactRoutes");
 // =====================================
 // MIDDLEWARE
 // =====================================
@@ -20,12 +21,56 @@ const PORT = 5000;
 app.use(cors());
 
 app.use(express.json());
+app.use("/api/auth", authRoutes);
+app.use("/api/contacts", contactRoutes);
 
 app.use(
   express.urlencoded({
     extended: true,
   })
 );
+// =====================================
+// ADMIN JWT AUTHENTICATION
+// =====================================
+
+const authenticateAdmin = (req, res, next) => {
+  try {
+    const authHeader = req.headers.authorization;
+
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication required",
+      });
+    }
+
+    const token = authHeader.split(" ")[1];
+
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_SECRET
+    );
+
+    if (decoded.role !== "admin") {
+      return res.status(403).json({
+        success: false,
+        message: "Admin access required",
+      });
+    }
+
+    req.admin = decoded;
+
+    next();
+
+  } catch (error) {
+    console.error("JWT AUTH ERROR:", error.message);
+
+    return res.status(401).json({
+      success: false,
+      message: "Invalid or expired token",
+    });
+  }
+};
 
 
 // =====================================
@@ -387,8 +432,126 @@ const getUploadedImage = (
   return existingImage;
 
 };
+// =====================================
+// ADMIN LOGIN
+// =====================================
 
+app.post("/api/secure/admin/login", async (req, res) => {
+  try {
+    console.log("========== ADMIN LOGIN REQUEST ==========");
 
+    const username = String(
+      req.body.username || ""
+    ).trim();
+
+    const password = String(
+      req.body.password || ""
+    );
+
+    if (!username || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "Username and password are required",
+      });
+    }
+
+    // Find admin in PostgreSQL
+    const result = await pool.query(
+      `
+      SELECT
+        id,
+        name,
+        email,
+        password_hash,
+        role,
+        is_active
+      FROM admins
+      WHERE name = $1
+      LIMIT 1
+      `,
+      [username]
+    );
+
+    if (result.rows.length === 0) {
+      console.log("LOGIN FAILED: Admin not found");
+
+      return res.status(401).json({
+        success: false,
+        message: "Invalid username or password",
+      });
+    }
+
+    const admin = result.rows[0];
+
+    // Check whether account is active
+    if (!admin.is_active) {
+      return res.status(403).json({
+        success: false,
+        message: "Admin account is inactive",
+      });
+    }
+
+    // Compare entered password with bcrypt hash
+    const passwordValid = await bcrypt.compare(
+      password,
+      admin.password_hash
+    );
+
+    if (!passwordValid) {
+      console.log("LOGIN FAILED: Invalid password");
+
+      return res.status(401).json({
+        success: false,
+        message: "Invalid username or password",
+      });
+    }
+
+    // Make sure JWT secret exists
+    if (!process.env.JWT_SECRET) {
+      console.error("JWT_SECRET is missing");
+
+      return res.status(500).json({
+        success: false,
+        message: "JWT_SECRET is not configured",
+      });
+    }
+
+    // Create JWT
+    const token = jwt.sign(
+      {
+        id: admin.id,
+        name: admin.name,
+        role: admin.role,
+      },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "1d",
+      }
+    );
+
+    console.log("LOGIN SUCCESSFUL");
+
+    return res.status(200).json({
+      success: true,
+      message: "Login successful",
+      token,
+      admin: {
+        id: admin.id,
+        name: admin.name,
+        email: admin.email,
+        role: admin.role,
+      },
+    });
+
+  } catch (error) {
+    console.error("ADMIN LOGIN ERROR:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Unable to login",
+    });
+  }
+});
 // =====================================
 // TEST ROUTE
 // =====================================
@@ -525,6 +688,7 @@ app.get(
 
 app.put(
   "/api/contacts/details",
+  authenticateAdmin,
   (req, res) => {
 
     try {
@@ -666,6 +830,7 @@ app.put(
 app.put(
 
   "/api/content/home",
+  authenticateAdmin,
 
   upload.fields([
 
@@ -1181,6 +1346,7 @@ app.put(
 
 app.put(
   "/api/content/contact",
+  authenticateAdmin,
   (req, res) => {
 
     try {
@@ -1263,7 +1429,7 @@ app.put(
 );
 
 
-//admin political_journey
+//secure/admin political_journey
 app.get(
   "/api/political-career",
   async (
@@ -1318,6 +1484,7 @@ app.get(
 
 app.post(
   "/api/political-career",
+  authenticateAdmin,
   upload.single("image"),
   async (
     req,
@@ -1453,6 +1620,7 @@ app.post(
 
 app.put(
   "/api/political-career/:id",
+  authenticateAdmin,
   upload.single("image"),
   async (
     req,
@@ -1818,6 +1986,7 @@ app.get(
 
 app.post(
   "/api/videos",
+  authenticateAdmin,
   videoUpload.single(
     "video"
   ),
@@ -1988,6 +2157,7 @@ app.post(
 
 app.put(
   "/api/videos/:id",
+  authenticateAdmin,
   videoUpload.single(
     "video"
   ),
@@ -2214,6 +2384,7 @@ app.put(
 
 app.delete(
   "/api/videos/:id",
+  authenticateAdmin,
   async (
     req,
     res
@@ -2423,6 +2594,7 @@ app.get(
 );
 app.post(
   "/api/news",
+  authenticateAdmin,
   upload.single("image"),
   async (
     req,
@@ -2556,6 +2728,7 @@ app.post(
 );
 app.put(
   "/api/news/:id",
+  authenticateAdmin,
   upload.single("image"),
   async (
     req,
@@ -2721,6 +2894,7 @@ app.put(
 );
 app.delete(
   "/api/news/:id",
+  authenticateAdmin,
   async (
     req,
     res
@@ -2856,6 +3030,7 @@ app.get("/api/gallery", async (req, res) => {
 // ADD NEW GALLERY IMAGE
 app.post(
   "/api/gallery",
+  authenticateAdmin,
   upload.single("image"),
   async (req, res) => {
     try {
@@ -2946,6 +3121,7 @@ app.post(
 // UPDATE GALLERY IMAGE
 app.put(
   "/api/gallery/:id",
+  authenticateAdmin,
   upload.single("image"),
   async (req, res) => {
     try {
@@ -3076,6 +3252,7 @@ app.put(
 // DELETE GALLERY IMAGE
 app.delete(
   "/api/gallery/:id",
+  authenticateAdmin,
   async (req, res) => {
     try {
       const { id } = req.params;
@@ -3139,18 +3316,51 @@ app.delete(
     }
   }
 );
+// =====================================
+// TEST ENVIRONMENT
+// =====================================
+
+app.get("/api/test-env", (req, res) => {
+  res.json({
+    success: true,
+    adminUsername:
+      process.env.ADMIN_USERNAME || "NOT FOUND",
+
+    adminPasswordConfigured:
+      !!process.env.ADMIN_PASSWORD,
+
+    jwtSecretConfigured:
+      !!process.env.JWT_SECRET,
+
+    dbHost:
+      process.env.DB_HOST || "NOT FOUND",
+
+    dbName:
+      process.env.DB_NAME || "NOT FOUND",
+  });
+});
 
 // =====================================
 // START SERVER
 // =====================================
 
-app.listen(
-  PORT,
-  () => {
+app.listen(PORT, () => {
+  console.log(
+    `Server running on http://localhost:${PORT}`
+  );
 
-    console.log(
-      `Server running on http://localhost:${PORT}`
-    );
+  console.log(
+    "ADMIN_USERNAME:",
+    process.env.ADMIN_USERNAME || "NOT FOUND"
+  );
 
-  }
-);
+  console.log(
+    "ADMIN_PASSWORD configured:",
+    process.env.ADMIN_PASSWORD ? "YES" : "NO"
+  );
+
+  console.log(
+    "JWT_SECRET configured:",
+    process.env.JWT_SECRET ? "YES" : "NO"
+  );
+});

@@ -195,7 +195,7 @@ const EditBiography = () => {
             <button
               type="button"
               onClick={() =>
-                navigate("/admin/biography")
+                navigate("/secure/admin/biography")
               }
               className="flex items-center gap-2 border border-slate-300 bg-white px-5 py-3 rounded-xl hover:bg-slate-100 transition"
             >
@@ -209,7 +209,7 @@ const EditBiography = () => {
             <button
               type="button"
               onClick={() =>
-                navigate("/admin")
+                navigate("/secure/admin/dashboard")
               }
               className="flex items-center gap-2 border border-slate-300 bg-white px-5 py-3 rounded-xl hover:bg-slate-100 transition"
             >
@@ -280,7 +280,7 @@ const EditBiography = () => {
             <button
               type="button"
               onClick={() =>
-                navigate("/admin/biography")
+                navigate("/secure/admin/biography")
               }
               className="border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 px-6 py-3 rounded-xl font-medium transition"
             >

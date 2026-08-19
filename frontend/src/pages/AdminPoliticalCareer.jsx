@@ -1096,7 +1096,7 @@ export default function AdminPoliticalCareer() {
           <button
             type="button"
             onClick={() =>
-              navigate("/admin")
+              navigate("/secure/admin/dashboard")
             }
             className="
               rounded-lg

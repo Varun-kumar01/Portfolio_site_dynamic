@@ -1,4 +1,4 @@
-const pool = require("../db");
+const pool = require("../config/db");
 
 // Get contact details
 const getContactDetails = async (req, res) => {

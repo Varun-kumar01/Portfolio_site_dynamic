@@ -986,7 +986,7 @@ const EditHome = () => {
           <button
             type="button"
             onClick={() =>
-              navigate("/admin")
+              navigate("/secure/admin/dashboard")
             }
             className="flex items-center gap-2 border border-slate-300 bg-white px-5 py-3 rounded-xl hover:bg-slate-100 transition"
           >
@@ -1585,7 +1585,7 @@ const EditHome = () => {
             <button
               type="button"
               onClick={() =>
-                navigate("/admin")
+                navigate("/secure/admin/dashboard")
               }
               className="px-6 py-3 border border-slate-300 bg-white rounded-xl hover:bg-slate-100 transition"
             >

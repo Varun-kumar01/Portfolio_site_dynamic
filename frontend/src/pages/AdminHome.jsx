@@ -491,7 +491,7 @@ const AdminHome = () => {
 
           <button
             onClick={() =>
-              navigate("/admin")
+              navigate("/secure/admin/dashboard")
             }
             className="
               flex
@@ -716,7 +716,7 @@ const AdminHome = () => {
 
             <button
               onClick={() =>
-                navigate("/admin")
+                navigate("/secure/admin/dashboard")
               }
               className="
                 flex

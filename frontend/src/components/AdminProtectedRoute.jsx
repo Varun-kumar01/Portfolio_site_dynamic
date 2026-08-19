@@ -1,11 +1,13 @@
 import { Navigate, Outlet } from "react-router-dom";
 
-export default function ProtectedRoute() {
+const AdminProtectedRoute = () => {
   const token = localStorage.getItem("adminToken");
 
   if (!token) {
-    return <Navigate to="/secure/admin-login" replace />;
+    return <Navigate to="/secure/admin/login" replace />;
   }
 
   return <Outlet />;
-}
+};
+
+export default AdminProtectedRoute;

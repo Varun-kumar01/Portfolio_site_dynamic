@@ -28,7 +28,7 @@ const AdminAbout = () => {
           </div>
 
           <button
-            onClick={() => navigate("/admin")}
+            onClick={() => navigate("/secure/admin/dashboard")}
             className="flex items-center gap-2 border border-slate-300 bg-white px-5 py-3 rounded-xl hover:bg-slate-50 transition"
           >
             <ArrowLeft size={18} />
@@ -66,7 +66,7 @@ const AdminAbout = () => {
 
 
           <button
-            onClick={() => navigate("/admin/about/edit")}
+            onClick={() => navigate("/secure/admin/about/edit")}
             className="mt-8 flex items-center gap-2 bg-green-700 hover:bg-green-800 text-white px-6 py-3 rounded-xl transition"
           >
 

@@ -345,7 +345,7 @@ const EditContact = () => {
 
           <button
             type="button"
-            onClick={() => navigate("/admin")}
+            onClick={() => navigate("/secure/admin/dashboard")}
             className="flex items-center gap-2 border border-slate-300 bg-white hover:bg-slate-50 px-5 py-3 rounded-xl transition"
           >
 

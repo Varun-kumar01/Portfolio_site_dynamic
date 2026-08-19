@@ -157,7 +157,7 @@ const EditDevelopment = () => {
           <button
             type="button"
             onClick={() =>
-              navigate("/admin/development")
+              navigate("/secure/admin/development")
             }
             className="
               border

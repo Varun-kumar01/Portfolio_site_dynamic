@@ -29,6 +29,17 @@ const Dashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   // ============================================================
+  // LOGOUT
+  // ============================================================
+
+  const handleLogout = () => {
+    localStorage.removeItem("adminToken");
+    localStorage.removeItem("admin");
+
+    navigate("/secure/admin/login", { replace: true });
+  };
+
+  // ============================================================
   // SIDEBAR MENU
   // ============================================================
 
@@ -39,7 +50,7 @@ const Dashboard = () => {
         {
           name: "Dashboard",
           icon: LayoutDashboard,
-          path: "/admin",
+          path: "/secure/admin/dashboard",
         },
       ],
     },
@@ -50,27 +61,27 @@ const Dashboard = () => {
         {
           name: "Home",
           icon: Home,
-          path: "/admin/home",
+          path: "/secure/admin/home",
         },
         {
           name: "About",
           icon: User,
-          path: "/admin/about",
+          path: "/secure/admin/about",
         },
         {
           name: "Biography",
           icon: BookOpen,
-          path: "/admin/biography",
+          path: "/secure/admin/biography",
         },
         {
           name: "Political Career",
           icon: Landmark,
-          path: "/admin/political-career",
+          path: "/secure/admin/political-career",
         },
         {
           name: "Development",
           icon: Building2,
-          path: "/admin/development",
+          path: "/secure/admin/development",
         },
       ],
     },
@@ -81,22 +92,22 @@ const Dashboard = () => {
         {
           name: "News",
           icon: Newspaper,
-          path: "/admin/news",
+          path: "/secure/admin/news",
         },
         {
           name: "Articles",
           icon: FileText,
-          path: "/admin/articles",
+          path: "/secure/admin/articles",
         },
         {
           name: "Gallery",
           icon: Image,
-          path: "/admin/gallery",
+          path: "/secure/admin/gallery",
         },
         {
           name: "Videos",
           icon: Video,
-          path: "/admin/videos",
+          path: "/secure/admin/videos",
         },
       ],
     },
@@ -107,12 +118,12 @@ const Dashboard = () => {
         {
           name: "Contact",
           icon: Phone,
-          path: "/admin/contact",
+          path: "/secure/admin/contact",
         },
         {
           name: "Settings",
           icon: Settings,
-          path: "/admin/settings",
+          path: "/secure/admin/settings",
         },
       ],
     },
@@ -177,10 +188,7 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen bg-gray-50">
 
-      {/* ========================================================= */}
       {/* MOBILE OVERLAY */}
-      {/* ========================================================= */}
-
       {sidebarOpen && (
         <div
           className="fixed inset-0 bg-black/40 z-40 lg:hidden"
@@ -262,7 +270,6 @@ const Dashboard = () => {
                   const Icon = item.icon;
 
                   return (
-
                     <button
                       key={item.name}
                       onClick={() => {
@@ -292,7 +299,6 @@ const Dashboard = () => {
                       </span>
 
                     </button>
-
                   );
 
                 })}
@@ -310,7 +316,7 @@ const Dashboard = () => {
         <div className="p-4 border-t border-gray-200">
 
           <button
-            onClick={() => navigate("/admin/login")}
+            onClick={handleLogout}
             className="
               w-full
               flex
@@ -324,7 +330,6 @@ const Dashboard = () => {
               transition
             "
           >
-
             <LogOut size={19} />
 
             <span>
@@ -343,9 +348,7 @@ const Dashboard = () => {
 
       <div className="lg:ml-72">
 
-        {/* ======================================================= */}
         {/* TOP HEADER */}
-        {/* ======================================================= */}
 
         <header className="h-20 bg-white border-b border-gray-200 flex items-center justify-between px-5 sm:px-8">
 
@@ -428,9 +431,7 @@ const Dashboard = () => {
 
           </div>
 
-          {/* ===================================================== */}
           {/* STATISTICS */}
-          {/* ===================================================== */}
 
           <div
             className="
@@ -448,7 +449,6 @@ const Dashboard = () => {
               const Icon = item.icon;
 
               return (
-
                 <div
                   key={item.title}
                   className="
@@ -498,7 +498,6 @@ const Dashboard = () => {
                   </div>
 
                 </div>
-
               );
 
             })}
@@ -523,8 +522,6 @@ const Dashboard = () => {
 
             </div>
 
-            {/* CHANGED lg:grid-cols-4 TO xl:grid-cols-5 */}
-
             <div
               className="
                 grid
@@ -539,7 +536,7 @@ const Dashboard = () => {
               {/* ADD NEWS */}
 
               <button
-                onClick={() => navigate("/admin/news")}
+                onClick={() => navigate("/secure/admin/news")}
                 className="
                   bg-white
                   border
@@ -553,19 +550,7 @@ const Dashboard = () => {
                 "
               >
 
-                <div
-                  className="
-                    w-11
-                    h-11
-                    rounded-xl
-                    bg-green-50
-                    text-green-700
-                    flex
-                    items-center
-                    justify-center
-                    mb-4
-                  "
-                >
+                <div className="w-11 h-11 rounded-xl bg-green-50 text-green-700 flex items-center justify-center mb-4">
                   <Plus size={22} />
                 </div>
 
@@ -582,7 +567,7 @@ const Dashboard = () => {
               {/* GALLERY */}
 
               <button
-                onClick={() => navigate("/admin/gallery")}
+                onClick={() => navigate("/secure/admin/gallery")}
                 className="
                   bg-white
                   border
@@ -596,19 +581,7 @@ const Dashboard = () => {
                 "
               >
 
-                <div
-                  className="
-                    w-11
-                    h-11
-                    rounded-xl
-                    bg-blue-50
-                    text-blue-700
-                    flex
-                    items-center
-                    justify-center
-                    mb-4
-                  "
-                >
+                <div className="w-11 h-11 rounded-xl bg-blue-50 text-blue-700 flex items-center justify-center mb-4">
                   <Image size={22} />
                 </div>
 
@@ -622,10 +595,10 @@ const Dashboard = () => {
 
               </button>
 
-              {/* ARTICLE */}
+              {/* ARTICLES */}
 
               <button
-                onClick={() => navigate("/admin/articles")}
+                onClick={() => navigate("/secure/admin/articles")}
                 className="
                   bg-white
                   border
@@ -639,19 +612,7 @@ const Dashboard = () => {
                 "
               >
 
-                <div
-                  className="
-                    w-11
-                    h-11
-                    rounded-xl
-                    bg-yellow-50
-                    text-yellow-700
-                    flex
-                    items-center
-                    justify-center
-                    mb-4
-                  "
-                >
+                <div className="w-11 h-11 rounded-xl bg-yellow-50 text-yellow-700 flex items-center justify-center mb-4">
                   <FileText size={22} />
                 </div>
 
@@ -665,10 +626,10 @@ const Dashboard = () => {
 
               </button>
 
-              {/* VIDEO */}
+              {/* VIDEOS */}
 
               <button
-                onClick={() => navigate("/admin/videos")}
+                onClick={() => navigate("/secure/admin/videos")}
                 className="
                   bg-white
                   border
@@ -682,19 +643,7 @@ const Dashboard = () => {
                 "
               >
 
-                <div
-                  className="
-                    w-11
-                    h-11
-                    rounded-xl
-                    bg-red-50
-                    text-red-700
-                    flex
-                    items-center
-                    justify-center
-                    mb-4
-                  "
-                >
+                <div className="w-11 h-11 rounded-xl bg-red-50 text-red-700 flex items-center justify-center mb-4">
                   <Video size={22} />
                 </div>
 
@@ -708,12 +657,10 @@ const Dashboard = () => {
 
               </button>
 
-              {/* ================================================= */}
-              {/* EDIT CONTACT - NEW */}
-              {/* ================================================= */}
+              {/* CONTACT */}
 
               <button
-                onClick={() => navigate("/admin/contact")}
+                onClick={() => navigate("/secure/admin/contact")}
                 className="
                   bg-white
                   border
@@ -727,19 +674,7 @@ const Dashboard = () => {
                 "
               >
 
-                <div
-                  className="
-                    w-11
-                    h-11
-                    rounded-xl
-                    bg-green-50
-                    text-green-700
-                    flex
-                    items-center
-                    justify-center
-                    mb-4
-                  "
-                >
+                <div className="w-11 h-11 rounded-xl bg-green-50 text-green-700 flex items-center justify-center mb-4">
                   <Phone size={22} />
                 </div>
 
@@ -761,29 +696,9 @@ const Dashboard = () => {
           {/* RECENT UPDATES */}
           {/* ===================================================== */}
 
-          <div
-            className="
-              bg-white
-              border
-              border-gray-200
-              rounded-2xl
-              overflow-hidden
-            "
-          >
+          <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden">
 
-            <div
-              className="
-                p-6
-                border-b
-                border-gray-200
-                flex
-                flex-col
-                sm:flex-row
-                sm:items-center
-                sm:justify-between
-                gap-3
-              "
-            >
+            <div className="p-6 border-b border-gray-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
 
               <div>
 
@@ -798,13 +713,8 @@ const Dashboard = () => {
               </div>
 
               <button
-                onClick={() => navigate("/admin/news")}
-                className="
-                  text-sm
-                  font-semibold
-                  text-green-700
-                  hover:text-green-800
-                "
+                onClick={() => navigate("/secure/admin/news")}
+                className="text-sm font-semibold text-green-700 hover:text-green-800"
               >
                 View All
               </button>
@@ -853,27 +763,21 @@ const Dashboard = () => {
                     >
 
                       <td className="px-6 py-4">
-
                         <p className="font-medium text-gray-900">
                           {item.title}
                         </p>
-
                       </td>
 
                       <td className="px-6 py-4">
-
                         <span className="text-sm text-gray-600">
                           {item.type}
                         </span>
-
                       </td>
 
                       <td className="px-6 py-4">
-
                         <span className="text-sm text-gray-600">
                           {item.date}
                         </span>
-
                       </td>
 
                       <td className="px-6 py-4">
@@ -903,37 +807,21 @@ const Dashboard = () => {
                         <div className="flex justify-end gap-2">
 
                           <button
-                            className="
-                              p-2
-                              rounded-lg
-                              text-gray-500
-                              hover:bg-gray-100
-                              hover:text-gray-900
-                            "
+                            className="p-2 rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-900"
                             title="View"
                           >
                             <Eye size={17} />
                           </button>
 
                           <button
-                            className="
-                              p-2
-                              rounded-lg
-                              text-blue-600
-                              hover:bg-blue-50
-                            "
+                            className="p-2 rounded-lg text-blue-600 hover:bg-blue-50"
                             title="Edit"
                           >
                             <Edit size={17} />
                           </button>
 
                           <button
-                            className="
-                              p-2
-                              rounded-lg
-                              text-red-600
-                              hover:bg-red-50
-                            "
+                            className="p-2 rounded-lg text-red-600 hover:bg-red-50"
                             title="Delete"
                           >
                             <Trash2 size={17} />

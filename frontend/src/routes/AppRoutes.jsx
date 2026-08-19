@@ -1,6 +1,7 @@
 import { Routes, Route } from "react-router-dom";
 
 import MainLayout from "../layouts/MainLayout";
+import AdminProtectedRoute from "../components/AdminProtectedRoute";
 
 // =====================================================
 // PUBLIC PAGES
@@ -49,7 +50,6 @@ import EditContact from "../pages/EditContact";
 // POLITICAL CAREER ADMIN
 import AdminPoliticalCareer from "../pages/AdminPoliticalCareer";
 
-//Gallery
 // GALLERY ADMIN
 import AdminGallery from "../pages/AdminGallery";
 
@@ -121,142 +121,151 @@ export default function AppRoutes() {
 
 
       {/* =====================================================
-          ADMIN LOGIN
+          ADMIN LOGIN - PUBLIC
       ===================================================== */}
 
       <Route
-        path="/admin-login"
+        path="/secure/admin/login"
         element={<AdminLogin />}
       />
 
 
       {/* =====================================================
-          ADMIN DASHBOARD
+          PROTECTED ADMIN ROUTES
       ===================================================== */}
 
-      <Route
-        path="/admin"
-        element={<Dashboard />}
-      />
+      <Route element={<AdminProtectedRoute />}>
+
+        {/* =====================================================
+            DASHBOARD
+        ===================================================== */}
+
+        <Route
+          path="/secure/admin/dashboard"
+          element={<Dashboard />}
+        />
 
 
-      {/* =====================================================
-          HOME ADMIN
-      ===================================================== */}
+        {/* =====================================================
+            HOME ADMIN
+        ===================================================== */}
 
-      <Route
-        path="/admin/home"
-        element={<EditHome />}
-      />
+        <Route
+          path="/secure/admin/home"
+          element={<EditHome />}
+        />
 
-      <Route
-        path="/admin/home/edit"
-        element={<EditHome />}
-      />
-
-
-      {/* =====================================================
-          ABOUT ADMIN
-      ===================================================== */}
-
-      <Route
-        path="/admin/about"
-        element={<AdminAbout />}
-      />
-
-      <Route
-        path="/admin/about/edit"
-        element={<EditAbout />}
-      />
+        <Route
+          path="/secure/admin/home/edit"
+          element={<EditHome />}
+        />
 
 
-      {/* =====================================================
-          BIOGRAPHY ADMIN
-      ===================================================== */}
+        {/* =====================================================
+            ABOUT ADMIN
+        ===================================================== */}
 
-      <Route
-        path="/admin/biography"
-        element={<AdminBiography />}
-      />
+        <Route
+          path="/secure/admin/about"
+          element={<AdminAbout />}
+        />
 
-      <Route
-        path="/admin/biography/edit"
-        element={<EditBiography />}
-      />
-
-
-      {/* =====================================================
-          DEVELOPMENT ADMIN
-      ===================================================== */}
-
-      <Route
-        path="/admin/development"
-        element={<AdminDevelopment />}
-      />
-
-      <Route
-        path="/admin/development/edit"
-        element={<EditDevelopment />}
-      />
+        <Route
+          path="/secure/admin/about/edit"
+          element={<EditAbout />}
+        />
 
 
-      {/* =====================================================
-          POLITICAL CAREER ADMIN
-      ===================================================== */}
+        {/* =====================================================
+            BIOGRAPHY ADMIN
+        ===================================================== */}
 
-      <Route
-        path="/admin/political-career"
-        element={<AdminPoliticalCareer />}
-      />
+        <Route
+          path="/secure/admin/biography"
+          element={<AdminBiography />}
+        />
 
-
-      {/* =====================================================
-          NEWS ADMIN
-      ===================================================== */}
-
-      <Route
-        path="/admin/news"
-        element={<AdminNews />}
-      />
+        <Route
+          path="/secure/admin/biography/edit"
+          element={<EditBiography />}
+        />
 
 
-      {/* =====================================================
-          ARTICLES ADMIN
-      ===================================================== */}
+        {/* =====================================================
+            DEVELOPMENT ADMIN
+        ===================================================== */}
 
-      <Route
-        path="/admin/articles"
-        element={<AdminArticles />}
-      />
+        <Route
+          path="/secure/admin/development"
+          element={<AdminDevelopment />}
+        />
 
-      {/* =====================================================
-    GALLERY ADMIN
-===================================================== */}
-
-<Route
-  path="/admin/gallery"
-  element={<AdminGallery />}
-/>
+        <Route
+          path="/secure/admin/development/edit"
+          element={<EditDevelopment />}
+        />
 
 
-      {/* =====================================================
-          VIDEOS ADMIN
-      ===================================================== */}
+        {/* =====================================================
+            POLITICAL CAREER ADMIN
+        ===================================================== */}
 
-      <Route
-        path="/admin/videos"
-        element={<AdminVideos />}
-      />
+        <Route
+          path="/secure/admin/political-career"
+          element={<AdminPoliticalCareer />}
+        />
 
 
-      {/* =====================================================
-          CONTACT ADMIN
-      ===================================================== */}
+        {/* =====================================================
+            NEWS ADMIN
+        ===================================================== */}
 
-      <Route
-        path="/admin/contact"
-        element={<EditContact />}
-      />
+        <Route
+          path="/secure/admin/news"
+          element={<AdminNews />}
+        />
+
+
+        {/* =====================================================
+            ARTICLES ADMIN
+        ===================================================== */}
+
+        <Route
+          path="/secure/admin/articles"
+          element={<AdminArticles />}
+        />
+
+
+        {/* =====================================================
+            GALLERY ADMIN
+        ===================================================== */}
+
+        <Route
+          path="/secure/admin/gallery"
+          element={<AdminGallery />}
+        />
+
+
+        {/* =====================================================
+            VIDEOS ADMIN
+        ===================================================== */}
+
+        <Route
+          path="/secure/admin/videos"
+          element={<AdminVideos />}
+        />
+
+
+        {/* =====================================================
+            CONTACT ADMIN
+        ===================================================== */}
+
+        <Route
+          path="/secure/admin/contact"
+          element={<EditContact />}
+        />
+
+      </Route>
 
     </Routes>
   );
