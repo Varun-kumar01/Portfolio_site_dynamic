@@ -60,7 +60,7 @@ import AdminNews from "../pages/AdminNews";
 import AdminArticles from "../pages/AdminArticles";
 
 // VIDEOS ADMIN
-import AdminVideos from "../pages/adminvideos";
+import AdminVideos from "../pages/admin-videos";
 
 export default function AppRoutes() {
   return (
@@ -263,6 +263,11 @@ export default function AppRoutes() {
         <Route
           path="/secure/admin/contact"
           element={<EditContact />}
+        />
+
+        <Route
+          path="/secure/admin/settings"
+          element={<Dashboard />}
         />
 
       </Route>

@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { authFetch } from "../services/authFetch";
+import { API_BASE_URL } from "../config";
 
-const API_URL = "http://localhost:5000/api/articles";
+const API_URL = `${API_BASE_URL}/api/articles`;
 
 const initialForm = {
   title: "",
@@ -49,7 +51,7 @@ export default function AdminArticles() {
       setLoading(true);
       setError("");
 
-      const response = await fetch(
+      const response = await authFetch(
         `${API_URL}?t=${Date.now()}`,
         {
           cache: "no-store",
@@ -235,7 +237,7 @@ export default function AdminArticles() {
         : API_URL;
 
       const response =
-        await fetch(url, {
+        await authFetch(url, {
           method: editingId
             ? "PUT"
             : "POST",
@@ -365,7 +367,7 @@ export default function AdminArticles() {
         setSuccess("");
 
         const response =
-          await fetch(
+          await authFetch(
             `${API_URL}/${id}`,
             {
               method: "DELETE",

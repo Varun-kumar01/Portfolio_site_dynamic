@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { authFetch } from "../services/authFetch";
+import { API_BASE_URL } from "../config";
 
 import {
   DndContext,
@@ -18,8 +20,7 @@ import {
 
 import { CSS } from "@dnd-kit/utilities";
 
-const API_URL =
-  "http://localhost:5000/api/political-career";
+const API_URL = `${API_BASE_URL}/api/political-career`;
 
 const CACHE_KEY = "political_career_cache";
 
@@ -319,7 +320,7 @@ export default function AdminPoliticalCareer() {
       setLoading(true);
       setError("");
 
-      const response = await fetch(
+      const response = await authFetch(
         `${API_URL}?t=${Date.now()}`,
         {
           method: "GET",
@@ -672,7 +673,7 @@ export default function AdminPoliticalCareer() {
         : API_URL;
 
       const response =
-        await fetch(
+        await authFetch(
           url,
           {
             method:
@@ -815,7 +816,7 @@ export default function AdminPoliticalCareer() {
       setSuccess("");
 
       const response =
-        await fetch(
+          await authFetch(
           `${API_URL}/${id}`,
           {
             method: "DELETE",
@@ -965,7 +966,7 @@ export default function AdminPoliticalCareer() {
         );
 
         const response =
-          await fetch(
+          await authFetch(
             `${API_URL}/${item.id}`,
             {
               method: "PUT",

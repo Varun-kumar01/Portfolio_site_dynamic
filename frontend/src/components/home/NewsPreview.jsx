@@ -4,6 +4,7 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { API_BASE_URL } from "../../config";
 
 export default function NewsPreview() {
   const navigate = useNavigate();
@@ -45,7 +46,7 @@ export default function NewsPreview() {
     const loadNewsPreview = async () => {
       try {
         const response = await fetch(
-          "http://localhost:5000/api/content"
+          `${API_BASE_URL}/api/content`
         );
 
         if (!response.ok) {

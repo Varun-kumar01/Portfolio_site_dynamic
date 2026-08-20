@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { authFetch } from "../services/authFetch";
+import { API_BASE_URL } from "../config";
 
-const API_URL = "http://localhost:5000/api/videos";
+const API_URL = `${API_BASE_URL}/api/videos`;
 
 const CACHE_KEY = "public_videos_cache";
 
@@ -38,7 +40,7 @@ const AdminVideos = () => {
       setLoading(true);
       setError("");
 
-      const response = await fetch(
+      const response = await authFetch(
         `${API_URL}?t=${Date.now()}`,
         {
           method: "GET",
@@ -247,7 +249,7 @@ const AdminVideos = () => {
         ? `${API_URL}/${editingId}`
         : API_URL;
 
-      const response = await fetch(
+      const response = await authFetch(
         url,
         {
           method: editingId
@@ -358,7 +360,7 @@ const AdminVideos = () => {
       setError("");
       setSuccess("");
 
-      const response = await fetch(
+      const response = await authFetch(
         `${API_URL}/${id}`,
         {
           method: "DELETE",

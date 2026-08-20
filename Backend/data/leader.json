@@ -11,7 +11,7 @@
   },
   "contact": {
     "email": "office@email.com",
-    "phone": "+91 9876543210",
+    "phone": "+91 9876543277",
     "address": "Dharmapuri, Jagtial, Telangana",
     "officeHours": ""
   },
@@ -30,15 +30,15 @@
   },
   "home": {
     "heroTitle": "LAXMAN KUMAR",
-    "heroSubtitle": "Building a Better Telanganaa",
+    "heroSubtitle": "Building a Better Telangana",
     "heroDescription": "Committed to transparent governance, inclusive growth, stronger infrastructure, quality education and public welfare.",
     "heroImage": "/leader.png",
     "aboutHeading": "Dedicated to the Progress of Every Citizen",
     "aboutDescription": "Public service is built on integrity, transparency and commitment. Through continuous interaction with citizens, community participation and development-focused initiatives, every effort is directed towards building a stronger and more prosperous Telangana.",
     "features": [
-      "Transparent Governance",
+      "Transparent Governance ",
       "Infrastructure Development",
-      "Quality Education",
+      "Quality Education fs",
       "Public Welfare"
     ],
     "stats": [
@@ -75,18 +75,18 @@
       ]
     },
     "developmentHighlights": {
-      "label": "Development Highlights",
-      "heading": "Building Stronger Communities",
-      "description": "Development is driven by better infrastructure, quality education, healthcare and sustainable opportunities that improve everyday life.",
+      "label": "Development Highlights ggd",
+      "heading": "Building Stronger Communities rgfbd",
+      "description": "Development is driven by better infrastructure, quality education, healthcare and sustainable opportunities that improve everyday life. fbb",
       "items": [
         {
-          "title": "Healthcare",
-          "description": "Enhancing healthcare access through medical camps, awareness programmes and better health facilities.",
+          "title": "Healthcare gbfgb",
+          "description": "Enhancing healthcare access through medical camps, awareness programmes and better health facilities. bbf",
           "image": ""
         },
         {
-          "title": "Agriculture",
-          "description": "Working alongside farmers to encourage sustainable agriculture and rural development initiatives.",
+          "title": "Agriculture gbfb",
+          "description": "Working alongside farmers to encourage sustainable agriculture and rural development initiatives. g",
           "image": ""
         },
         {
@@ -109,11 +109,11 @@
       "momentsNumber": "500+",
       "momentsText": "Moments",
       "images": [
-        "http://localhost:5000/uploads/1786864922195-45077911.png",
-        "http://localhost:5000/uploads/1786864922230-991655599.png",
-        "http://localhost:5000/uploads/1786864922235-245642756.png",
-        "http://localhost:5000/uploads/1786864922257-146872032.png",
-        "http://localhost:5000/uploads/1786864922265-761723142.png"
+        "/uploads/1786864922195-45077911.png",
+        "/uploads/1786864922230-991655599.png",
+        "/uploads/1786864922235-245642756.png",
+        "/uploads/1786864922257-146872032.png",
+        "/uploads/1786864922265-761723142.png"
       ]
     },
     "newsPreview": {
@@ -146,5 +146,13 @@
       "buttonText": "Contact Office"
     },
     "aboutImage": ""
+  },
+  "about": {
+    "aboutName": "Adluri Laxman Kumar",
+    "aboutPosition": "Minister for SC, ST, Minority, Disabled, Senior Citizens Welfare & Transgender Empowerment",
+    "aboutDescription": ""
+  },
+  "biography": {
+    "biographyContent": "Adluri Laxman Kumar is an Indian politician belonging to the Indian National Congress (INC) who serves as the Cabinet Minister for Scheduled Castes Development, Tribal Welfare, and Minorities Welfare in Telangana. Born on April 1, 1968, in Peddapalli, he hails from the Scheduled Caste (Madiga) community. His educational background includes completing his intermediate education and technical training (ITI).Kumar began his political career as a student leader in 1982, serving as the NSUI president at his college in Godavarikhani. Over the next two decades, he steadily rose through the ranks of the Congress party's youth wing, serving as the Karimnagar District NSUI General Secretary and later as the Andhra Pradesh Youth Congress General Secretary. He gained extensive experience in local governance by serving as a ZPTC member and as the Karimnagar District Zilla Parishad Chairman, which helped him establish a strong grassroots network across the region.After years of active political work, Kumar successfully contested the 2023 Telangana Legislative Assembly election from the Dharmapuri (SC) constituency, securing his first term as an MLA. His decade-long dedication to the region and the party led to his elevation to the state cabinet on June 8, 2025, under Chief Minister A. Revanth Reddy. In addition to welfare departments for marginalized communities, his portfolios encompass Backward Classes welfare, disabled welfare, and senior citizen empowerment."
   }
 }

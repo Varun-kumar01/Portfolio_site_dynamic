@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { authFetch } from "../services/authFetch";
+import { API_BASE_URL } from "../config";
 
 const EditDevelopment = () => {
   const navigate = useNavigate();
@@ -18,8 +20,8 @@ const EditDevelopment = () => {
   useEffect(() => {
     const loadDevelopment = async () => {
       try {
-        const response = await fetch(
-          "http://localhost:5000/api/content"
+        const response = await authFetch(
+          `${API_BASE_URL}/api/content`
         );
 
         const data = await response.json();
@@ -67,8 +69,8 @@ const EditDevelopment = () => {
     setMessage("");
 
     try {
-      const response = await fetch(
-        "http://localhost:5000/api/content/development",
+      const response = await authFetch(
+        `${API_BASE_URL}/api/content/development`,
         {
           method: "PUT",
 

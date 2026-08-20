@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Image,
   Plus,
@@ -7,11 +8,15 @@ import {
   Trash2,
   Save,
   GripVertical,
+  LayoutDashboard,
 } from "lucide-react";
+import { API_BASE_URL } from "../config";
 
-const API_URL = "http://localhost:5000/api/gallery";
+const API_URL = `${API_BASE_URL}/api/gallery`;
 
 export default function AdminGallery() {
+  const navigate = useNavigate();
+
   // =========================================
   // FORM VISIBILITY
   // =========================================
@@ -71,7 +76,6 @@ export default function AdminGallery() {
   // =========================================
 
   const [message, setMessage] = useState("");
-
   const [error, setError] = useState("");
 
   // =========================================
@@ -108,10 +112,10 @@ export default function AdminGallery() {
     }
 
     if (image.startsWith("/")) {
-      return `http://localhost:5000${image}`;
+      return `${API_BASE_URL}${image}`;
     }
 
-    return `http://localhost:5000/${image}`;
+    return `${API_BASE_URL}/${image}`;
   };
 
   // =========================================
@@ -229,7 +233,6 @@ export default function AdminGallery() {
     setMessage("");
     setError("");
 
-    // Validate title
     if (!title.trim()) {
       setError(
         "Please enter an image title."
@@ -237,7 +240,6 @@ export default function AdminGallery() {
       return;
     }
 
-    // Image required when adding
     if (!editingId && !selectedFile) {
       setError(
         "Please select an image."
@@ -265,7 +267,6 @@ export default function AdminGallery() {
         category
       );
 
-      // Image is optional during edit
       if (selectedFile) {
         formData.append(
           "image",
@@ -322,6 +323,8 @@ export default function AdminGallery() {
       clearGalleryForm();
 
       setEditingId(null);
+
+      setShowGalleryManager(false);
     } catch (error) {
       console.error(
         "Gallery save error:",
@@ -564,7 +567,6 @@ export default function AdminGallery() {
       return;
     }
 
-    // Move item
     const newItems = [
       ...oldItems,
     ];
@@ -582,10 +584,8 @@ export default function AdminGallery() {
       movedItem
     );
 
-    // Update UI immediately
     setGalleryItems(newItems);
 
-    // Save order
     await saveGalleryOrder(
       newItems
     );
@@ -661,7 +661,6 @@ export default function AdminGallery() {
           "The new order could not be saved."
       );
 
-      // Restore database order
       await fetchGallery();
     }
   };
@@ -672,6 +671,39 @@ export default function AdminGallery() {
 
   return (
     <div className="p-6 lg:p-10">
+
+      {/* =====================================
+          TOP HEADER
+      ===================================== */}
+
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">
+            Gallery Management
+          </h1>
+
+          <p className="text-gray-500 mt-2">
+            Manage all photographs displayed
+            on the public gallery.
+          </p>
+        </div>
+
+        {/* BACK TO DASHBOARD */}
+
+        <button
+          type="button"
+          onClick={() =>
+            navigate("/secure/admin/dashboard")
+          }
+          className="inline-flex items-center justify-center gap-2 bg-gray-900 hover:bg-gray-800 text-white px-5 py-3 rounded-xl font-semibold transition"
+        >
+          <LayoutDashboard size={19} />
+
+          Back to Dashboard
+        </button>
+
+      </div>
 
       {/* =====================================
           INTRODUCTION
@@ -691,9 +723,9 @@ export default function AdminGallery() {
 
             </div>
 
-            <h1 className="text-3xl font-bold text-gray-900 mt-8">
+            <h2 className="text-3xl font-bold text-gray-900 mt-8">
               Gallery Management
-            </h1>
+            </h2>
 
             <p className="text-gray-500 text-lg mt-4">
               Add, edit, replace, delete and
@@ -724,19 +756,17 @@ export default function AdminGallery() {
       {showGalleryManager && (
         <div className="bg-white rounded-2xl shadow-sm p-10">
 
-          {/* HEADER */}
-
           <div className="flex items-center justify-between mb-8">
 
             <div>
 
-              <h1 className="text-3xl font-bold text-gray-900">
+              <h2 className="text-3xl font-bold text-gray-900">
 
                 {editingId
                   ? "Edit Gallery Photo"
-                  : "Gallery Management"}
+                  : "Add Gallery Photo"}
 
-              </h1>
+              </h2>
 
               <p className="text-gray-500 mt-2">
 
@@ -763,23 +793,17 @@ export default function AdminGallery() {
 
           </div>
 
-          {/* SUCCESS */}
-
           {message && (
             <div className="mb-6 rounded-xl border border-green-200 bg-green-50 text-green-700 px-5 py-4">
               {message}
             </div>
           )}
 
-          {/* ERROR */}
-
           {error && (
             <div className="mb-6 rounded-xl border border-red-200 bg-red-50 text-red-700 px-5 py-4">
               {error}
             </div>
           )}
-
-          {/* FORM */}
 
           <form
             onSubmit={
@@ -788,11 +812,7 @@ export default function AdminGallery() {
             className="grid lg:grid-cols-2 gap-10"
           >
 
-            {/* LEFT */}
-
             <div className="space-y-6">
-
-              {/* TITLE */}
 
               <div>
 
@@ -814,8 +834,6 @@ export default function AdminGallery() {
 
               </div>
 
-              {/* CAPTION */}
-
               <div>
 
                 <label className="block font-medium text-gray-800 mb-2">
@@ -835,8 +853,6 @@ export default function AdminGallery() {
                 />
 
               </div>
-
-              {/* CATEGORY */}
 
               <div>
 
@@ -874,8 +890,6 @@ export default function AdminGallery() {
 
               </div>
 
-              {/* IMAGE */}
-
               <div>
 
                 <label className="block font-medium text-gray-800 mb-2">
@@ -897,16 +911,13 @@ export default function AdminGallery() {
 
                 {editingId && (
                   <p className="text-sm text-gray-500 mt-2">
-                    Leave empty to keep the
-                    existing image.
+                    Leave empty to keep the existing image.
                   </p>
                 )}
 
               </div>
 
-              {/* BUTTONS */}
-
-              <div className="flex gap-4">
+              <div className="flex flex-wrap gap-4">
 
                 <button
                   type="submit"
@@ -948,7 +959,7 @@ export default function AdminGallery() {
 
             </div>
 
-            {/* RIGHT PREVIEW */}
+            {/* PREVIEW */}
 
             <div>
 
@@ -994,8 +1005,6 @@ export default function AdminGallery() {
 
       <div className="bg-white rounded-2xl shadow-sm p-8 mt-8">
 
-        {/* HEADER */}
-
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
 
           <div>
@@ -1032,15 +1041,11 @@ export default function AdminGallery() {
 
         </div>
 
-        {/* MESSAGE */}
-
         {message && (
           <div className="mb-6 rounded-xl border border-green-200 bg-green-50 text-green-700 px-5 py-4">
             {message}
           </div>
         )}
-
-        {/* ERROR */}
 
         {error && (
           <div className="mb-6 rounded-xl border border-red-200 bg-red-50 text-red-700 px-5 py-4">
@@ -1048,16 +1053,12 @@ export default function AdminGallery() {
           </div>
         )}
 
-        {/* LOADING */}
-
         {loading &&
           galleryItems.length === 0 && (
             <div className="py-12 text-center text-gray-500">
               Loading gallery photos...
             </div>
           )}
-
-        {/* EMPTY */}
 
         {!loading &&
           galleryItems.length === 0 && (
@@ -1079,14 +1080,11 @@ export default function AdminGallery() {
             </div>
           )}
 
-        {/* EXISTING PHOTOS */}
-
         {galleryItems.length > 0 && (
           <div className="space-y-4">
 
             {galleryItems.map(
               (item, index) => {
-
                 const imageUrl =
                   getImageUrl(item);
 
@@ -1148,22 +1146,16 @@ export default function AdminGallery() {
                     `}
                   >
 
-                    {/* DRAG HANDLE */}
-
                     <div className="flex items-center justify-center">
 
                       <div
                         className="w-10 h-10 rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-500"
                         title="Drag to reorder"
                       >
-                        <GripVertical
-                          size={22}
-                        />
+                        <GripVertical size={22} />
                       </div>
 
                     </div>
-
-                    {/* POSITION */}
 
                     <div className="flex items-center justify-center">
 
@@ -1172,8 +1164,6 @@ export default function AdminGallery() {
                       </div>
 
                     </div>
-
-                    {/* IMAGE */}
 
                     <div className="w-full lg:w-52 h-40 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0">
 
@@ -1189,16 +1179,12 @@ export default function AdminGallery() {
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-gray-400">
 
-                          <Image
-                            size={40}
-                          />
+                          <Image size={40} />
 
                         </div>
                       )}
 
                     </div>
-
-                    {/* DETAILS */}
 
                     <div className="flex-1 min-w-0">
 
@@ -1210,8 +1196,7 @@ export default function AdminGallery() {
                         </span>
 
                         <span className="text-xs font-semibold text-gray-600 bg-gray-100 px-3 py-1 rounded-full">
-                          Position #
-                          {index + 1}
+                          Position #{index + 1}
                         </span>
 
                       </div>
@@ -1228,26 +1213,19 @@ export default function AdminGallery() {
 
                     </div>
 
-                    {/* ACTIONS */}
-
                     <div className="flex lg:flex-col gap-3 justify-center">
 
                       <button
                         type="button"
                         onClick={(e) => {
                           e.stopPropagation();
-
-                          handleEdit(
-                            item
-                          );
+                          handleEdit(item);
                         }}
                         draggable={false}
                         className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg border border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100 font-medium transition"
                       >
 
-                        <Edit
-                          size={17}
-                        />
+                        <Edit size={17} />
 
                         Edit
 
@@ -1257,18 +1235,13 @@ export default function AdminGallery() {
                         type="button"
                         onClick={(e) => {
                           e.stopPropagation();
-
-                          handleDelete(
-                            item.id
-                          );
+                          handleDelete(item.id);
                         }}
                         draggable={false}
                         className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg border border-red-200 bg-red-50 text-red-700 hover:bg-red-100 font-medium transition"
                       >
 
-                        <Trash2
-                          size={17}
-                        />
+                        <Trash2 size={17} />
 
                         Delete
 

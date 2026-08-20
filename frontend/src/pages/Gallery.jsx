@@ -1,11 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { Play, X } from "lucide-react";
+import { API_BASE_URL } from "../config";
 
 /* =========================================================
    API CONFIGURATION
 ========================================================= */
-
-const API_BASE_URL = "http://localhost:5000";
 
 const PHOTO_API_URL = `${API_BASE_URL}/api/gallery`;
 const VIDEO_API_URL = `${API_BASE_URL}/api/videos`;

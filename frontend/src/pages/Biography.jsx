@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { API_BASE_URL } from "../config";
 
 import BiographyHero from "../components/biography/BiographyHero";
 import ProfileSection from "../components/biography/ProfileSection";
@@ -20,7 +21,7 @@ export default function Biography() {
     const loadBiography = async () => {
       try {
         const response = await fetch(
-          "http://localhost:5000/api/content"
+          `${API_BASE_URL}/api/content`
         );
 
         const data = await response.json();

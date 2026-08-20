@@ -1,7 +1,7 @@
 const {
   authenticateAdmin,
   requireAdmin
-} = require("../middleware/authMiddleware");
+} = require("../middleware/authmiddleware");
 router.get(
   "/users",
   authenticateAdmin,

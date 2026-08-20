@@ -1,5 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { authFetch } from "../services/authFetch";
+import { API_BASE_URL } from "../config";
 
 import {
   LayoutDashboard,
@@ -27,6 +29,14 @@ const Dashboard = () => {
   const navigate = useNavigate();
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const [recentUpdates, setRecentUpdates] = useState([]);
+
+  const [recentUpdatesLoading, setRecentUpdatesLoading] =
+    useState(true);
+
+  const [showAllUpdates, setShowAllUpdates] =
+    useState(false);
 
   // ============================================================
   // LOGOUT
@@ -164,26 +174,89 @@ const Dashboard = () => {
   // RECENT UPDATES
   // ============================================================
 
-  const recentUpdates = [
-    {
-      title: "New Welfare Initiative",
-      type: "News",
-      date: "10 Aug 2026",
-      status: "Published",
-    },
-    {
-      title: "Public Meeting at Dharmapuri",
-      type: "News",
-      date: "08 Aug 2026",
-      status: "Published",
-    },
-    {
-      title: "Development Projects",
-      type: "Article",
-      date: "05 Aug 2026",
-      status: "Draft",
-    },
-  ];
+  useEffect(() => {
+    const loadRecentUpdates = async () => {
+      try {
+        const [newsResponse, articlesResponse] =
+          await Promise.all([
+            authFetch(`${API_BASE_URL}/api/news`),
+            authFetch(`${API_BASE_URL}/api/articles`),
+          ]);
+
+        const [newsResult, articlesResult] =
+          await Promise.all([
+            newsResponse.json(),
+            articlesResponse.json(),
+          ]);
+
+        if (!newsResponse.ok || !newsResult.success) {
+          throw new Error(
+            newsResult.message || "Failed to load recent news"
+          );
+        }
+
+        if (!articlesResponse.ok || !articlesResult.success) {
+          throw new Error(
+            articlesResult.message ||
+              "Failed to load recent articles"
+          );
+        }
+
+        const updates = [
+          ...(Array.isArray(newsResult.data)
+            ? newsResult.data
+            : []
+          ).map((item) => ({
+            title: item.title || "Untitled news",
+            type: "News",
+            date: item.published_date || item.updated_at,
+            status: item.published_date
+              ? "Published"
+              : "Draft",
+          })),
+          ...(Array.isArray(articlesResult.data)
+            ? articlesResult.data
+            : []
+          ).map((item) => ({
+            title: item.title || "Untitled article",
+            type: "Article",
+            date: item.published_date || item.updated_at,
+            status: item.published_date
+              ? "Published"
+              : "Draft",
+          })),
+        ]
+          .filter((item) => item.date)
+          .sort(
+            (first, second) =>
+              new Date(second.date) - new Date(first.date)
+          )
+          .map((item) => ({
+            ...item,
+            date: new Date(item.date).toLocaleDateString(
+              "en-GB",
+              {
+                day: "2-digit",
+                month: "short",
+                year: "numeric",
+              }
+            ),
+          }));
+
+        setRecentUpdates(updates);
+      } catch (error) {
+        console.error(
+          "Error loading dashboard updates:",
+          error
+        );
+        setRecentUpdates([]);
+      } finally {
+        setRecentUpdatesLoading(false);
+      }
+    };
+
+    loadRecentUpdates();
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -713,10 +786,10 @@ const Dashboard = () => {
               </div>
 
               <button
-                onClick={() => navigate("/secure/admin/news")}
+                onClick={() => setShowAllUpdates((value) => !value)}
                 className="text-sm font-semibold text-green-700 hover:text-green-800"
               >
-                View All
+                {showAllUpdates ? "Show Less" : "View All"}
               </button>
 
             </div>
@@ -755,7 +828,27 @@ const Dashboard = () => {
 
                 <tbody>
 
-                  {recentUpdates.map((item, index) => (
+                  {recentUpdatesLoading ? (
+                    <tr>
+                      <td
+                        colSpan="5"
+                        className="px-6 py-8 text-center text-sm text-gray-500"
+                      >
+                        Loading recent updates...
+                      </td>
+                    </tr>
+                  ) : recentUpdates.length === 0 ? (
+                    <tr>
+                      <td
+                        colSpan="5"
+                        className="px-6 py-8 text-center text-sm text-gray-500"
+                      >
+                        No recent updates found.
+                      </td>
+                    </tr>
+                  ) : recentUpdates
+                    .slice(0, showAllUpdates ? undefined : 3)
+                    .map((item, index) => (
 
                     <tr
                       key={index}

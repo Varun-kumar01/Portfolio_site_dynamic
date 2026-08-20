@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
+import { API_BASE_URL } from "../config";
 import {
   CalendarDays,
   Search,
   ArrowRight,
 } from "lucide-react";
 
-const API_URL = "http://localhost:5000/api/news";
+const API_URL = `${API_BASE_URL}/api/news`;
 
 const fallbackCategories = [
   "All",

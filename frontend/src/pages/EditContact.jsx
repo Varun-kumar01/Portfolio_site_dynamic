@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { authFetch } from "../services/authFetch";
+import { API_BASE_URL } from "../config";
 
 import {
   ArrowLeft,
@@ -46,8 +48,8 @@ const EditContact = () => {
         setLoading(true);
         setError("");
 
-        const response = await fetch(
-          "http://localhost:5000/api/content"
+        const response = await authFetch(
+          `${API_BASE_URL}/api/content`
         );
 
         if (!response.ok) {
@@ -158,8 +160,8 @@ const EditContact = () => {
       setError("");
 
 
-      const response = await fetch(
-        "http://localhost:5000/api/content/contact",
+      const response = await authFetch(
+        `${API_BASE_URL}/api/content/contact`,
         {
           method: "PUT",
 

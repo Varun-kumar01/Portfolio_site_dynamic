@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { authFetch } from "../services/authFetch";
+import { API_BASE_URL } from "../config";
 import {
   ArrowLeft,
   LayoutDashboard,
@@ -33,8 +35,8 @@ const EditBiography = () => {
         setLoading(true);
         setMessage("");
 
-        const response = await fetch(
-          "http://localhost:5000/api/content"
+        const response = await authFetch(
+          `${API_BASE_URL}/api/content`
         );
 
         const data = await response.json();
@@ -91,8 +93,8 @@ const EditBiography = () => {
       setMessage("");
       setIsError(false);
 
-      const response = await fetch(
-        "http://localhost:5000/api/content/biography",
+      const response = await authFetch(
+        `${API_BASE_URL}/api/content/biography`,
         {
           method: "PUT",
 

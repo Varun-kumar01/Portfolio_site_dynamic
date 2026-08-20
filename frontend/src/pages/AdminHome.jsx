@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { authFetch } from "../services/authFetch";
+import { API_BASE_URL } from "../config";
 
 import {
   Home,
@@ -11,7 +13,7 @@ import {
   X,
 } from "lucide-react";
 
-const API_URL = "http://localhost:5000";
+const API_URL = API_BASE_URL;
 
 const AdminHome = () => {
 
@@ -54,7 +56,7 @@ const AdminHome = () => {
       try {
 
         const response =
-          await fetch(
+          await authFetch(
             `${API_URL}/api/content`
           );
 
@@ -368,7 +370,7 @@ const AdminHome = () => {
       // ------------------------------------------------------
 
       const response =
-        await fetch(
+          await authFetch(
           `${API_URL}/api/content/home`,
           {
             method: "PUT",

@@ -1,22 +1,99 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { authFetch } from "../services/authFetch";
+import { API_BASE_URL } from "../config";
 import { LayoutDashboard } from "lucide-react";
+
+const Input = ({
+  label,
+  name,
+  value,
+  onChange,
+  placeholder = "",
+}) => (
+  <div className="mb-6">
+    <label className="block text-slate-700 font-medium mb-2">
+      {label}
+    </label>
+
+    <input
+      type="text"
+      name={name}
+      value={value || ""}
+      onChange={onChange}
+      placeholder={placeholder}
+      className="w-full border border-slate-300 rounded-xl px-4 py-4 outline-none focus:ring-2 focus:ring-orange-600"
+    />
+  </div>
+);
+
+const Textarea = ({
+  label,
+  name,
+  value,
+  onChange,
+  rows = 5,
+}) => (
+  <div className="mb-6">
+    <label className="block text-slate-700 font-medium mb-2">
+      {label}
+    </label>
+
+    <textarea
+      name={name}
+      value={value || ""}
+      onChange={onChange}
+      rows={rows}
+      className="w-full border border-slate-300 rounded-xl px-4 py-4 outline-none focus:ring-2 focus:ring-orange-600"
+    />
+  </div>
+);
+
+const ImageInput = ({
+  label,
+  preview,
+  setSelected,
+  setPreview,
+  alt,
+  onImageChange,
+}) => (
+  <div>
+    <label className="block text-slate-700 font-medium mb-2">
+      {label}
+    </label>
+
+    <input
+      type="file"
+      accept="image/*"
+      onChange={(event) =>
+        onImageChange(
+          event,
+          setSelected,
+          setPreview
+        )
+      }
+      className="w-full border border-slate-300 rounded-xl px-4 py-3"
+    />
+
+    {preview && (
+      <img
+        src={preview}
+        alt={alt}
+        className="mt-5 w-full max-w-md h-[300px] object-cover rounded-2xl border border-slate-200"
+      />
+    )}
+  </div>
+);
 
 const EditHome = () => {
   const navigate = useNavigate();
 
-  // =========================
-  // FORM DATA
-  // =========================
-
   const [formData, setFormData] = useState({
-    // HERO
     heroTitle: "",
     heroSubtitle: "",
     heroDescription: "",
     heroImage: "",
 
-    // ABOUT
     aboutImage: "",
     aboutHeading: "",
     aboutDescription: "",
@@ -29,24 +106,19 @@ const EditHome = () => {
     stat2Number: "",
     stat2Text: "",
 
-    // FOCUS AREAS
     focusLabel: "",
     focusHeading: "",
     focusDescription: "",
 
     focus1Title: "",
     focus1Description: "",
-
     focus2Title: "",
     focus2Description: "",
-
     focus3Title: "",
     focus3Description: "",
-
     focus4Title: "",
     focus4Description: "",
 
-    // DEVELOPMENT
     developmentLabel: "",
     developmentHeading: "",
     developmentDescription: "",
@@ -67,7 +139,6 @@ const EditHome = () => {
     development4Description: "",
     development4Image: "",
 
-    // GALLERY
     galleryLabel: "",
     galleryHeading: "",
     galleryDescription: "",
@@ -81,7 +152,6 @@ const EditHome = () => {
     galleryImage4: "",
     galleryImage5: "",
 
-    // NEWS PREVIEW
     newsLabel: "",
     newsHeading: "",
     newsDescription: "",
@@ -99,7 +169,6 @@ const EditHome = () => {
     news2Title: "",
     news2Image: "",
 
-    // CONTACT CTA
     contactLabel: "",
     contactHeading: "",
     contactDescription: "",
@@ -108,10 +177,6 @@ const EditHome = () => {
     contactOffice: "",
     contactButtonText: "",
   });
-
-  // =========================
-  // SELECTED IMAGE STATES
-  // =========================
 
   const [selectedHeroImage, setSelectedHeroImage] =
     useState(null);
@@ -179,10 +244,6 @@ const EditHome = () => {
     setSelectedNews2Image,
   ] = useState(null);
 
-  // =========================
-  // IMAGE PREVIEWS
-  // =========================
-
   const [previewHeroImage, setPreviewHeroImage] =
     useState("");
 
@@ -249,25 +310,17 @@ const EditHome = () => {
     setPreviewNews2Image,
   ] = useState("");
 
-  // =========================
-  // OTHER STATES
-  // =========================
-
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-
-  // =========================
-  // LOAD HOME CONTENT
-  // =========================
 
   useEffect(() => {
     const loadHomeContent = async () => {
       try {
         setLoading(true);
 
-        const response = await fetch(
-          "http://localhost:5000/api/content"
+        const response = await authFetch(
+          `${API_BASE_URL}/api/content`
         );
 
         if (!response.ok) {
@@ -277,62 +330,45 @@ const EditHome = () => {
         }
 
         const data = await response.json();
-
         const home = data.home || {};
 
         setFormData({
-          // HERO
           heroTitle: home.heroTitle || "",
           heroSubtitle: home.heroSubtitle || "",
           heroDescription:
             home.heroDescription || "",
           heroImage: home.heroImage || "",
 
-          // ABOUT
           aboutImage: home.aboutImage || "",
           aboutHeading:
             home.aboutHeading || "",
           aboutDescription:
             home.aboutDescription || "",
 
-          feature1:
-            home.features?.[0] || "",
-
-          feature2:
-            home.features?.[1] || "",
-
-          feature3:
-            home.features?.[2] || "",
-
-          feature4:
-            home.features?.[3] || "",
+          feature1: home.features?.[0] || "",
+          feature2: home.features?.[1] || "",
+          feature3: home.features?.[2] || "",
+          feature4: home.features?.[3] || "",
 
           stat1Number:
             home.stats?.[0]?.number || "",
-
           stat1Text:
             home.stats?.[0]?.text || "",
-
           stat2Number:
             home.stats?.[1]?.number || "",
-
           stat2Text:
             home.stats?.[1]?.text || "",
 
-          // FOCUS
           focusLabel:
             home.focusAreas?.label || "",
-
           focusHeading:
             home.focusAreas?.heading || "",
-
           focusDescription:
             home.focusAreas?.description || "",
 
           focus1Title:
             home.focusAreas?.items?.[0]?.title ||
             "",
-
           focus1Description:
             home.focusAreas?.items?.[0]
               ?.description || "",
@@ -340,7 +376,6 @@ const EditHome = () => {
           focus2Title:
             home.focusAreas?.items?.[1]?.title ||
             "",
-
           focus2Description:
             home.focusAreas?.items?.[1]
               ?.description || "",
@@ -348,7 +383,6 @@ const EditHome = () => {
           focus3Title:
             home.focusAreas?.items?.[2]?.title ||
             "",
-
           focus3Description:
             home.focusAreas?.items?.[2]
               ?.description || "",
@@ -356,20 +390,16 @@ const EditHome = () => {
           focus4Title:
             home.focusAreas?.items?.[3]?.title ||
             "",
-
           focus4Description:
             home.focusAreas?.items?.[3]
               ?.description || "",
 
-          // DEVELOPMENT
           developmentLabel:
             home.developmentHighlights?.label ||
             "",
-
           developmentHeading:
             home.developmentHighlights?.heading ||
             "",
-
           developmentDescription:
             home.developmentHighlights
               ?.description || "",
@@ -377,11 +407,9 @@ const EditHome = () => {
           development1Title:
             home.developmentHighlights?.items?.[0]
               ?.title || "",
-
           development1Description:
             home.developmentHighlights?.items?.[0]
               ?.description || "",
-
           development1Image:
             home.developmentHighlights?.items?.[0]
               ?.image || "",
@@ -389,11 +417,9 @@ const EditHome = () => {
           development2Title:
             home.developmentHighlights?.items?.[1]
               ?.title || "",
-
           development2Description:
             home.developmentHighlights?.items?.[1]
               ?.description || "",
-
           development2Image:
             home.developmentHighlights?.items?.[1]
               ?.image || "",
@@ -401,11 +427,9 @@ const EditHome = () => {
           development3Title:
             home.developmentHighlights?.items?.[2]
               ?.title || "",
-
           development3Description:
             home.developmentHighlights?.items?.[2]
               ?.description || "",
-
           development3Image:
             home.developmentHighlights?.items?.[2]
               ?.image || "",
@@ -413,33 +437,25 @@ const EditHome = () => {
           development4Title:
             home.developmentHighlights?.items?.[3]
               ?.title || "",
-
           development4Description:
             home.developmentHighlights?.items?.[3]
               ?.description || "",
-
           development4Image:
             home.developmentHighlights?.items?.[3]
               ?.image || "",
 
-          // GALLERY
           galleryLabel:
             home.galleryPreview?.label || "",
-
           galleryHeading:
             home.galleryPreview?.heading || "",
-
           galleryDescription:
             home.galleryPreview?.description ||
             "",
-
           galleryMainTitle:
             home.galleryPreview?.mainTitle || "",
-
           galleryMomentsNumber:
             home.galleryPreview?.momentsNumber ||
             "",
-
           galleryMomentsText:
             home.galleryPreview?.momentsText ||
             "",
@@ -447,45 +463,35 @@ const EditHome = () => {
           galleryImage1:
             home.galleryPreview?.images?.[0] ||
             "",
-
           galleryImage2:
             home.galleryPreview?.images?.[1] ||
             "",
-
           galleryImage3:
             home.galleryPreview?.images?.[2] ||
             "",
-
           galleryImage4:
             home.galleryPreview?.images?.[3] ||
             "",
-
           galleryImage5:
             home.galleryPreview?.images?.[4] ||
             "",
 
-          // NEWS
           newsLabel:
             home.newsPreview?.label || "",
-
           newsHeading:
             home.newsPreview?.heading || "",
-
           newsDescription:
             home.newsPreview?.description || "",
 
           featuredNewsDate:
             home.newsPreview?.featured?.date ||
             "",
-
           featuredNewsTitle:
             home.newsPreview?.featured?.title ||
             "",
-
           featuredNewsDescription:
             home.newsPreview?.featured
               ?.description || "",
-
           featuredNewsImage:
             home.newsPreview?.featured?.image ||
             "",
@@ -493,11 +499,9 @@ const EditHome = () => {
           news1Date:
             home.newsPreview?.news?.[0]?.date ||
             "",
-
           news1Title:
             home.newsPreview?.news?.[0]?.title ||
             "",
-
           news1Image:
             home.newsPreview?.news?.[0]?.image ||
             "",
@@ -505,41 +509,28 @@ const EditHome = () => {
           news2Date:
             home.newsPreview?.news?.[1]?.date ||
             "",
-
           news2Title:
             home.newsPreview?.news?.[1]?.title ||
             "",
-
           news2Image:
             home.newsPreview?.news?.[1]?.image ||
             "",
 
-          // CONTACT CTA
           contactLabel:
             home.contactCTA?.label || "",
-
           contactHeading:
             home.contactCTA?.heading || "",
-
           contactDescription:
             home.contactCTA?.description || "",
-
           contactPhone:
             home.contactCTA?.phone || "",
-
           contactEmail:
             home.contactCTA?.email || "",
-
           contactOffice:
             home.contactCTA?.office || "",
-
           contactButtonText:
             home.contactCTA?.buttonText || "",
         });
-
-        // =========================
-        // SET IMAGE PREVIEWS
-        // =========================
 
         setPreviewHeroImage(
           home.heroImage || ""
@@ -608,7 +599,6 @@ const EditHome = () => {
           home.newsPreview?.news?.[1]?.image ||
           ""
         );
-
       } catch (error) {
         console.error(error);
 
@@ -624,10 +614,6 @@ const EditHome = () => {
     loadHomeContent();
   }, []);
 
-  // =========================
-  // TEXT CHANGE
-  // =========================
-
   const handleChange = (event) => {
     const { name, value } = event.target;
 
@@ -636,10 +622,6 @@ const EditHome = () => {
       [name]: value,
     }));
   };
-
-  // =========================
-  // IMAGE CHANGE
-  // =========================
 
   const handleImageChange = (
     event,
@@ -657,10 +639,6 @@ const EditHome = () => {
     );
   };
 
-  // =========================
-  // SAVE
-  // =========================
-
   const handleSubmit = async (event) => {
     event.preventDefault();
 
@@ -669,8 +647,6 @@ const EditHome = () => {
       setMessage("");
 
       const uploadData = new FormData();
-
-      // ADD TEXT FIELDS
 
       Object.keys(formData).forEach((key) => {
         if (!key.includes("Image")) {
@@ -681,8 +657,6 @@ const EditHome = () => {
         }
       });
 
-      // HERO
-
       if (selectedHeroImage) {
         uploadData.append(
           "heroImage",
@@ -690,16 +664,12 @@ const EditHome = () => {
         );
       }
 
-      // ABOUT
-
       if (selectedAboutImage) {
         uploadData.append(
           "aboutImage",
           selectedAboutImage
         );
       }
-
-      // DEVELOPMENT
 
       if (selectedDevelopment1Image) {
         uploadData.append(
@@ -728,8 +698,6 @@ const EditHome = () => {
           selectedDevelopment4Image
         );
       }
-
-      // GALLERY
 
       if (selectedGalleryImage1) {
         uploadData.append(
@@ -766,8 +734,6 @@ const EditHome = () => {
         );
       }
 
-      // NEWS
-
       if (selectedFeaturedNewsImage) {
         uploadData.append(
           "featuredNewsImage",
@@ -789,10 +755,15 @@ const EditHome = () => {
         );
       }
 
-      const response = await fetch(
-        "http://localhost:5000/api/content/home",
+      const response = await authFetch(
+        `${API_BASE_URL}/api/content/home`,
         {
           method: "PUT",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem(
+              "adminToken"
+            )}`,
+          },
           body: uploadData,
         }
       );
@@ -812,8 +783,6 @@ const EditHome = () => {
         "Home content updated successfully!"
       );
 
-      // RESET SELECTED FILES
-
       setSelectedHeroImage(null);
       setSelectedAboutImage(null);
 
@@ -831,7 +800,6 @@ const EditHome = () => {
       setSelectedFeaturedNewsImage(null);
       setSelectedNews1Image(null);
       setSelectedNews2Image(null);
-
     } catch (error) {
       console.error(
         "Error updating Home content:",
@@ -840,113 +808,15 @@ const EditHome = () => {
 
       setMessage(
         "Error: " +
-        (
-          error.message ||
-          "Failed to update Home content"
-        )
+          (
+            error.message ||
+            "Failed to update Home content"
+          )
       );
     } finally {
       setSaving(false);
     }
   };
-
-  // =========================
-  // REUSABLE INPUT
-  // =========================
-
-  const Input = ({
-    label,
-    name,
-    placeholder = "",
-  }) => (
-    <div className="mb-6">
-
-      <label className="block text-slate-700 font-medium mb-2">
-        {label}
-      </label>
-
-      <input
-        type="text"
-        name={name}
-        value={formData[name] || ""}
-        onChange={handleChange}
-        placeholder={placeholder}
-        className="w-full border border-slate-300 rounded-xl px-4 py-4 outline-none focus:ring-2 focus:ring-orange-600"
-      />
-
-    </div>
-  );
-
-  // =========================
-  // REUSABLE TEXTAREA
-  // =========================
-
-  const Textarea = ({
-    label,
-    name,
-    rows = 5,
-  }) => (
-    <div className="mb-6">
-
-      <label className="block text-slate-700 font-medium mb-2">
-        {label}
-      </label>
-
-      <textarea
-        name={name}
-        value={formData[name] || ""}
-        onChange={handleChange}
-        rows={rows}
-        className="w-full border border-slate-300 rounded-xl px-4 py-4 outline-none focus:ring-2 focus:ring-orange-600"
-      />
-
-    </div>
-  );
-
-  // =========================
-  // REUSABLE IMAGE INPUT
-  // =========================
-
-  const ImageInput = ({
-    label,
-    preview,
-    setSelected,
-    setPreview,
-    alt,
-  }) => (
-    <div>
-
-      <label className="block text-slate-700 font-medium mb-2">
-        {label}
-      </label>
-
-      <input
-        type="file"
-        accept="image/*"
-        onChange={(event) =>
-          handleImageChange(
-            event,
-            setSelected,
-            setPreview
-          )
-        }
-        className="w-full border border-slate-300 rounded-xl px-4 py-3"
-      />
-
-      {preview && (
-        <img
-          src={preview}
-          alt={alt}
-          className="mt-5 w-full max-w-md h-[300px] object-cover rounded-2xl border border-slate-200"
-        />
-      )}
-
-    </div>
-  );
-
-  // =========================
-  // LOADING
-  // =========================
 
   if (loading) {
     return (
@@ -960,15 +830,10 @@ const EditHome = () => {
 
   return (
     <div className="min-h-screen bg-slate-100 p-6 md:p-8">
-
       <div className="max-w-6xl mx-auto">
 
-        {/* HEADER */}
-
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-5 mb-8">
-
           <div>
-
             <p className="text-sm font-semibold tracking-widest text-orange-600 uppercase">
               Admin Panel
             </p>
@@ -980,7 +845,6 @@ const EditHome = () => {
             <p className="text-slate-500 mt-2">
               Update all sections of the Home page.
             </p>
-
           </div>
 
           <button
@@ -993,7 +857,6 @@ const EditHome = () => {
             <LayoutDashboard size={18} />
             Dashboard
           </button>
-
         </div>
 
         <form
@@ -1004,7 +867,6 @@ const EditHome = () => {
           {/* HERO */}
 
           <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 md:p-10">
-
             <h2 className="text-2xl font-bold text-slate-800 mb-8">
               Hero Section
             </h2>
@@ -1012,37 +874,38 @@ const EditHome = () => {
             <Input
               label="Hero Title"
               name="heroTitle"
+              value={formData.heroTitle}
+              onChange={handleChange}
             />
 
             <Input
               label="Hero Subtitle"
               name="heroSubtitle"
+              value={formData.heroSubtitle}
+              onChange={handleChange}
             />
 
             <Textarea
               label="Hero Description"
               name="heroDescription"
+              value={formData.heroDescription}
+              onChange={handleChange}
               rows={7}
             />
 
             <ImageInput
               label="Hero Image"
               preview={previewHeroImage}
-              setSelected={
-                setSelectedHeroImage
-              }
-              setPreview={
-                setPreviewHeroImage
-              }
+              setSelected={setSelectedHeroImage}
+              setPreview={setPreviewHeroImage}
               alt="Hero preview"
+              onImageChange={handleImageChange}
             />
-
           </div>
 
           {/* ABOUT */}
 
           <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 md:p-10">
-
             <h2 className="text-2xl font-bold text-slate-800 mb-8">
               About Preview Section
             </h2>
@@ -1050,24 +913,25 @@ const EditHome = () => {
             <Input
               label="About Heading"
               name="aboutHeading"
+              value={formData.aboutHeading}
+              onChange={handleChange}
             />
 
             <Textarea
               label="About Description"
               name="aboutDescription"
+              value={formData.aboutDescription}
+              onChange={handleChange}
               rows={7}
             />
 
             <ImageInput
               label="About Image"
               preview={previewAboutImage}
-              setSelected={
-                setSelectedAboutImage
-              }
-              setPreview={
-                setPreviewAboutImage
-              }
+              setSelected={setSelectedAboutImage}
+              setPreview={setPreviewAboutImage}
               alt="About preview"
+              onImageChange={handleImageChange}
             />
 
             <h3 className="text-xl font-bold text-slate-800 mt-10 mb-5">
@@ -1075,17 +939,15 @@ const EditHome = () => {
             </h3>
 
             <div className="grid md:grid-cols-2 gap-5">
-
-              {[1, 2, 3, 4].map(
-                (number) => (
-                  <Input
-                    key={number}
-                    label={`Feature ${number}`}
-                    name={`feature${number}`}
-                  />
-                )
-              )}
-
+              {[1, 2, 3, 4].map((number) => (
+                <Input
+                  key={number}
+                  label={`Feature ${number}`}
+                  name={`feature${number}`}
+                  value={formData[`feature${number}`]}
+                  onChange={handleChange}
+                />
+              ))}
             </div>
 
             <h3 className="text-xl font-bold text-slate-800 mt-6 mb-5">
@@ -1093,36 +955,32 @@ const EditHome = () => {
             </h3>
 
             <div className="grid md:grid-cols-2 gap-6">
-
               {[1, 2].map((number) => (
-
                 <div
                   key={number}
                   className="border border-slate-200 rounded-2xl p-5"
                 >
-
                   <Input
                     label={`Statistic ${number} Number`}
                     name={`stat${number}Number`}
+                    value={formData[`stat${number}Number`]}
+                    onChange={handleChange}
                   />
 
                   <Input
                     label={`Statistic ${number} Text`}
                     name={`stat${number}Text`}
+                    value={formData[`stat${number}Text`]}
+                    onChange={handleChange}
                   />
-
                 </div>
-
               ))}
-
             </div>
-
           </div>
 
           {/* FOCUS AREAS */}
 
           <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 md:p-10">
-
             <h2 className="text-2xl font-bold text-slate-800 mb-8">
               Focus Areas
             </h2>
@@ -1130,52 +988,58 @@ const EditHome = () => {
             <Input
               label="Section Label"
               name="focusLabel"
+              value={formData.focusLabel}
+              onChange={handleChange}
             />
 
             <Input
               label="Main Heading"
               name="focusHeading"
+              value={formData.focusHeading}
+              onChange={handleChange}
             />
 
             <Textarea
               label="Section Description"
               name="focusDescription"
+              value={formData.focusDescription}
+              onChange={handleChange}
             />
 
-            {[1, 2, 3, 4].map(
-              (number) => (
+            {[1, 2, 3, 4].map((number) => (
+              <div
+                key={number}
+                className="border border-slate-200 rounded-2xl p-6 mb-6"
+              >
+                <h3 className="text-xl font-bold text-slate-800 mb-5">
+                  Focus Area {number}
+                </h3>
 
-                <div
-                  key={number}
-                  className="border border-slate-200 rounded-2xl p-6 mb-6"
-                >
+                <Input
+                  label="Title"
+                  name={`focus${number}Title`}
+                  value={formData[`focus${number}Title`]}
+                  onChange={handleChange}
+                />
 
-                  <h3 className="text-xl font-bold text-slate-800 mb-5">
-                    Focus Area {number}
-                  </h3>
-
-                  <Input
-                    label="Title"
-                    name={`focus${number}Title`}
-                  />
-
-                  <Textarea
-                    label="Description"
-                    name={`focus${number}Description`}
-                    rows={4}
-                  />
-
-                </div>
-
-              )
-            )}
-
+                <Textarea
+                  label="Description"
+                  name={`focus${number}Description`}
+                  value={
+                    formData[
+                      `focus${number}Description`
+                    ]
+                  }
+                  onChange={handleChange}
+                  rows={4}
+                />
+              </div>
+            ))}
           </div>
 
           {/* DEVELOPMENT */}
 
           <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 md:p-10">
-
             <h2 className="text-2xl font-bold text-slate-800 mb-8">
               Development Highlights
             </h2>
@@ -1183,92 +1047,98 @@ const EditHome = () => {
             <Input
               label="Section Label"
               name="developmentLabel"
+              value={formData.developmentLabel}
+              onChange={handleChange}
             />
 
             <Input
               label="Main Heading"
               name="developmentHeading"
+              value={formData.developmentHeading}
+              onChange={handleChange}
             />
 
             <Textarea
               label="Section Description"
               name="developmentDescription"
+              value={formData.developmentDescription}
+              onChange={handleChange}
             />
 
-            {[1, 2, 3, 4].map(
-              (number) => {
+            {[1, 2, 3, 4].map((number) => {
+              const previews = [
+                previewDevelopment1Image,
+                previewDevelopment2Image,
+                previewDevelopment3Image,
+                previewDevelopment4Image,
+              ];
 
-                const previews = [
-                  previewDevelopment1Image,
-                  previewDevelopment2Image,
-                  previewDevelopment3Image,
-                  previewDevelopment4Image,
-                ];
+              const selectedSetters = [
+                setSelectedDevelopment1Image,
+                setSelectedDevelopment2Image,
+                setSelectedDevelopment3Image,
+                setSelectedDevelopment4Image,
+              ];
 
-                const selectedSetters = [
-                  setSelectedDevelopment1Image,
-                  setSelectedDevelopment2Image,
-                  setSelectedDevelopment3Image,
-                  setSelectedDevelopment4Image,
-                ];
+              const previewSetters = [
+                setPreviewDevelopment1Image,
+                setPreviewDevelopment2Image,
+                setPreviewDevelopment3Image,
+                setPreviewDevelopment4Image,
+              ];
 
-                const previewSetters = [
-                  setPreviewDevelopment1Image,
-                  setPreviewDevelopment2Image,
-                  setPreviewDevelopment3Image,
-                  setPreviewDevelopment4Image,
-                ];
+              return (
+                <div
+                  key={number}
+                  className="border border-slate-200 rounded-2xl p-6 mb-6"
+                >
+                  <h3 className="text-xl font-bold text-slate-800 mb-5">
+                    Development Highlight {number}
+                  </h3>
 
-                return (
-                  <div
-                    key={number}
-                    className="border border-slate-200 rounded-2xl p-6 mb-6"
-                  >
+                  <Input
+                    label="Title"
+                    name={`development${number}Title`}
+                    value={
+                      formData[
+                        `development${number}Title`
+                      ]
+                    }
+                    onChange={handleChange}
+                  />
 
-                    <h3 className="text-xl font-bold text-slate-800 mb-5">
-                      Development Highlight {number}
-                    </h3>
+                  <Textarea
+                    label="Description"
+                    name={`development${number}Description`}
+                    value={
+                      formData[
+                        `development${number}Description`
+                      ]
+                    }
+                    onChange={handleChange}
+                    rows={4}
+                  />
 
-                    <Input
-                      label="Title"
-                      name={`development${number}Title`}
-                    />
-
-                    <Textarea
-                      label="Description"
-                      name={`development${number}Description`}
-                      rows={4}
-                    />
-
-                    <ImageInput
-                      label="Image"
-                      preview={
-                        previews[number - 1]
-                      }
-                      setSelected={
-                        selectedSetters[
-                          number - 1
-                        ]
-                      }
-                      setPreview={
-                        previewSetters[
-                          number - 1
-                        ]
-                      }
-                      alt={`Development ${number}`}
-                    />
-
-                  </div>
-                );
-              }
-            )}
-
+                  <ImageInput
+                    label="Image"
+                    preview={previews[number - 1]}
+                    setSelected={
+                      selectedSetters[number - 1]
+                    }
+                    setPreview={
+                      previewSetters[number - 1]
+                    }
+                    alt={`Development ${number}`}
+                    onImageChange={handleImageChange}
+                  />
+                </div>
+              );
+            })}
           </div>
 
           {/* GALLERY */}
 
           <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 md:p-10">
-
             <h2 className="text-2xl font-bold text-slate-800 mb-8">
               Gallery Preview
             </h2>
@@ -1276,85 +1146,78 @@ const EditHome = () => {
             <Input
               label="Section Label"
               name="galleryLabel"
+              value={formData.galleryLabel}
+              onChange={handleChange}
             />
 
             <Input
               label="Main Heading"
               name="galleryHeading"
+              value={formData.galleryHeading}
+              onChange={handleChange}
             />
 
             <Textarea
               label="Section Description"
               name="galleryDescription"
+              value={formData.galleryDescription}
+              onChange={handleChange}
             />
 
             <Input
               label="Main Image Title"
               name="galleryMainTitle"
+              value={formData.galleryMainTitle}
+              onChange={handleChange}
             />
 
             <div className="grid md:grid-cols-2 gap-6">
-
               <Input
                 label="Moments Number"
                 name="galleryMomentsNumber"
+                value={formData.galleryMomentsNumber}
+                onChange={handleChange}
               />
 
               <Input
                 label="Moments Text"
                 name="galleryMomentsText"
+                value={formData.galleryMomentsText}
+                onChange={handleChange}
               />
-
             </div>
 
             {[
               {
-                preview:
-                  previewGalleryImage1,
-                selected:
-                  setSelectedGalleryImage1,
-                previewSetter:
-                  setPreviewGalleryImage1,
+                preview: previewGalleryImage1,
+                selected: setSelectedGalleryImage1,
+                previewSetter: setPreviewGalleryImage1,
               },
               {
-                preview:
-                  previewGalleryImage2,
-                selected:
-                  setSelectedGalleryImage2,
-                previewSetter:
-                  setPreviewGalleryImage2,
+                preview: previewGalleryImage2,
+                selected: setSelectedGalleryImage2,
+                previewSetter: setPreviewGalleryImage2,
               },
               {
-                preview:
-                  previewGalleryImage3,
-                selected:
-                  setSelectedGalleryImage3,
-                previewSetter:
-                  setPreviewGalleryImage3,
+                preview: previewGalleryImage3,
+                selected: setSelectedGalleryImage3,
+                previewSetter: setPreviewGalleryImage3,
               },
               {
-                preview:
-                  previewGalleryImage4,
-                selected:
-                  setSelectedGalleryImage4,
-                previewSetter:
-                  setPreviewGalleryImage4,
+                preview: previewGalleryImage4,
+                selected: setSelectedGalleryImage4,
+                previewSetter: setPreviewGalleryImage4,
               },
               {
-                preview:
-                  previewGalleryImage5,
-                selected:
-                  setSelectedGalleryImage5,
-                previewSetter:
-                  setPreviewGalleryImage5,
+                preview: previewGalleryImage5,
+                selected: setSelectedGalleryImage5,
+                previewSetter: setPreviewGalleryImage5,
               },
             ].map((image, index) => (
-
               <div
                 key={index}
                 className="border border-slate-200 rounded-2xl p-6 mb-6"
               >
-
                 <h3 className="text-lg font-semibold mb-5">
                   Gallery Image {index + 1}
                 </h3>
@@ -1362,25 +1225,18 @@ const EditHome = () => {
                 <ImageInput
                   label="Upload Image"
                   preview={image.preview}
-                  setSelected={
-                    image.selected
-                  }
-                  setPreview={
-                    image.previewSetter
-                  }
+                  setSelected={image.selected}
+                  setPreview={image.previewSetter}
                   alt={`Gallery ${index + 1}`}
+                  onImageChange={handleImageChange}
                 />
-
               </div>
-
             ))}
-
           </div>
 
-          {/* NEWS PREVIEW */}
+          {/* NEWS */}
 
           <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 md:p-10">
-
             <h2 className="text-2xl font-bold text-slate-800 mb-8">
               News Preview
             </h2>
@@ -1388,23 +1244,26 @@ const EditHome = () => {
             <Input
               label="Section Label"
               name="newsLabel"
+              value={formData.newsLabel}
+              onChange={handleChange}
               placeholder="Latest News"
             />
 
             <Input
               label="Main Heading"
               name="newsHeading"
+              value={formData.newsHeading}
+              onChange={handleChange}
             />
 
             <Textarea
               label="Section Description"
               name="newsDescription"
+              value={formData.newsDescription}
+              onChange={handleChange}
             />
 
-            {/* FEATURED NEWS */}
-
             <div className="border border-slate-200 rounded-2xl p-6 mb-6">
-
               <h3 className="text-xl font-bold text-slate-800 mb-6">
                 Featured News
               </h3>
@@ -1412,24 +1271,30 @@ const EditHome = () => {
               <Input
                 label="Date"
                 name="featuredNewsDate"
+                value={formData.featuredNewsDate}
+                onChange={handleChange}
               />
 
               <Input
                 label="Title"
                 name="featuredNewsTitle"
+                value={formData.featuredNewsTitle}
+                onChange={handleChange}
               />
 
               <Textarea
                 label="Description"
                 name="featuredNewsDescription"
+                value={
+                  formData.featuredNewsDescription
+                }
+                onChange={handleChange}
                 rows={5}
               />
 
               <ImageInput
                 label="Featured News Image"
-                preview={
-                  previewFeaturedNewsImage
-                }
+                preview={previewFeaturedNewsImage}
                 setSelected={
                   setSelectedFeaturedNewsImage
                 }
@@ -1437,14 +1302,11 @@ const EditHome = () => {
                   setPreviewFeaturedNewsImage
                 }
                 alt="Featured news"
+                onImageChange={handleImageChange}
               />
-
             </div>
 
-            {/* NEWS 1 */}
-
             <div className="border border-slate-200 rounded-2xl p-6 mb-6">
-
               <h3 className="text-xl font-bold text-slate-800 mb-6">
                 Recent News 1
               </h3>
@@ -1452,31 +1314,28 @@ const EditHome = () => {
               <Input
                 label="Date"
                 name="news1Date"
+                value={formData.news1Date}
+                onChange={handleChange}
               />
 
               <Input
                 label="Title"
                 name="news1Title"
+                value={formData.news1Title}
+                onChange={handleChange}
               />
 
               <ImageInput
                 label="News Image"
                 preview={previewNews1Image}
-                setSelected={
-                  setSelectedNews1Image
-                }
-                setPreview={
-                  setPreviewNews1Image
-                }
+                setSelected={setSelectedNews1Image}
+                setPreview={setPreviewNews1Image}
                 alt="News 1"
+                onImageChange={handleImageChange}
               />
-
             </div>
 
-            {/* NEWS 2 */}
-
             <div className="border border-slate-200 rounded-2xl p-6">
-
               <h3 className="text-xl font-bold text-slate-800 mb-6">
                 Recent News 2
               </h3>
@@ -1484,33 +1343,31 @@ const EditHome = () => {
               <Input
                 label="Date"
                 name="news2Date"
+                value={formData.news2Date}
+                onChange={handleChange}
               />
 
               <Input
                 label="Title"
                 name="news2Title"
+                value={formData.news2Title}
+                onChange={handleChange}
               />
 
               <ImageInput
                 label="News Image"
                 preview={previewNews2Image}
-                setSelected={
-                  setSelectedNews2Image
-                }
-                setPreview={
-                  setPreviewNews2Image
-                }
+                setSelected={setSelectedNews2Image}
+                setPreview={setPreviewNews2Image}
                 alt="News 2"
+                onImageChange={handleImageChange}
               />
-
             </div>
-
           </div>
 
           {/* CONTACT CTA */}
 
           <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 md:p-10">
-
             <h2 className="text-2xl font-bold text-slate-800 mb-8">
               Contact CTA Section
             </h2>
@@ -1518,54 +1375,62 @@ const EditHome = () => {
             <Input
               label="Section Label"
               name="contactLabel"
+              value={formData.contactLabel}
+              onChange={handleChange}
               placeholder="Get In Touch"
             />
 
             <Textarea
               label="Main Heading"
               name="contactHeading"
+              value={formData.contactHeading}
+              onChange={handleChange}
               rows={3}
             />
 
             <Textarea
               label="Description"
               name="contactDescription"
+              value={formData.contactDescription}
+              onChange={handleChange}
               rows={5}
             />
 
             <div className="grid md:grid-cols-2 gap-6">
-
               <Input
                 label="Phone Number"
                 name="contactPhone"
+                value={formData.contactPhone}
+                onChange={handleChange}
                 placeholder="+91 98765 43210"
               />
 
               <Input
                 label="Email Address"
                 name="contactEmail"
+                value={formData.contactEmail}
+                onChange={handleChange}
               />
 
               <Input
                 label="Office Location"
                 name="contactOffice"
+                value={formData.contactOffice}
+                onChange={handleChange}
                 placeholder="Dharmapuri, Telangana"
               />
 
               <Input
                 label="Button Text"
                 name="contactButtonText"
+                value={formData.contactButtonText}
+                onChange={handleChange}
                 placeholder="Contact Office"
               />
-
             </div>
-
           </div>
 
-          {/* MESSAGE */}
-
           {message && (
-
             <div
               className={`px-5 py-4 rounded-xl border ${
                 message.startsWith("Error")
@@ -1575,13 +1440,9 @@ const EditHome = () => {
             >
               {message}
             </div>
-
           )}
 
-          {/* BUTTONS */}
-
           <div className="flex justify-end gap-4 pb-10">
-
             <button
               type="button"
               onClick={() =>
@@ -1601,13 +1462,9 @@ const EditHome = () => {
                 ? "Saving..."
                 : "Save All Changes"}
             </button>
-
           </div>
-
         </form>
-
       </div>
-
     </div>
   );
 };

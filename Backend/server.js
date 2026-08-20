@@ -10,6 +10,7 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 
 const app = express();
+app.set("trust proxy", true);
 
 const PORT = process.env.PORT || 5000;
 const authRoutes = require("./routes/authRoutes");
@@ -409,6 +410,33 @@ const saveContent = (
 };
 
 
+const resolveContentUrls = (value, req) => {
+  if (Array.isArray(value)) {
+    return value.map((item) =>
+      resolveContentUrls(item, req)
+    );
+  }
+
+  if (value && typeof value === "object") {
+    return Object.fromEntries(
+      Object.entries(value).map(([key, item]) => [
+        key,
+        resolveContentUrls(item, req),
+      ])
+    );
+  }
+
+  if (
+    typeof value === "string" &&
+    value.startsWith("/uploads/")
+  ) {
+    return `${req.protocol}://${req.get("host")}${value}`;
+  }
+
+  return value;
+};
+
+
 // =====================================
 // HELPER FUNCTION
 // =====================================
@@ -425,7 +453,7 @@ const getUploadedImage = (
     files[fieldName][0]
   ) {
 
-    return `http://localhost:${PORT}/uploads/${files[fieldName][0].filename}`;
+    return `/uploads/${files[fieldName][0].filename}`;
 
   }
 
@@ -583,7 +611,7 @@ app.get(
         readContent();
 
       res.status(200).json(
-        content
+        resolveContentUrls(content, req)
       );
 
     } catch (error) {
@@ -1336,6 +1364,114 @@ app.put(
 
   }
 
+);
+
+
+// =====================================
+// UPDATE ABOUT CONTENT
+// =====================================
+
+app.put(
+  "/api/content/about",
+  authenticateAdmin,
+  (req, res) => {
+    try {
+      const content = readContent();
+
+      content.about = {
+        ...(content.about || {}),
+        aboutName: req.body.aboutName || "",
+        aboutPosition: req.body.aboutPosition || "",
+        aboutDescription: req.body.aboutDescription || "",
+      };
+
+      saveContent(content);
+
+      res.status(200).json({
+        success: true,
+        message: "About content updated successfully!",
+        about: content.about,
+      });
+    } catch (error) {
+      console.error("Error updating About content:", error);
+
+      res.status(500).json({
+        success: false,
+        message: "Failed to update About content",
+      });
+    }
+  }
+);
+
+
+// =====================================
+// UPDATE BIOGRAPHY CONTENT
+// =====================================
+
+app.put(
+  "/api/content/biography",
+  authenticateAdmin,
+  (req, res) => {
+    try {
+      const content = readContent();
+
+      content.biography = {
+        ...(content.biography || {}),
+        biographyContent: req.body.biographyContent || "",
+      };
+
+      saveContent(content);
+
+      res.status(200).json({
+        success: true,
+        message: "Biography updated successfully!",
+        biography: content.biography,
+      });
+    } catch (error) {
+      console.error("Error updating biography:", error);
+
+      res.status(500).json({
+        success: false,
+        message: "Failed to update biography",
+      });
+    }
+  }
+);
+
+
+// =====================================
+// UPDATE DEVELOPMENT CONTENT
+// =====================================
+
+app.put(
+  "/api/content/development",
+  authenticateAdmin,
+  (req, res) => {
+    try {
+      const content = readContent();
+
+      content.development = {
+        ...(content.development || {}),
+        title: req.body.developmentTitle || "",
+        description: req.body.developmentDescription || "",
+      };
+
+      saveContent(content);
+
+      res.status(200).json({
+        success: true,
+        message: "Development content updated successfully!",
+        development: content.development,
+      });
+    } catch (error) {
+      console.error("Error updating development content:", error);
+
+      res.status(500).json({
+        success: false,
+        message: "Failed to update development content",
+      });
+    }
+  }
 );
 
 
@@ -2479,6 +2615,218 @@ app.delete(
     }
   }
 );
+// =====================================
+// ARTICLES API
+// =====================================
+
+app.get(
+  "/api/articles",
+  async (req, res) => {
+    try {
+      const result = await pool.query(`
+        SELECT
+          id,
+          title,
+          summary,
+          content,
+          category,
+          image_url,
+          published_date,
+          link,
+          created_at,
+          updated_at
+        FROM articles
+        ORDER BY published_date DESC NULLS LAST, id DESC
+      `);
+
+      res.json({
+        success: true,
+        data: result.rows,
+      });
+    } catch (error) {
+      console.error("GET ARTICLES ERROR:", error);
+
+      res.status(500).json({
+        success: false,
+        message: "Unable to load articles",
+      });
+    }
+  }
+);
+
+app.post(
+  "/api/articles",
+  authenticateAdmin,
+  upload.single("image"),
+  async (req, res) => {
+    try {
+      const {
+        title,
+        summary,
+        content,
+        category,
+        published_date,
+        link,
+      } = req.body;
+
+      if (!title || !title.trim()) {
+        return res.status(400).json({
+          success: false,
+          message: "Article title is required",
+        });
+      }
+
+      const imageUrl = req.file
+        ? `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`
+        : "";
+
+      const result = await pool.query(
+        `
+        INSERT INTO articles
+          (title, summary, content, category, image_url, published_date, link)
+        VALUES ($1, $2, $3, $4, $5, $6, $7)
+        RETURNING *
+        `,
+        [
+          title.trim(),
+          summary || "",
+          content || "",
+          category || "Article",
+          imageUrl,
+          published_date || null,
+          link || "",
+        ]
+      );
+
+      res.status(201).json({
+        success: true,
+        message: "Article added successfully",
+        data: result.rows[0],
+      });
+    } catch (error) {
+      console.error("CREATE ARTICLE ERROR:", error);
+
+      res.status(500).json({
+        success: false,
+        message: "Unable to create article",
+      });
+    }
+  }
+);
+
+app.put(
+  "/api/articles/:id",
+  authenticateAdmin,
+  upload.single("image"),
+  async (req, res) => {
+    try {
+      const existing = await pool.query(
+        "SELECT image_url FROM articles WHERE id = $1",
+        [req.params.id]
+      );
+
+      if (existing.rows.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: "Article not found",
+        });
+      }
+
+      const {
+        title,
+        summary,
+        content,
+        category,
+        published_date,
+        link,
+      } = req.body;
+
+      if (!title || !title.trim()) {
+        return res.status(400).json({
+          success: false,
+          message: "Article title is required",
+        });
+      }
+
+      const imageUrl = req.file
+        ? `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`
+        : existing.rows[0].image_url || "";
+
+      const result = await pool.query(
+        `
+        UPDATE articles
+        SET
+          title = $1,
+          summary = $2,
+          content = $3,
+          category = $4,
+          image_url = $5,
+          published_date = $6,
+          link = $7,
+          updated_at = CURRENT_TIMESTAMP
+        WHERE id = $8
+        RETURNING *
+        `,
+        [
+          title.trim(),
+          summary || "",
+          content || "",
+          category || "Article",
+          imageUrl,
+          published_date || null,
+          link || "",
+          req.params.id,
+        ]
+      );
+
+      res.json({
+        success: true,
+        message: "Article updated successfully",
+        data: result.rows[0],
+      });
+    } catch (error) {
+      console.error("UPDATE ARTICLE ERROR:", error);
+
+      res.status(500).json({
+        success: false,
+        message: "Unable to update article",
+      });
+    }
+  }
+);
+
+app.delete(
+  "/api/articles/:id",
+  authenticateAdmin,
+  async (req, res) => {
+    try {
+      const result = await pool.query(
+        "DELETE FROM articles WHERE id = $1 RETURNING id",
+        [req.params.id]
+      );
+
+      if (result.rows.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: "Article not found",
+        });
+      }
+
+      res.json({
+        success: true,
+        message: "Article deleted successfully",
+      });
+    } catch (error) {
+      console.error("DELETE ARTICLE ERROR:", error);
+
+      res.status(500).json({
+        success: false,
+        message: "Unable to delete article",
+      });
+    }
+  }
+);
+
 //NEW API
 app.get(
   "/api/news",
@@ -3323,12 +3671,7 @@ app.delete(
 app.get("/api/test-env", (req, res) => {
   res.json({
     success: true,
-    adminUsername:
-      process.env.ADMIN_USERNAME || "NOT FOUND",
-
-    adminPasswordConfigured:
-      !!process.env.ADMIN_PASSWORD,
-
+    adminAuthentication: "PostgreSQL admins table",
     jwtSecretConfigured:
       !!process.env.JWT_SECRET,
 
@@ -3346,17 +3689,16 @@ app.get("/api/test-env", (req, res) => {
 
 app.listen(PORT, () => {
   console.log(
-    `Server running on http://localhost:${PORT}`
+    `Server running on port ${PORT}`
   );
 
   console.log(
-    "ADMIN_USERNAME:",
-    process.env.ADMIN_USERNAME || "NOT FOUND"
+    "Admin authentication: PostgreSQL admins table"
   );
 
   console.log(
-    "ADMIN_PASSWORD configured:",
-    process.env.ADMIN_PASSWORD ? "YES" : "NO"
+    "Database configured:",
+    process.env.DB_HOST && process.env.DB_NAME ? "YES" : "NO"
   );
 
   console.log(

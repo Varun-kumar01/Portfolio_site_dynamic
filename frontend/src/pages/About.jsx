@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { API_BASE_URL } from "../config";
 
 import SectionTitle from "../components/common/SectionTitle";
 import ProfileTabs from "../components/profile/ProfileTabs";
@@ -23,7 +24,7 @@ const About = () => {
     const loadAboutContent = async () => {
       try {
         const response = await fetch(
-          "http://localhost:5000/api/content"
+          `${API_BASE_URL}/api/content`
         );
 
         if (!response.ok) {

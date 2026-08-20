@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { authFetch } from "../services/authFetch";
+import { API_BASE_URL } from "../config";
 
 import {
   DndContext,
@@ -18,7 +20,7 @@ import {
 
 import { CSS } from "@dnd-kit/utilities";
 
-const API_URL = "http://localhost:5000/api/news";
+const API_URL = `${API_BASE_URL}/api/news`;
 
 // =====================================================
 // EMPTY FORM
@@ -308,7 +310,7 @@ const AdminNews = () => {
       setError("");
 
       const response =
-        await fetch(
+        await authFetch(
           `${API_URL}?t=${Date.now()}`
         );
 
@@ -507,7 +509,7 @@ const AdminNews = () => {
           : "POST";
 
       const response =
-        await fetch(
+        await authFetch(
           url,
           {
             method,
@@ -624,7 +626,7 @@ const AdminNews = () => {
         setSuccess("");
 
         const response =
-          await fetch(
+          await authFetch(
             `${API_URL}/${id}`,
             {
               method: "DELETE",
@@ -689,7 +691,7 @@ const AdminNews = () => {
           reorderedNews[index];
 
         const response =
-          await fetch(
+          await authFetch(
             `${API_URL}/${item.id}`,
             {
               method: "PUT",

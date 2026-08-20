@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Lock, User, Eye, EyeOff, LogIn } from "lucide-react";
+import { API_BASE_URL } from "../config";
 
 const AdminLogin = () => {
   const navigate = useNavigate();
@@ -25,7 +26,7 @@ const AdminLogin = () => {
       setLoading(true);
 
       const response = await fetch(
-        "http://localhost:5000/api/secure/admin/login",
+        `${API_BASE_URL}/api/secure/admin/login`,
         {
           method: "POST",
           headers: {

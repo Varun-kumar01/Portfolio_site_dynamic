@@ -2,6 +2,7 @@ import {
   useEffect,
   useState,
 } from "react";
+import { API_BASE_URL } from "../config";
 
 import Hero from "../components/home/Hero";
 import AboutPreview from "../components/home/AboutPreview";
@@ -45,7 +46,7 @@ const Home = () => {
 
           const response =
             await fetch(
-              "http://localhost:5000/api/content",
+              `${API_BASE_URL}/api/content`,
               {
                 method:
                   "GET",

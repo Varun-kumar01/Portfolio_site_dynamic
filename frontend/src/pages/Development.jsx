@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { API_BASE_URL } from "../config";
 
 const Development = () => {
   const [development, setDevelopment] = useState({
@@ -17,7 +18,7 @@ const Development = () => {
     const loadDevelopment = async () => {
       try {
         const response = await fetch(
-          "http://localhost:5000/api/content"
+          `${API_BASE_URL}/api/content`
         );
 
         const data = await response.json();

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { Menu, X } from "lucide-react";
+import { API_BASE_URL } from "../../config";
 
 import {
   FaFacebookF,
@@ -60,7 +61,7 @@ export default function Navbar() {
       try {
 
         const response = await fetch(
-          "http://localhost:5000/api/content"
+          `${API_BASE_URL}/api/content`
         );
 
         if (!response.ok) {

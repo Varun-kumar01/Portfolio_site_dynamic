@@ -8,6 +8,7 @@
 
 
 // import SocialLinks from "./SocialLinks";
+import { API_BASE_URL } from "../../config";
 
 // const ContactCard = () => {
 //   return (
@@ -172,7 +173,7 @@ const ContactCard = () => {
 
 
         const response = await fetch(
-          "http://localhost:5000/api/content"
+          `${API_BASE_URL}/api/content`
         );
 
 

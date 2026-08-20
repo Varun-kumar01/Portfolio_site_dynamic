@@ -12,9 +12,11 @@ async function resetAdmin() {
       `UPDATE admins
        SET password_hash = $1,
            name = $2,
+           email = $5,
            role = $3,
            is_active = $4
-       WHERE email = $5`,
+         WHERE email = $5
+          OR name = $2`,
       [passwordHash, "admin", "admin", true, email]
     );
 

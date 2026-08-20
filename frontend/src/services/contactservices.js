@@ -1,4 +1,6 @@
-const API_URL = "http://localhost:5000/api/contacts";
+import { API_BASE_URL } from "../config";
+
+const API_URL = `${API_BASE_URL}/api/contacts`;
 
 export const getContacts = async () => {
     const response = await fetch(API_URL);
