@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Play, X } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { API_BASE_URL } from "../config";
 
 /* =========================================================
@@ -410,6 +411,7 @@ function mergePhotos(
 ========================================================= */
 
 export default function Gallery() {
+  const { i18n, t } = useTranslation();
   /* =======================================================
      TYPE
   ======================================================= */
@@ -494,7 +496,7 @@ export default function Gallery() {
       );
 
       const response = await fetch(
-        `${PHOTO_API_URL}?t=${Date.now()}`,
+        `${PHOTO_API_URL}?lang=${i18n.language?.startsWith("te") ? "te" : "en"}&t=${Date.now()}`,
         {
           method: "GET",
           cache: "no-store",
@@ -694,7 +696,7 @@ export default function Gallery() {
       setLoadingVideos(true);
 
       const response = await fetch(
-        `${VIDEO_API_URL}?t=${Date.now()}`,
+        `${VIDEO_API_URL}?lang=${i18n.language?.startsWith("te") ? "te" : "en"}&t=${Date.now()}`,
         {
           method: "GET",
           cache: "no-store",
@@ -822,7 +824,7 @@ export default function Gallery() {
     loadPhotos();
 
     loadVideos();
-  }, []);
+  }, [i18n.language]);
 
   /* =======================================================
      REFRESH WHEN ADMIN CHANGES GALLERY
@@ -972,6 +974,18 @@ export default function Gallery() {
       ? photoError
       : "";
 
+  const categoryLabels = {
+    All: "all",
+    "Public Events": "publicEvents",
+    Constituency: "constituency",
+    Meetings: "meetings",
+    Events: "events",
+  };
+  const translateCategory = (value) =>
+    categoryLabels[value]
+      ? t(`gallery.${categoryLabels[value]}`)
+      : value;
+
   /* =======================================================
      UI
   ======================================================= */
@@ -994,18 +1008,15 @@ export default function Gallery() {
             <div className="max-w-2xl">
 
               <span className="text-sm font-semibold uppercase tracking-[0.25em] text-orange-600">
-                Media Gallery
+                {t("gallery.pageTitle")}
               </span>
 
               <h2 className="mt-3 text-3xl font-bold text-slate-900 md:text-4xl lg:text-5xl">
-                Moments of Public Service
+                {t("gallery.momentsTitle")}
               </h2>
 
               <p className="mt-4 leading-8 text-gray-600">
-                Explore photographs and videos
-                capturing public programmes,
-                constituency visits, meetings
-                and important events.
+                {t("gallery.momentsSubtitle")}
               </p>
 
             </div>
@@ -1027,7 +1038,7 @@ export default function Gallery() {
                     : "text-slate-600 hover:text-orange-600"
                 }`}
               >
-                Photos
+                {t("gallery.photos")}
               </button>
 
               <button
@@ -1041,7 +1052,7 @@ export default function Gallery() {
                     : "text-slate-600 hover:text-orange-600"
                 }`}
               >
-                Videos
+                {t("gallery.videos")}
               </button>
 
             </div>
@@ -1055,9 +1066,7 @@ export default function Gallery() {
           {type === "video" &&
             usingVideoCache && (
               <div className="mt-6 rounded-xl border border-yellow-200 bg-yellow-50 px-4 py-3 text-sm text-yellow-700">
-                Showing saved video information
-                because the video backend is
-                temporarily unavailable.
+                {t("gallery.cachedVideos", "Showing saved video information because the video backend is temporarily unavailable.")}
               </div>
             )}
 
@@ -1081,7 +1090,7 @@ export default function Gallery() {
                       : "border-slate-200 bg-white text-slate-600 hover:border-orange-500 hover:text-orange-600"
                   }`}
                 >
-                  {item}
+                  {translateCategory(item)}
                 </button>
               )
             )}
@@ -1101,8 +1110,8 @@ export default function Gallery() {
 
                 <p className="text-sm text-gray-500">
                   {type === "photo"
-                    ? "Loading gallery photos..."
-                    : "Loading videos..."}
+                    ? t("common.loading")
+                    : t("common.loading")}
                 </p>
 
               </div>
@@ -1134,7 +1143,7 @@ export default function Gallery() {
                   }
                   className="mt-4 rounded-lg bg-orange-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-orange-700"
                 >
-                  Try Again
+                  {t("common.tryAgain", "Try Again")}
                 </button>
 
               </div>
@@ -1151,18 +1160,14 @@ export default function Gallery() {
             type === "photo" &&
             !currentError && (
               <div className="mt-8 text-sm text-gray-500">
-                Showing{" "}
+                {t("gallery.showing")} {" "}
                 <span className="font-semibold text-gray-800">
                   {filteredItems.length}
                 </span>{" "}
-                photo
-                {filteredItems.length !==
-                1
-                  ? "s"
-                  : ""}
+                {filteredItems.length !== 1 ? t("gallery.photos") : t("gallery.photo")}
                 {category !==
                   "All" &&
-                  ` in ${category}`}
+                  ` ${t("gallery.inCategory")} ${translateCategory(category)}`}
               </div>
             )}
 
@@ -1449,13 +1454,7 @@ export default function Gallery() {
               <div className="mt-12 rounded-3xl border border-slate-100 bg-slate-50 py-20 text-center">
 
                 <p className="text-gray-500">
-                  No{" "}
-                  {type ===
-                  "photo"
-                    ? "photos"
-                    : "videos"}{" "}
-                  found in this
-                  category.
+                  {t(type === "photo" ? "gallery.noPhotosFound" : "gallery.noVideosFound")}
                 </p>
 
               </div>

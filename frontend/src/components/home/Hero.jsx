@@ -1,8 +1,10 @@
 import { ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 export default function Hero({ content }) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   // =========================
   // SAFETY CHECK
@@ -49,11 +51,11 @@ export default function Hero({ content }) {
             <div className="mt-7">
 
               <div className="text-sm sm:text-base lg:text-lg font-bold tracking-[0.45em] text-slate-500 uppercase">
-                ADLURI
+                {t("home.hero.surname")}
               </div>
 
               <h1 className="mt-2 text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-semibold leading-[1.05] tracking-tight text-slate-800">
-                {content.home?.heroTitle || ""}
+                {t("home.hero.name")}
               </h1>
 
             </div>
@@ -61,13 +63,13 @@ export default function Hero({ content }) {
             {/* HERO SUBTITLE */}
 
             <h2 className="mt-4 text-[1.8rem] lg:text-[2.4rem] font-semibold text-gray-800 leading-tight">
-              {content.home?.heroSubtitle || ""}
+              {t("home.hero.title")}
             </h2>
 
             {/* HERO DESCRIPTION */}
 
             <p className="mt-5 w-full text-[15px] sm:text-base lg:text-lg leading-8 text-gray-500">
-              {content.home?.heroDescription || ""}
+              {t("home.hero.description")}
             </p>
 
             {/* BUTTONS */}
@@ -78,7 +80,7 @@ export default function Hero({ content }) {
                 onClick={() => navigate("/journey")}
                 className="group bg-orange-600 hover:bg-orange-700 transition-all duration-300 px-7 py-4 rounded-full text-white font-semibold flex items-center justify-center gap-3"
               >
-                Explore Journey
+                {t("home.hero.exploreJourney")}
 
                 <ArrowRight
                   size={18}
@@ -90,7 +92,7 @@ export default function Hero({ content }) {
                 onClick={() => navigate("/news")}
                 className="rounded-full border border-gray-300 hover:border-orange-600 hover:text-orange-600 transition-all duration-300 px-7 py-4 font-semibold"
               >
-                Development Works
+                {t("home.hero.developmentWorks")}
               </button>
 
             </div>

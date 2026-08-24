@@ -6,9 +6,9 @@ const API_URL = `${API_BASE_URL}/api`;
 // GET ALL WEBSITE CONTENT
 // =====================================
 
-export async function getWebsiteContent() {
+export async function getWebsiteContent(language = "en") {
   const response = await fetch(
-    `${API_URL}/content`
+    `${API_URL}/content?lang=${language}`
   );
 
   const data = await response.json();

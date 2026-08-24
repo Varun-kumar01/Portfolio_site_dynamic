@@ -1,5 +1,6 @@
 import Container from "../common/Container";
 import SectionTitle from "../common/SectionTitle";
+import { useTranslation } from "react-i18next";
 
 const timeline = [
   {
@@ -29,15 +30,16 @@ const timeline = [
 ];
 
 export default function PoliticalTimeline() {
+  const { t } = useTranslation();
   return (
     <section className="py-24 bg-white">
 
       <Container>
 
         <SectionTitle
-          subtitle="Journey"
-          title="Political Timeline"
-          description="Key milestones in the journey of public service."
+          subtitle={t("journey.pageLabel")}
+          title={t("timeline.title", "Political Timeline")}
+          description={t("timeline.description", "Key milestones in the journey of public service.")}
           center
         />
 

@@ -18,11 +18,16 @@
     "search": "Search",
     "category": "Category",
     "date": "Date",
-    "description": "Description"
+    "description": "Description",
+    "loading": "Loading...",
+    "noContent": "No website content found.",
+    "tryAgain": "Try Again"
   },
 
   "home": {
     "hero": {
+      "surname": "ADLURI",
+      "name": "LAXMAN KUMAR",
       "title": "Building a Better Telangana",
       "description": "Committed to transparent governance, inclusive growth, stronger infrastructure, quality education and public welfare.",
       "exploreJourney": "Explore Journey",
@@ -117,6 +122,10 @@
       "label": "Latest News",
       "title": "Recent Updates & Public Activities",
       "description": "Stay updated with recent constituency visits, welfare initiatives, government programmes and important public announcements.",
+      "featuredTitle": "Minister Calls for Reclaiming Encroached Government Land for the Poor",
+      "featuredDescription": "Adluri Laxman Kumar directed officials to identify illegally occupied government land and redistribute eligible land to poor families while addressing a public awareness programme in Dharmaram Mandal.",
+      "item1Title": "Annadanam Service Inaugurated at Dharmapuri Temple",
+      "item2Title": "Congress Records Complete Municipal Sweep in Dharmapuri",
       "viewAll": "View All News"
     }
   },
@@ -171,11 +180,21 @@
     "meetings": "Meetings",
     "constituency": "Constituency",
     "events": "Events",
+    "photo": "photo",
+    "showing": "Showing",
+    "inCategory": "in",
+    "cachedVideos": "Showing saved video information because the video backend is temporarily unavailable.",
     "noPhotosFound": "No photos found in this category.",
     "noVideosFound": "No videos found in this category."
   },
 
+  "videos": {
+    "title": "Video library and public appearances.",
+    "subtitle": "A collection of speeches, interviews, and event highlights."
+  },
+
   "news": {
+    "loading": "Loading news...",
     "pageLabel": "Latest Updates",
     "pageTitle": "News & Announcements",
     "pageDescription": "Follow the latest public programmes, constituency activities, welfare initiatives and important announcements.",
@@ -193,6 +212,10 @@
     "noNewsFound": "No news found",
     "tryAnother": "Try another search term or category.",
     "clearFilters": "Clear Filters",
+    "noImage": "No Image",
+    "defaultCategory": "News",
+    "defaultTitle": "Latest Public Update",
+    "defaultDescription": "Latest public programme and constituency update.",
     "items": {
       "news1": {
         "title": "Development Review Meeting Conducted Successfully",
@@ -222,6 +245,7 @@
   },
 
   "journey": {
+    "noData": "No Political Career Information",
     "pageLabel": "Political Journey",
     "pageTitle": "Political Career",
     "pageDescription": "A journey of public service, leadership, social justice and inclusive development spanning more than two decades of dedicated service to the people of Telangana.",
@@ -474,5 +498,29 @@
     "office": "Office",
     "officeAddress": "Dharmapuri, Telangana",
     "button": "Contact Office"
+  },
+
+  "profile": {
+    "label": "Profile",
+    "servingPeople": "Serving the People",
+    "party": "Party",
+    "quickProfile": "Quick Profile",
+    "atAGlance": "At a Glance",
+    "overview": "A quick overview of the public profile, leadership role and constituency represented.",
+    "fact1": "Current Position",
+    "fact2": "Political Party",
+    "fact3": "Assembly Constituency",
+    "fact4": "Public Service"
+  },
+
+  "education": {
+    "subtitle": "Education & Experience",
+    "title": "Learning, Leadership & Public Service",
+    "description": "A journey built on education, community engagement, and dedication to public welfare."
+  },
+
+  "timeline": {
+    "title": "Political Timeline",
+    "description": "Key milestones in the journey of public service."
   }
 }

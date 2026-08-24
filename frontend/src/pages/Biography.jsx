@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { API_BASE_URL } from "../config";
 
 import BiographyHero from "../components/biography/BiographyHero";
@@ -10,6 +11,7 @@ import Awards from "../components/biography/Awards";
 import GalleryStrip from "../components/biography/GalleryStrip";
 
 export default function Biography() {
+  const { i18n, t } = useTranslation();
   const [biographyContent, setBiographyContent] = useState("");
   const [loading, setLoading] = useState(true);
 
@@ -21,7 +23,9 @@ export default function Biography() {
     const loadBiography = async () => {
       try {
         const response = await fetch(
-          `${API_BASE_URL}/api/content`
+          `${API_BASE_URL}/api/content?lang=${
+            i18n.language?.startsWith("te") ? "te" : "en"
+          }`
         );
 
         const data = await response.json();
@@ -48,7 +52,7 @@ export default function Biography() {
     };
 
     loadBiography();
-  }, []);
+  }, [i18n.language]);
 
   return (
     <>
@@ -68,21 +72,28 @@ export default function Biography() {
           <div className="bg-gray-50 rounded-3xl p-8 md:p-12 shadow-sm">
 
             <span className="inline-block bg-green-700 text-white px-5 py-2 rounded-full text-sm uppercase tracking-widest">
-              Biography
+              {t("biographyTimeline.label")}
             </span>
 
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mt-6 mb-8">
-              About Adluri Laxman Kumar
+              {t("biographyTimeline.title")}
             </h2>
 
             {loading ? (
               <p className="text-gray-500">
-                Loading biography...
+                {t("common.loading")}
               </p>
             ) : (
               <div className="text-gray-700 text-lg leading-8 whitespace-pre-line">
-                {biographyContent ||
-                  "Biography content is not available."}
+                {biographyContent ? (
+                  [1, 2, 3, 4, 5].map((paragraphNumber) => (
+                    <p key={paragraphNumber} className="mb-6 last:mb-0">
+                      {t(`biographyTimeline.paragraph${paragraphNumber}`)}
+                    </p>
+                  ))
+                ) : (
+                  t("common.noContent")
+                )}
               </div>
             )}
 

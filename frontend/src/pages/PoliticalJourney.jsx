@@ -940,6 +940,7 @@
 
 
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { API_BASE_URL } from "../config";
 
 const API_URL = `${API_BASE_URL}/api/political-career`;
@@ -1101,6 +1102,7 @@ const CareerImage = ({ item }) => {
 ========================================================= */
 
 const PoliticalJourney = () => {
+  const { i18n, t } = useTranslation();
   /*
     IMPORTANT:
     Read localStorage FIRST.
@@ -1118,6 +1120,22 @@ const PoliticalJourney = () => {
   const [backendOffline, setBackendOffline] =
     useState(false);
 
+  const translatedCareer = t("journey.careerJourney", {
+    returnObjects: true,
+  });
+  const visibleCareerJourney =
+    i18n.language?.startsWith("te") &&
+    Array.isArray(translatedCareer)
+      ? translatedCareer.map((translatedItem, index) => ({
+          ...(careerJourney[index] || {}),
+          ...translatedItem,
+          image_url:
+            careerJourney[index]?.image_url ||
+            translatedItem.image_url ||
+            "",
+        }))
+      : careerJourney;
+
   /* =========================================================
      FETCH LATEST BACKEND DATA
   ========================================================= */
@@ -1125,7 +1143,7 @@ const PoliticalJourney = () => {
   const loadCareerData = async () => {
     try {
       const response = await fetch(
-        `${API_URL}?t=${Date.now()}`,
+        `${API_URL}?lang=${i18n.language?.startsWith("te") ? "te" : "en"}&t=${Date.now()}`,
         {
           cache: "no-store",
         }
@@ -1185,7 +1203,7 @@ const PoliticalJourney = () => {
 
   useEffect(() => {
     loadCareerData();
-  }, []);
+  }, [i18n.language]);
 
   /* =========================================================
      ONLY SHOW LOADING IF THERE IS NO SAVED DATA
@@ -1193,7 +1211,7 @@ const PoliticalJourney = () => {
 
   if (
     checkingBackend &&
-    careerJourney.length === 0
+    visibleCareerJourney.length === 0
   ) {
     return (
       <section className="min-h-screen bg-white">
@@ -1202,7 +1220,7 @@ const PoliticalJourney = () => {
             <div className="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-orange-200 border-t-orange-600" />
 
             <p className="mt-4 text-sm text-slate-500">
-              Loading political career...
+              {t("common.loading")}
             </p>
           </div>
         </div>
@@ -1214,13 +1232,13 @@ const PoliticalJourney = () => {
      NO DATA
   ========================================================= */
 
-  if (careerJourney.length === 0) {
+  if (visibleCareerJourney.length === 0) {
     return (
       <section className="min-h-screen bg-white">
         <div className="flex min-h-screen items-center justify-center px-6">
           <div className="rounded-2xl border border-gray-200 bg-white p-8 text-center shadow-sm">
             <h2 className="text-xl font-bold text-gray-900">
-              No Political Career Information
+              {t("journey.noData", "No Political Career Information")}
             </h2>
 
             <p className="mt-3 text-sm text-gray-500">
@@ -1233,7 +1251,7 @@ const PoliticalJourney = () => {
               onClick={loadCareerData}
               className="mt-6 rounded-lg bg-orange-600 px-5 py-3 text-sm font-semibold text-white hover:bg-orange-700"
             >
-              Try Again
+              {t("common.tryAgain", "Try Again")}
             </button>
           </div>
         </div>
@@ -1258,20 +1276,16 @@ const PoliticalJourney = () => {
                 <span className="h-[2px] w-10 bg-orange-500" />
 
                 <span className="text-xs font-bold uppercase tracking-[0.25em] text-orange-500">
-                  Political Journey
+                  {t("journey.pageLabel")}
                 </span>
               </div>
 
               <h1 className="max-w-3xl text-3xl font-bold leading-tight text-slate-900 sm:text-4xl lg:text-5xl">
-                Political Career
+                {t("journey.pageTitle")}
               </h1>
 
               <p className="mt-6 max-w-2xl text-sm leading-7 text-slate-600 sm:text-base lg:text-lg lg:leading-8">
-                A journey of public service,
-                leadership, social justice and
-                inclusive development spanning
-                more than two decades of dedicated
-                service to the people of Telangana.
+                {t("journey.pageDescription")}
               </p>
             </div>
 
@@ -1283,7 +1297,7 @@ const PoliticalJourney = () => {
                 </h3>
 
                 <p className="mt-2 text-xs uppercase tracking-[0.18em] text-slate-500">
-                  Years Experience
+                  {t("journeyStats.yearsExperience")}
                 </p>
               </div>
 
@@ -1295,7 +1309,7 @@ const PoliticalJourney = () => {
                   </h3>
 
                   <p className="mt-2 text-xs uppercase tracking-[0.15em] text-slate-500">
-                    Assembly Victory
+                    {t("journeyStats.assemblyVictory")}
                   </p>
                 </div>
 
@@ -1305,7 +1319,7 @@ const PoliticalJourney = () => {
                   </h3>
 
                   <p className="mt-2 text-xs uppercase tracking-[0.15em] text-slate-500">
-                    Cabinet Minister
+                    {t("journeyStats.cabinetMinister")}
                   </p>
                 </div>
 
@@ -1342,7 +1356,7 @@ const PoliticalJourney = () => {
 
             <div className="absolute left-1/2 top-0 h-full w-[2px] -translate-x-1/2 bg-orange-200" />
 
-            {careerJourney.map(
+            {visibleCareerJourney.map(
               (item, index) => {
 
                 const leftSide =
@@ -1418,19 +1432,15 @@ const PoliticalJourney = () => {
 
             <div>
               <div className="text-[9px] font-bold uppercase tracking-[0.2em] text-orange-400 sm:text-xs">
-                Key Highlight
+                {t("journeyStats.keyHighlight")}
               </div>
 
               <h2 className="mt-3 text-2xl font-bold leading-tight text-white sm:text-3xl lg:text-4xl">
-                From Youth Leadership to Cabinet Responsibility
+                {t("journeyStats.highlightTitle")}
               </h2>
 
               <p className="mt-4 max-w-xl text-xs leading-5 text-slate-300 sm:text-sm sm:leading-6">
-                With more than 25 years of political
-                experience, his journey reflects a
-                continued focus on public service,
-                social justice, welfare and inclusive
-                development.
+                {t("journeyStats.highlightDesc")}
               </p>
             </div>
 
@@ -1442,7 +1452,7 @@ const PoliticalJourney = () => {
                 </div>
 
                 <div className="mt-1 text-[9px] text-slate-400 sm:text-xs">
-                  Votes secured in 2023
+                  {t("journeyStats.votesSecured")}
                 </div>
               </div>
 
@@ -1452,7 +1462,7 @@ const PoliticalJourney = () => {
                 </div>
 
                 <div className="mt-1 text-[9px] text-slate-400 sm:text-xs">
-                  Victory margin
+                  {t("journeyStats.victoryMargin")}
                 </div>
               </div>
 

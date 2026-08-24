@@ -119,6 +119,7 @@ import { API_BASE_URL } from "../../config";
 
 
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import {
   Mail,
@@ -138,6 +139,7 @@ import { FaXTwitter } from "react-icons/fa6";
 
 
 const ContactCard = () => {
+  const { i18n, t } = useTranslation();
 
   const [contact, setContact] = useState({
     email: "",
@@ -173,7 +175,9 @@ const ContactCard = () => {
 
 
         const response = await fetch(
-          `${API_BASE_URL}/api/content`
+          `${API_BASE_URL}/api/content?lang=${
+            i18n.language?.startsWith("te") ? "te" : "en"
+          }`
         );
 
 
@@ -266,7 +270,7 @@ const ContactCard = () => {
 
     loadContactDetails();
 
-  }, []);
+  }, [i18n.language]);
 
 
   // =========================
@@ -281,7 +285,7 @@ const ContactCard = () => {
 
         <p className="text-slate-500">
 
-          Loading contact information...
+          {t("common.loading")}
 
         </p>
 
@@ -324,14 +328,14 @@ const ContactCard = () => {
 
       <p className="text-sm font-semibold tracking-widest text-orange-600">
 
-        CONTACT INFORMATION
+        {t("contactCard.label")}
 
       </p>
 
 
       <h2 className="text-3xl font-bold text-slate-900 mt-2">
 
-        Let’s Stay Connected
+        {t("contactCard.title")}
 
       </h2>
 
@@ -359,7 +363,7 @@ const ContactCard = () => {
 
             <h3 className="font-semibold text-slate-900">
 
-              Email
+              {t("contactCard.email")}
 
             </h3>
 
@@ -400,7 +404,7 @@ const ContactCard = () => {
 
             <h3 className="font-semibold text-slate-900">
 
-              Phone
+              {t("contactCard.phone")}
 
             </h3>
 
@@ -441,7 +445,7 @@ const ContactCard = () => {
 
             <h3 className="font-semibold text-slate-900">
 
-              Office Address
+              {t("contactCard.address")}
 
             </h3>
 
@@ -475,7 +479,7 @@ const ContactCard = () => {
 
             <h3 className="font-semibold text-slate-900">
 
-              Office Hours
+              {t("contactCard.hours")}
 
             </h3>
 
@@ -502,7 +506,7 @@ const ContactCard = () => {
 
       <h3 className="text-xl font-semibold text-slate-900 mb-5">
 
-        Follow Us
+        {t("contactCard.followUs")}
 
       </h3>
 

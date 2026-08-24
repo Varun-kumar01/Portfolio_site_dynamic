@@ -7,6 +7,7 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 const developments = [
 
@@ -46,6 +47,9 @@ export default function DevelopmentHighlights() {
   const current = developments[active];
 
   const navigate = useNavigate();
+  const { t } = useTranslation();
+  const initiativeKeys = ["healthcare", "agriculture", "infrastructure", "education"];
+  const initiativeKey = initiativeKeys[active];
 
   return (
     <section className="py-16 lg:py-20 bg-slate-50 overflow-hidden">
@@ -57,17 +61,15 @@ export default function DevelopmentHighlights() {
         <div className="max-w-2xl">
 
           <span className="uppercase tracking-[0.25em] text-orange-600 text-sm font-semibold">
-            Development Highlights
+            {t("home.development.label")}
           </span>
 
           <h2 className="mt-4 text-3xl md:text-4xl lg:text-5xl font-bold text-slate-900">
-            Building Stronger Communities
+            {t("home.development.title")}
           </h2>
 
           <p className="mt-5 text-gray-600 leading-8">
-            Development is driven by better infrastructure,
-            quality education, healthcare and sustainable
-            opportunities that improve everyday life.
+            {t("home.development.description")}
           </p>
 
         </div>
@@ -93,22 +95,22 @@ export default function DevelopmentHighlights() {
               <current.icon size={22} />
 
               <span className="font-semibold uppercase tracking-wide">
-                Featured Initiative
+                {t("home.development.featuredInitiative")}
               </span>
 
             </div>
 
             <h3 className="mt-5 text-3xl font-bold text-slate-900">
-              {current.title}
+              {t(`home.development.initiatives.${initiativeKey}.title`)}
             </h3>
 
             <p className="mt-6 text-gray-600 leading-8">
-              {current.description}
+              {t(`home.development.initiatives.${initiativeKey}.description`)}
             </p>
 
             <button onClick={() => navigate("/news")} className="mt-8 inline-flex items-center gap-2 text-orange-600 font-semibold group">
 
-              Learn More
+              {t("common.learnMore")}
 
               <ArrowRight
                 size={18}
@@ -151,7 +153,7 @@ export default function DevelopmentHighlights() {
                 />
 
                 <h4 className="mt-5 text-lg font-semibold">
-                  {item.title}
+                  {t(`home.development.initiatives.${initiativeKeys[index]}.title`)}
                 </h4>
 
                 <p
@@ -161,7 +163,7 @@ export default function DevelopmentHighlights() {
                       : "text-gray-600"
                   }`}
                 >
-                  {item.description.substring(0, 90)}...
+                  {t(`home.development.initiatives.${initiativeKeys[index]}.description`).substring(0, 90)}...
                 </p>
 
               </button>

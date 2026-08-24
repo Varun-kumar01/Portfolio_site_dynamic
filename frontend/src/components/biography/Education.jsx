@@ -1,6 +1,7 @@
 import { GraduationCap, BookOpen, Briefcase } from "lucide-react";
 import Container from "../common/Container";
 import SectionTitle from "../common/SectionTitle";
+import { useTranslation } from "react-i18next";
 
 const education = [
   {
@@ -24,14 +25,15 @@ const education = [
 ];
 
 export default function Education() {
+  const { t } = useTranslation();
   return (
     <section className="py-24 bg-gray-50">
       <Container>
 
         <SectionTitle
-          subtitle="Education & Experience"
-          title="Learning, Leadership & Public Service"
-          description="A journey built on education, community engagement, and dedication to public welfare."
+          subtitle={t("education.subtitle", "Education & Experience")}
+          title={t("education.title", "Learning, Leadership & Public Service")}
+          description={t("education.description", "A journey built on education, community engagement, and dedication to public welfare.")}
           center
         />
 

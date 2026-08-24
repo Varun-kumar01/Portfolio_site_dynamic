@@ -436,6 +436,37 @@ const resolveContentUrls = (value, req) => {
   return value;
 };
 
+const resolveLocalizedContent = (value, language = "en") => {
+  if (Array.isArray(value)) {
+    return value.map((item) =>
+      resolveLocalizedContent(item, language)
+    );
+  }
+
+  if (value && typeof value === "object") {
+    const localizedKeys = Object.keys(value);
+
+    if (
+      localizedKeys.includes("en") ||
+      localizedKeys.includes("te")
+    ) {
+      return resolveLocalizedContent(
+        value[language] ?? value.en ?? value.te ?? "",
+        language
+      );
+    }
+
+    return Object.fromEntries(
+      Object.entries(value).map(([key, item]) => [
+        key,
+        resolveLocalizedContent(item, language),
+      ])
+    );
+  }
+
+  return value;
+};
+
 
 // =====================================
 // HELPER FUNCTION
@@ -607,8 +638,10 @@ app.get(
 
     try {
 
-      const content =
-        readContent();
+      const content = resolveLocalizedContent(
+        readContent(),
+        req.query.lang === "te" ? "te" : "en"
+      );
 
       res.status(200).json(
         resolveContentUrls(content, req)

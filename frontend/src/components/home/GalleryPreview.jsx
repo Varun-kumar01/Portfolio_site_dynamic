@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import { ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { API_BASE_URL } from "../../config";
 
 export default function GalleryPreview() {
   const navigate = useNavigate();
+  const { i18n, t } = useTranslation();
 
   const [gallery, setGallery] = useState({
     label: "Gallery",
@@ -27,7 +29,9 @@ export default function GalleryPreview() {
     const loadGalleryContent = async () => {
       try {
         const response = await fetch(
-          `${API_BASE_URL}/api/content`
+          `${API_BASE_URL}/api/content?lang=${
+            i18n.language?.startsWith("te") ? "te" : "en"
+          }`
         );
 
         if (!response.ok) {
@@ -51,9 +55,16 @@ export default function GalleryPreview() {
     };
 
     loadGalleryContent();
-  }, []);
+  }, [i18n.language]);
 
   const images = gallery.images || [];
+  const galleryText = {
+    label: t("home.galleryPreview.label"),
+    heading: `${t("home.galleryPreview.titleLine1")} ${t("home.galleryPreview.titleLine2")}`,
+    description: t("home.galleryPreview.description"),
+    largeImageTitle: t("home.galleryPreview.communityDev"),
+    countText: t("home.galleryPreview.momentsLabel"),
+  };
 
   return (
     <section className="py-16 lg:py-20 bg-white">
@@ -68,19 +79,19 @@ export default function GalleryPreview() {
 
             <span className="uppercase tracking-[0.25em] text-orange-600 text-sm font-semibold">
 
-              {gallery.label}
+              {galleryText.label}
 
             </span>
 
             <h2 className="mt-4 text-3xl md:text-4xl lg:text-5xl font-bold text-slate-900">
 
-              {gallery.heading}
+              {galleryText.heading}
 
             </h2>
 
             <p className="mt-5 text-gray-600 leading-8">
 
-              {gallery.description}
+              {galleryText.description}
 
             </p>
 
@@ -91,7 +102,7 @@ export default function GalleryPreview() {
             className="inline-flex items-center gap-2 text-orange-600 font-semibold group"
           >
 
-            View Complete Gallery
+              {t("home.galleryPreview.viewComplete")}
 
             <ArrowRight
               size={18}
@@ -112,7 +123,7 @@ export default function GalleryPreview() {
 
             <img
               src={images[0]}
-              alt={gallery.largeImageTitle}
+              alt={galleryText.largeImageTitle}
               className="w-full h-[260px] md:h-[520px] object-cover transition duration-700 group-hover:scale-105"
             />
 
@@ -122,7 +133,7 @@ export default function GalleryPreview() {
 
                 <p className="text-white text-2xl font-semibold">
 
-                  {gallery.largeImageTitle}
+                  {galleryText.largeImageTitle}
 
                 </p>
 
@@ -130,7 +141,7 @@ export default function GalleryPreview() {
 
                   <span className="text-white/80">
 
-                    View Photo
+                    {t("home.galleryPreview.viewPhoto")}
 
                   </span>
 
@@ -165,7 +176,7 @@ export default function GalleryPreview() {
 
                     <span className="text-white font-semibold">
 
-                      View
+                      {t("home.galleryPreview.view")}
 
                     </span>
 
@@ -218,7 +229,7 @@ export default function GalleryPreview() {
 
             <p className="uppercase tracking-widest text-sm">
 
-              {gallery.label}
+              {galleryText.label}
 
             </p>
 
@@ -228,7 +239,7 @@ export default function GalleryPreview() {
 
               <br />
 
-              {gallery.countText}
+              {galleryText.countText}
 
             </h3>
 
@@ -237,7 +248,7 @@ export default function GalleryPreview() {
               className="mt-8 inline-flex items-center gap-2 font-semibold"
             >
 
-              Explore Gallery
+              {t("home.galleryPreview.exploreGallery")}
 
               <ArrowRight size={18} />
 

@@ -10,13 +10,15 @@
 //       <App />
 //     </BrowserRouter>
 //   </React.StrictMode>
-// );
 
+
+// ...existing code...
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import App from "./App";
 import "./index.css";
+import "./i18n/config";
 
 import "@fontsource/manrope/400.css";
 import "@fontsource/manrope/500.css";

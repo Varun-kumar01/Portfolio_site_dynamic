@@ -1,12 +1,9 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { API_BASE_URL } from "../config";
 
 const Development = () => {
-  const [development, setDevelopment] = useState({
-    title: "",
-    description: "",
-  });
-
+  const { i18n, t } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -18,7 +15,9 @@ const Development = () => {
     const loadDevelopment = async () => {
       try {
         const response = await fetch(
-          `${API_BASE_URL}/api/content`
+          `${API_BASE_URL}/api/content?lang=${
+            i18n.language?.startsWith("te") ? "te" : "en"
+          }`
         );
 
         const data = await response.json();
@@ -29,10 +28,6 @@ const Development = () => {
           );
         }
 
-        setDevelopment({
-          title: data.development?.title || "",
-          description: data.development?.description || "",
-        });
       } catch (error) {
         console.error(
           "Error loading development content:",
@@ -49,7 +44,7 @@ const Development = () => {
     };
 
     loadDevelopment();
-  }, []);
+  }, [i18n.language]);
 
   // ===============================
   // LOADING
@@ -59,7 +54,7 @@ const Development = () => {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <p className="text-gray-600">
-          Loading development content...
+          {t("common.loading")}
         </p>
       </div>
     );
@@ -91,11 +86,11 @@ const Development = () => {
         <div className="text-center mb-16">
 
           <span className="inline-block bg-green-700 text-white px-5 py-2 rounded-full text-sm uppercase tracking-widest">
-            Development
+            {t("home.development.label")}
           </span>
 
           <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mt-6">
-            {development.title}
+            {t("home.development.title")}
           </h1>
 
           <div className="mx-auto mt-6 h-1 w-24 bg-yellow-500"></div>
@@ -106,7 +101,7 @@ const Development = () => {
         <div className="bg-white rounded-2xl shadow-md p-8 md:p-12">
 
           <p className="text-gray-700 text-lg leading-8 whitespace-pre-line">
-            {development.description}
+            {t("home.development.description")}
           </p>
 
         </div>

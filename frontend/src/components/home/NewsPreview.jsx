@@ -4,10 +4,12 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { API_BASE_URL } from "../../config";
 
 export default function NewsPreview() {
   const navigate = useNavigate();
+  const { i18n, t } = useTranslation();
 
   const [newsData, setNewsData] = useState({
     label: "Latest News",
@@ -41,12 +43,15 @@ export default function NewsPreview() {
   });
 
   const [loading, setLoading] = useState(true);
+  const isTelugu = i18n.language?.startsWith("te");
 
   useEffect(() => {
     const loadNewsPreview = async () => {
       try {
         const response = await fetch(
-          `${API_BASE_URL}/api/content`
+          `${API_BASE_URL}/api/content?lang=${
+            i18n.language?.startsWith("te") ? "te" : "en"
+          }`
         );
 
         if (!response.ok) {
@@ -142,14 +147,32 @@ export default function NewsPreview() {
     };
 
     loadNewsPreview();
-  }, []);
+  }, [i18n.language]);
+
+  const localizedNews = {
+    label: t("home.newsPreview.label"),
+    heading: t("home.newsPreview.title"),
+    description: t("home.newsPreview.description"),
+    featuredTitle: isTelugu
+      ? t("home.newsPreview.featuredTitle")
+      : newsData.featured.title,
+    featuredDescription: isTelugu
+      ? t("home.newsPreview.featuredDescription")
+      : newsData.featured.description,
+    item1Title: isTelugu
+      ? t("home.newsPreview.item1Title")
+      : newsData.items[0].title,
+    item2Title: isTelugu
+      ? t("home.newsPreview.item2Title")
+      : newsData.items[1].title,
+  };
 
   if (loading) {
     return (
       <section className="py-16 lg:py-20 bg-slate-50">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <p className="text-gray-500">
-            Loading news...
+            {t("news.loading", "Loading news...")}
           </p>
         </div>
       </section>
@@ -169,19 +192,19 @@ export default function NewsPreview() {
 
             <span className="uppercase tracking-[0.25em] text-orange-600 text-sm font-semibold">
 
-              {newsData.label}
+              {localizedNews.label}
 
             </span>
 
             <h2 className="mt-4 text-3xl md:text-4xl lg:text-5xl font-bold text-slate-900">
 
-              {newsData.heading}
+              {localizedNews.heading}
 
             </h2>
 
             <p className="mt-5 text-gray-600 leading-8">
 
-              {newsData.description}
+              {localizedNews.description}
 
             </p>
 
@@ -192,7 +215,7 @@ export default function NewsPreview() {
             className="inline-flex items-center gap-2 text-orange-600 font-semibold group"
           >
 
-            View All News
+            {t("home.newsPreview.viewAll")}
 
             <ArrowRight
               size={18}
@@ -215,7 +238,7 @@ export default function NewsPreview() {
 
             <img
               src={newsData.featured.image}
-              alt={newsData.featured.title}
+              alt={localizedNews.featuredTitle}
               className="w-full h-[260px] md:h-[380px] object-cover"
             />
 
@@ -231,13 +254,13 @@ export default function NewsPreview() {
 
               <h3 className="mt-4 text-2xl font-bold text-slate-900">
 
-                {newsData.featured.title}
+                {localizedNews.featuredTitle}
 
               </h3>
 
               <p className="mt-5 text-gray-600 leading-8">
 
-                {newsData.featured.description}
+                {localizedNews.featuredDescription}
 
               </p>
 
@@ -246,7 +269,7 @@ export default function NewsPreview() {
                 className="mt-7 inline-flex items-center gap-2 text-orange-600 font-semibold group"
               >
 
-                Read More
+                {t("news.readMore")}
 
                 <ArrowRight
                   size={18}
@@ -290,7 +313,7 @@ export default function NewsPreview() {
 
                     <h4 className="mt-4 text-lg font-semibold text-slate-900 leading-8">
 
-                      {item.title}
+                      {index === 0 ? localizedNews.item1Title : localizedNews.item2Title}
 
                     </h4>
 
@@ -299,7 +322,7 @@ export default function NewsPreview() {
                       className="mt-5 inline-flex items-center gap-2 text-orange-600 font-semibold group"
                     >
 
-                      Read More
+                      {t("news.readMore")}
 
                       <ArrowRight
                         size={16}

@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 
 import leader from "../../data/leader";
+import { useTranslation } from "react-i18next";
 
 const facts = [
   {
@@ -31,6 +32,19 @@ const facts = [
 ];
 
 export default function QuickFacts() {
+  const { t } = useTranslation();
+  const labels = [
+    "Current Position",
+    "Political Party",
+    "Assembly Constituency",
+    "Public Service",
+  ];
+  const valueKeys = [
+    "position",
+    "party",
+    "constituency",
+    "experience",
+  ];
   return (
     <section className="py-16 lg:py-20 bg-slate-50">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
@@ -38,16 +52,15 @@ export default function QuickFacts() {
         <div className="text-center max-w-3xl mx-auto">
 
           <span className="text-orange-600 uppercase tracking-[0.3em] font-semibold text-sm">
-            QUICK PROFILE
+            {t("profile.quickProfile", "Quick Profile")}
           </span>
 
           <h2 className="mt-4 text-3xl md:text-4xl font-bold text-slate-900">
-            At a Glance
+            {t("profile.atAGlance", "At a Glance")}
           </h2>
 
           <p className="mt-4 text-gray-600 leading-8">
-            A quick overview of the public profile, leadership role and
-            constituency represented.
+            {t("profile.overview", "A quick overview of the public profile, leadership role and constituency represented.")}
           </p>
 
         </div>
@@ -76,13 +89,13 @@ export default function QuickFacts() {
 
                 <h3 className="mt-8 text-xl font-semibold text-slate-900">
 
-                  {item.value}
+                  {t(`quickFacts.values.${valueKeys[index]}`, item.value)}
 
                 </h3>
 
                 <p className="mt-2 text-gray-500">
 
-                  {item.label}
+                  {t(`profile.fact${index + 1}`, labels[index])}
 
                 </p>
 

@@ -1,15 +1,15 @@
-import MainLayout from '../layouts/MainLayout'
 import SectionTitle from '../components/common/SectionTitle'
+import { useTranslation } from 'react-i18next'
 
 const Videos = () => {
+  const { t } = useTranslation()
+
   return (
-    <MainLayout>
-      <section className="py-20">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <SectionTitle eyebrow="Videos" title="Video library and public appearances." subtitle="A collection of speeches, interviews, and event highlights." />
-        </div>
-      </section>
-    </MainLayout>
+    <section className="py-20">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <SectionTitle eyebrow={t('gallery.videos')} title={t('videos.title')} subtitle={t('videos.subtitle')} />
+      </div>
+    </section>
   )
 }
 

@@ -2,6 +2,7 @@ import {
   useEffect,
   useState,
 } from "react";
+import { useTranslation } from "react-i18next";
 import { API_BASE_URL } from "../config";
 
 import Hero from "../components/home/Hero";
@@ -13,6 +14,7 @@ import NewsPreview from "../components/home/NewsPreview";
 import ContactCTA from "../components/home/ContactCTA";
 
 const Home = () => {
+  const { i18n, t } = useTranslation();
 
   const [
     content,
@@ -46,7 +48,9 @@ const Home = () => {
 
           const response =
             await fetch(
-              `${API_BASE_URL}/api/content`,
+              `${API_BASE_URL}/api/content?lang=${
+                i18n.language?.startsWith("te") ? "te" : "en"
+              }`,
               {
                 method:
                   "GET",
@@ -108,7 +112,7 @@ const Home = () => {
 
     loadWebsiteContent();
 
-  }, []);
+  }, [i18n.language, t]);
 
   // =====================================
   // LOADING
@@ -123,7 +127,7 @@ const Home = () => {
       <div className="min-h-screen flex items-center justify-center">
 
         <p className="text-slate-600">
-          Loading website...
+          {t("common.loading", "Loading website...")}
         </p>
 
       </div>
@@ -169,7 +173,7 @@ const Home = () => {
       <div className="min-h-screen flex items-center justify-center">
 
         <p className="text-slate-600">
-          No website content found.
+          {t("common.noContent", "No website content found.")}
         </p>
 
       </div>

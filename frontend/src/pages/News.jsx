@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { API_BASE_URL } from "../config";
+import { useTranslation } from "react-i18next";
 import {
   CalendarDays,
   Search,
@@ -18,6 +19,22 @@ const fallbackCategories = [
 ];
 
 export default function News() {
+  const { i18n, t } = useTranslation();
+  const categoryKeys = {
+    All: "all",
+    Government: "government",
+    Public: "public",
+    Healthcare: "healthcare",
+    Education: "education",
+    Agriculture: "agriculture",
+  };
+  const translateCategory = (category) =>
+    categoryKeys[category]
+      ? t(`news.${categoryKeys[category]}`)
+      : i18n.language?.startsWith("te")
+        ? t("news.defaultCategory")
+        : category;
+  const isTelugu = i18n.language?.startsWith("te");
   const [newsData, setNewsData] = useState([]);
   const [category, setCategory] = useState("All");
   const [search, setSearch] = useState("");
@@ -35,7 +52,7 @@ export default function News() {
       setError("");
 
       const response = await fetch(
-        `${API_URL}?t=${Date.now()}`
+        `${API_URL}?lang=${i18n.language?.startsWith("te") ? "te" : "en"}&t=${Date.now()}`
       );
 
       if (!response.ok) {
@@ -82,7 +99,7 @@ export default function News() {
 
   useEffect(() => {
     loadNews();
-  }, []);
+  }, [i18n.language]);
 
   // =====================================================
   // FORMAT DATE
@@ -100,7 +117,7 @@ export default function News() {
     }
 
     return parsedDate.toLocaleDateString(
-      "en-IN",
+      isTelugu ? "te-IN" : "en-IN",
       {
         day: "numeric",
         month: "long",
@@ -174,7 +191,7 @@ export default function News() {
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="py-20 text-center">
             <p className="text-gray-500">
-              Loading news...
+              {t("news.loading", "Loading news...")}
             </p>
           </div>
         </div>
@@ -192,7 +209,7 @@ export default function News() {
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="rounded-2xl border border-red-200 bg-red-50 p-8 text-center">
             <h2 className="text-xl font-semibold text-red-700">
-              Unable to load news
+              {t("news.noNewsFound")}
             </h2>
 
             <p className="mt-2 text-red-600">
@@ -203,7 +220,7 @@ export default function News() {
               onClick={loadNews}
               className="mt-5 rounded-lg bg-orange-600 px-5 py-3 font-semibold text-white hover:bg-orange-700"
             >
-              Try Again
+              {t("common.tryAgain")}
             </button>
           </div>
         </div>
@@ -230,17 +247,15 @@ export default function News() {
             <div className="max-w-2xl">
 
               <span className="text-sm font-semibold uppercase tracking-[0.25em] text-orange-600">
-                Latest Updates
+                {t("news.pageLabel")}
               </span>
 
               <h1 className="mt-3 text-3xl font-bold text-slate-900 md:text-4xl lg:text-5xl">
-                News & Announcements
+                {t("news.pageTitle")}
               </h1>
 
               <p className="mt-4 leading-8 text-gray-600">
-                Follow the latest public programmes,
-                constituency activities, welfare initiatives
-                and important announcements.
+                {t("news.pageDescription")}
               </p>
 
             </div>
@@ -260,7 +275,7 @@ export default function News() {
                 onChange={(e) =>
                   setSearch(e.target.value)
                 }
-                placeholder="Search news..."
+                placeholder={t("news.search")}
                 className="
                   w-full
                   rounded-2xl
@@ -312,7 +327,7 @@ export default function News() {
                       }
                     `}
                   >
-                    {item}
+                    {translateCategory(item)}
                   </button>
                 ))
               : fallbackCategories.map(
@@ -337,7 +352,7 @@ export default function News() {
                         }
                       `}
                     >
-                      {item}
+                      {translateCategory(item)}
                     </button>
                   )
                 )}
@@ -352,15 +367,15 @@ export default function News() {
 
             <p className="text-sm text-gray-500">
 
-              Showing{" "}
+              {t("news.showing")} {" "}
 
               <span className="font-semibold text-slate-900">
                 {filteredNews.length}
               </span>{" "}
 
               {filteredNews.length === 1
-                ? "update"
-                : "updates"}
+                ? t("news.update")
+                : t("news.updates")}
 
             </p>
 
@@ -375,7 +390,7 @@ export default function News() {
             <div className="mt-6 grid gap-7 md:grid-cols-2 xl:grid-cols-3">
 
               {filteredNews.map(
-                (item) => (
+                (item, index) => (
 
                   <article
                     key={item.id}
@@ -430,7 +445,7 @@ export default function News() {
                             text-gray-400
                           "
                         >
-                          No Image
+                          {t("common.noImage", "No Image")}
                         </div>
 
                       )}
@@ -470,20 +485,28 @@ export default function News() {
                           text-orange-600
                         "
                       >
-                        {item.category || "News"}
+                        {translateCategory(item.category || "News")}
                       </span>
 
                       {/* TITLE */}
 
                       <h2 className="mt-4 text-xl font-bold leading-8 text-slate-900">
-                        {item.title}
+                        {isTelugu
+                          ? t(`news.items.news${index + 1}.title`, {
+                              defaultValue: t("news.defaultTitle"),
+                            })
+                          : item.title}
                       </h2>
 
                       {/* DESCRIPTION */}
 
                       {item.description && (
                         <p className="mt-3 text-sm leading-7 text-gray-600">
-                          {item.description}
+                          {isTelugu
+                            ? t(`news.items.news${index + 1}.description`, {
+                                defaultValue: t("news.defaultDescription"),
+                              })
+                            : item.description}
                         </p>
                       )}
 
@@ -503,7 +526,7 @@ export default function News() {
                             text-orange-600
                           "
                         >
-                          Read More
+                              {t("news.readMore")}
 
                           <ArrowRight
                             size={17}

@@ -206,11 +206,15 @@
 // }
 
 
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, NavLink } from "react-router-dom";
 import { Menu, X } from "lucide-react";
-import { FaFacebookF, FaInstagram, FaTwitter } from "react-icons/fa";
+import {
+  FaFacebookF,
+  FaInstagram,
+  FaTwitter,
+} from "react-icons/fa";
 import leader from "../../data/leader";
 
 const navLinks = [
@@ -224,172 +228,205 @@ const navLinks = [
 
 export default function Navbar() {
   const { t, i18n } = useTranslation();
+
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
-  const currentLanguage = i18n.language?.startsWith("te") ? "te" : "en";
-
-  const changeLanguage = async (language) => {
-    await i18n.changeLanguage(language);
-    localStorage.setItem("language", language);
-  };
-
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 50);
+    const onScroll = () => {
+      setScrolled(window.scrollY > 50);
+    };
 
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    window.addEventListener("scroll", onScroll);
+
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+    };
   }, []);
-
-  const navClass = ({ isActive }) =>
-    `transition ${
-      isActive
-        ? "font-semibold text-orange-600"
-        : "text-gray-700 hover:text-orange-600"
-    }`;
 
   return (
     <header
-      className={`fixed left-0 top-0 z-50 w-full transition-all duration-500 ${
-        scrolled
-          ? "bg-white/90 shadow-md backdrop-blur-xl"
-          : "bg-white"
-      }`}
+      className={`
+        fixed top-0 left-0 w-full z-50 transition-all duration-500
+        ${
+          scrolled
+            ? "bg-white/90 backdrop-blur-xl shadow-md"
+            : "bg-white"
+        }
+      `}
     >
-      <div className="mx-auto max-w-7xl">
-        <div className="flex h-20 items-center justify-between px-4 lg:px-8">
+      <div className="max-w-7xl mx-auto">
+
+        <div className="h-20 px-4 lg:px-8 flex items-center justify-between">
+
+          {/* ================= LOGO ================= */}
+
           <Link to="/" className="flex items-center gap-3">
             <img
               src="/logo.png"
-              alt={t("about.name")}
-              className="h-14 w-14 object-contain"
+              alt="Logo"
+              className="w-14 h-14 object-contain"
             />
 
             <div className="hidden sm:block">
               <h1 className="text-lg font-bold text-gray-800">
                 {t("about.name")}
               </h1>
+
+              <p className="text-sm text-orange-600">
+                {leader.profile.designation}
+              </p>
             </div>
           </Link>
 
-          <nav className="hidden items-center gap-8 lg:flex">
+          {/* ================= DESKTOP NAVIGATION ================= */}
+
+          <nav className="hidden lg:flex items-center gap-8">
+
             {navLinks.map((item) => (
-              <NavLink key={item.key} to={item.path} className={navClass}>
+              <NavLink
+                key={item.key}
+                to={item.path}
+                className={({ isActive }) =>
+                  isActive
+                    ? "text-orange-600 font-semibold"
+                    : "text-gray-700 hover:text-orange-600 transition"
+                }
+              >
                 {t(`nav.${item.key}`)}
               </NavLink>
             ))}
+
           </nav>
 
-          <div className="hidden items-center gap-3 lg:flex">
-            <div className="flex items-center gap-1 rounded-full border border-gray-200 p-1">
-              <button
-                type="button"
-                onClick={() => changeLanguage("en")}
-                className={`rounded-full px-3 py-1 text-sm font-medium ${
-                  currentLanguage === "en"
-                    ? "bg-orange-600 text-white"
-                    : "text-gray-600 hover:text-orange-600"
-                }`}
-              >
-                EN
-              </button>
+          {/* ================= DESKTOP LANGUAGE SWITCHER ================= */}
 
-              <button
-                type="button"
-                onClick={() => changeLanguage("te")}
-                className={`rounded-full px-3 py-1 text-sm font-medium ${
-                  currentLanguage === "te"
-                    ? "bg-orange-600 text-white"
-                    : "text-gray-600 hover:text-orange-600"
-                }`}
-              >
-                తెలుగు
-              </button>
-            </div>
+          <div className="hidden lg:flex items-center gap-1 ml-4 border border-gray-200 rounded-full p-1">
+
+            <button
+              onClick={() => i18n.changeLanguage("en")}
+              className={`px-3 py-1 rounded-full text-sm font-medium transition ${
+                i18n.language === "en"
+                  ? "bg-orange-600 text-white"
+                  : "text-gray-600 hover:text-orange-600"
+              }`}
+            >
+              EN
+            </button>
+
+            <button
+              onClick={() => i18n.changeLanguage("te")}
+              className={`px-3 py-1 rounded-full text-sm font-medium transition ${
+                i18n.language === "te"
+                  ? "bg-orange-600 text-white"
+                  : "text-gray-600 hover:text-orange-600"
+              }`}
+            >
+              తెలుగు
+            </button>
+
+          </div>
+
+          {/* ================= SOCIAL ICONS ================= */}
+
+          <div className="hidden lg:flex items-center gap-3">
 
             <a
               href={leader.social.facebook}
               target="_blank"
-              rel="noreferrer"
-              aria-label="Facebook"
-              className="text-gray-600 hover:text-orange-600"
+              rel="noopener noreferrer"
             >
-              <FaFacebookF />
+              <FaFacebookF className="text-gray-600 hover:text-orange-600 transition" />
             </a>
 
             <a
               href={leader.social.instagram}
               target="_blank"
-              rel="noreferrer"
-              aria-label="Instagram"
-              className="text-gray-600 hover:text-orange-600"
+              rel="noopener noreferrer"
             >
-              <FaInstagram />
+              <FaInstagram className="text-gray-600 hover:text-orange-600 transition" />
             </a>
 
             <a
               href={leader.social.twitter}
               target="_blank"
-              rel="noreferrer"
-              aria-label="Twitter"
-              className="text-gray-600 hover:text-orange-600"
+              rel="noopener noreferrer"
             >
-              <FaTwitter />
+              <FaTwitter className="text-gray-600 hover:text-orange-600 transition" />
             </a>
+
           </div>
 
+          {/* ================= MOBILE MENU BUTTON ================= */}
+
           <button
-            type="button"
-            onClick={() => setMenuOpen(true)}
             className="lg:hidden"
-            aria-label={t("common.menu")}
+            onClick={() => setMenuOpen(true)}
+            aria-label="Open menu"
           >
             <Menu size={30} />
           </button>
+
         </div>
       </div>
+
+      {/* ================= MOBILE DRAWER ================= */}
 
       <div
         className={`fixed inset-0 z-50 transition ${
           menuOpen ? "visible" : "invisible"
         }`}
       >
-        <button
-          type="button"
+
+        {/* Overlay */}
+
+        <div
           onClick={() => setMenuOpen(false)}
-          className={`absolute inset-0 h-full w-full bg-black/40 transition-opacity ${
+          className={`absolute inset-0 bg-black/40 transition-opacity ${
             menuOpen ? "opacity-100" : "opacity-0"
           }`}
-          aria-label="Close menu"
         />
 
-        <aside
-          className={`absolute right-0 top-0 h-full w-80 max-w-[85%] bg-white transition-transform duration-300 ${
-            menuOpen ? "translate-x-0" : "translate-x-full"
+        {/* Drawer */}
+
+        <div
+          className={`absolute top-0 right-0 h-full w-80 max-w-[85%] bg-white transition-transform duration-300 ${
+            menuOpen
+              ? "translate-x-0"
+              : "translate-x-full"
           }`}
         >
-          <div className="flex h-20 items-center justify-between border-b px-6">
-            <h2 className="text-xl font-bold">{t("common.menu")}</h2>
+
+          {/* Mobile Header */}
+
+          <div className="flex items-center justify-between h-20 px-6 border-b">
+
+            <h2 className="text-xl font-bold">
+              {t("common.menu")}
+            </h2>
 
             <button
-              type="button"
               onClick={() => setMenuOpen(false)}
               aria-label="Close menu"
             >
               <X />
             </button>
+
           </div>
 
+          {/* Mobile Navigation */}
+
           <nav className="flex flex-col">
+
             {navLinks.map((item) => (
               <NavLink
                 key={item.key}
                 to={item.path}
                 onClick={() => setMenuOpen(false)}
                 className={({ isActive }) =>
-                  `border-b px-6 py-4 ${
+                  `px-6 py-4 border-b ${
                     isActive
-                      ? "font-semibold text-orange-600"
+                      ? "text-orange-600 font-semibold"
                       : "text-gray-700"
                   }`
                 }
@@ -397,35 +434,40 @@ export default function Navbar() {
                 {t(`nav.${item.key}`)}
               </NavLink>
             ))}
+
           </nav>
 
-          <div className="flex justify-center gap-2 border-t p-6">
+          {/* Mobile Language Switcher */}
+
+          <div className="flex items-center justify-center gap-2 p-6 border-t">
+
             <button
-              type="button"
-              onClick={() => changeLanguage("en")}
-              className={`rounded-full px-4 py-2 text-sm font-medium ${
-                currentLanguage === "en"
+              onClick={() => i18n.changeLanguage("en")}
+              className={`px-4 py-2 rounded-full text-sm font-medium transition ${
+                i18n.language === "en"
                   ? "bg-orange-600 text-white"
                   : "bg-gray-100 text-gray-700"
               }`}
             >
-              English
+              {t("common.english")}
             </button>
 
             <button
-              type="button"
-              onClick={() => changeLanguage("te")}
-              className={`rounded-full px-4 py-2 text-sm font-medium ${
-                currentLanguage === "te"
+              onClick={() => i18n.changeLanguage("te")}
+              className={`px-4 py-2 rounded-full text-sm font-medium transition ${
+                i18n.language === "te"
                   ? "bg-orange-600 text-white"
                   : "bg-gray-100 text-gray-700"
               }`}
             >
-              తెలుగు
+              {t("common.telugu")}
             </button>
+
           </div>
-        </aside>
+
+        </div>
       </div>
+
     </header>
   );
 }

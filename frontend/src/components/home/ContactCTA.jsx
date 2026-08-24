@@ -8,21 +8,11 @@ import {
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { API_BASE_URL } from "../../config";
+import { useTranslation } from "react-i18next";
 
 export default function ContactCTA() {
   const navigate = useNavigate();
-
-  const [contactCTA, setContactCTA] = useState({
-    label: "Get In Touch",
-
-    heading:
-      "Together, Let's Build A Better Tomorrow",
-
-    description:
-      "Your ideas, suggestions and concerns matter. Stay connected and work together towards stronger communities, better development and transparent governance.",
-
-    buttonText: "Contact Office",
-  });
+  const { i18n, t } = useTranslation();
 
   const [contact, setContact] = useState({
     phone: "",
@@ -38,7 +28,9 @@ export default function ContactCTA() {
     const loadData = async () => {
       try {
         const response = await fetch(
-          `${API_BASE_URL}/api/content`
+                      `${API_BASE_URL}/api/content?lang=${
+                        i18n.language?.startsWith("te") ? "te" : "en"
+                      }`
         );
 
         if (!response.ok) {
@@ -67,29 +59,6 @@ export default function ContactCTA() {
           });
         }
 
-        // =========================
-        // CONTACT CTA TEXT
-        // =========================
-
-        if (data.home?.contactCTA) {
-          setContactCTA({
-            label:
-              data.home.contactCTA.label ||
-              "Get In Touch",
-
-            heading:
-              data.home.contactCTA.heading ||
-              "Together, Let's Build A Better Tomorrow",
-
-            description:
-              data.home.contactCTA.description ||
-              "Your ideas, suggestions and concerns matter. Stay connected and work together towards stronger communities, better development and transparent governance.",
-
-            buttonText:
-              data.home.contactCTA.buttonText ||
-              "Contact Office",
-          });
-        }
       } catch (error) {
         console.error(
           "Error loading Contact CTA:",
@@ -99,7 +68,7 @@ export default function ContactCTA() {
     };
 
     loadData();
-  }, []);
+  }, [i18n.language]);
 
   return (
     <section className="pt-16 pb-20 lg:pt-20 lg:pb-24 bg-white">
@@ -125,7 +94,7 @@ export default function ContactCTA() {
 
               <span className="uppercase tracking-[0.25em] text-white/80 text-sm font-semibold">
 
-                {contactCTA.label}
+                {t("contactCTA.label")}
 
               </span>
 
@@ -134,7 +103,7 @@ export default function ContactCTA() {
 
               <h2 className="mt-4 text-3xl md:text-4xl lg:text-5xl font-bold text-white leading-tight whitespace-pre-line">
 
-                {contactCTA.heading}
+                {t("contactCTA.titleLine1")} {t("contactCTA.titleLine2")}
 
               </h2>
 
@@ -143,7 +112,7 @@ export default function ContactCTA() {
 
               <p className="mt-6 text-white/90 leading-8 max-w-2xl">
 
-                {contactCTA.description}
+                {t("contactCTA.description")}
 
               </p>
 
@@ -166,7 +135,7 @@ export default function ContactCTA() {
 
                     <p className="text-white font-medium">
 
-                      Phone
+                      {t("contactCTA.phone")}
 
                     </p>
 
@@ -194,7 +163,7 @@ export default function ContactCTA() {
 
                     <p className="text-white font-medium">
 
-                      Email
+                      {t("contactCTA.email")}
 
                     </p>
 
@@ -222,7 +191,7 @@ export default function ContactCTA() {
 
                     <p className="text-white font-medium">
 
-                      Office
+                      {t("contactCTA.office")}
 
                     </p>
 
@@ -252,7 +221,7 @@ export default function ContactCTA() {
                 className="bg-white text-orange-600 hover:bg-slate-100 transition-all duration-300 rounded-full px-10 py-5 font-semibold inline-flex items-center gap-3 shadow-xl hover:scale-105"
               >
 
-                {contactCTA.buttonText}
+                {t("contactCTA.button")}
 
                 <ArrowRight size={18} />
 

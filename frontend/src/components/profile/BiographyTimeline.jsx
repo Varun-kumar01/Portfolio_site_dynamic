@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { API_BASE_URL } from "../../config";
+import { useTranslation } from "react-i18next";
 
 const BiographyTimeline = () => {
+  const { i18n, t } = useTranslation();
   const [biographyContent, setBiographyContent] = useState("");
   const [loading, setLoading] = useState(true);
 
@@ -9,7 +11,9 @@ const BiographyTimeline = () => {
     const loadBiography = async () => {
       try {
         const response = await fetch(
-          `${API_BASE_URL}/api/content`
+          `${API_BASE_URL}/api/content?lang=${
+            i18n.language?.startsWith("te") ? "te" : "en"
+          }`
         );
 
         if (!response.ok) {
@@ -32,14 +36,14 @@ const BiographyTimeline = () => {
     };
 
     loadBiography();
-  }, []);
+  }, [i18n.language]);
 
   if (loading) {
     return (
       <section className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4">
           <p className="text-center text-gray-500">
-            Loading biography...
+            {t("common.loading")}
           </p>
         </div>
       </section>
@@ -51,15 +55,19 @@ const BiographyTimeline = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
         <h2 className="text-4xl font-bold text-gray-900 mb-8">
-          Biography
+          {t("biographyTimeline.label")}
         </h2>
 
         <div className="text-gray-600 leading-8 whitespace-pre-line">
 
-          {biographyContent || (
-            <p>
-              Biography content is not available.
-            </p>
+          {biographyContent ? (
+            [1, 2, 3, 4, 5].map((paragraphNumber) => (
+              <p key={paragraphNumber} className="mb-6 last:mb-0">
+                {t(`biographyTimeline.paragraph${paragraphNumber}`)}
+              </p>
+            ))
+          ) : (
+            <p>{t("common.noContent")}</p>
           )}
 
         </div>

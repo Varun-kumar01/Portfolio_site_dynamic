@@ -1,7 +1,9 @@
 import Container from "../common/Container";
 import Button from "../common/Button";
+import { useTranslation } from "react-i18next";
 
 export default function ProfileSection() {
+  const { t } = useTranslation();
   return (
     <section className="py-24 bg-white">
 
@@ -23,7 +25,7 @@ export default function ProfileSection() {
 
               <p className="text-sm text-gray-500">
 
-                Serving the People
+                {t("profile.servingPeople", "Serving the People")}
 
               </p>
 
@@ -43,39 +45,31 @@ export default function ProfileSection() {
 
             <span className="uppercase tracking-[0.3em] text-orange-600 font-semibold text-sm">
 
-              Profile
+              {t("profile.label", "Profile")}
 
             </span>
 
             <h2 className="mt-4 text-4xl lg:text-5xl font-bold leading-tight">
 
-              Shri Adluri Laxman Kumar
+              {t("about.name")}
 
             </h2>
 
             <p className="mt-2 text-orange-600 font-semibold">
 
-              Minister, Government of Telangana
+              {t("footer.designation")}
 
             </p>
 
             <p className="mt-8 text-gray-600 leading-8">
 
-              Shri Adluri Laxman Kumar is a public representative
-              from the Dharmapuri Assembly Constituency in Jagtial
-              district, Telangana. As a member of the Indian National
-              Congress, he is committed to inclusive development,
-              transparent governance, and improving the quality of
-              life for every citizen.
+              {t("biographyTimeline.paragraph1")}
 
             </p>
 
             <p className="mt-5 text-gray-600 leading-8">
 
-              His public service focuses on strengthening education,
-              healthcare, infrastructure, social justice, and welfare
-              initiatives while ensuring that government programmes
-              reach every eligible beneficiary.
+              {t("biographyTimeline.paragraph2")}
 
             </p>
 
@@ -85,7 +79,7 @@ export default function ProfileSection() {
 
                 <h4 className="font-semibold">
 
-                  Constituency
+                  {t("footer.constituency")}
 
                 </h4>
 
@@ -101,7 +95,7 @@ export default function ProfileSection() {
 
                 <h4 className="font-semibold">
 
-                  District
+                  {t("footer.district")}
 
                 </h4>
 
@@ -117,7 +111,7 @@ export default function ProfileSection() {
 
                 <h4 className="font-semibold">
 
-                  State
+                  {t("footer.state")}
 
                 </h4>
 
@@ -133,7 +127,7 @@ export default function ProfileSection() {
 
                 <h4 className="font-semibold">
 
-                  Party
+                  {t("profile.party", "Party")}
 
                 </h4>
 
@@ -151,7 +145,7 @@ export default function ProfileSection() {
 
               <Button>
 
-                View Development Works
+                {t("home.hero.developmentWorks")}
 
               </Button>
 

@@ -6,12 +6,14 @@ import {
 import {
   useNavigate,
 } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 export default function AboutPreview({
   content,
 }) {
   const navigate =
     useNavigate();
+  const { t } = useTranslation();
 
   // =====================================
   // SAFETY CHECK
@@ -98,7 +100,7 @@ export default function AboutPreview({
             {/* SECTION LABEL */}
 
             <span className="uppercase tracking-[0.25em] text-orange-600 font-semibold text-sm">
-              About
+              {t("home.aboutPreview.label")}
             </span>
 
             {/* HEADING */}
@@ -106,8 +108,7 @@ export default function AboutPreview({
             <h2 className="mt-5 text-2xl lg:text-4xl font-black leading-tight text-slate-900">
 
               {
-                home.aboutHeading ||
-                "Dedicated to the Progress of Every Citizen"
+                <>{t("home.aboutPreview.titleLine1")} {t("home.aboutPreview.titleLine2")}</>
               }
 
             </h2>
@@ -116,10 +117,7 @@ export default function AboutPreview({
 
             <p className="mt-8 text-lg leading-9 text-gray-600">
 
-              {
-                home.aboutDescription ||
-                "Public service is built on integrity, transparency and commitment."
-              }
+              {t("home.aboutPreview.description")}
 
             </p>
 
@@ -151,7 +149,12 @@ export default function AboutPreview({
 
                       <span className="font-medium text-gray-700">
 
-                        {item}
+                        {t(`home.aboutPreview.features.${[
+                          "transparentGovernance",
+                          "infrastructureDevelopment",
+                          "qualityEducation",
+                          "publicWelfare",
+                        ][index]}`, item)}
 
                       </span>
 
@@ -193,7 +196,7 @@ export default function AboutPreview({
 
                       <p className="mt-2 text-gray-600">
 
-                        {stat.text}
+                        {t(`home.aboutPreview.stats.${index === 0 ? "projects" : "years"}`, stat.text)}
 
                       </p>
 

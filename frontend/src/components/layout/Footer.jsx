@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { API_BASE_URL } from "../../config";
 
 import {
@@ -29,6 +30,7 @@ const links = [
 
 
 export default function Footer() {
+  const { i18n, t } = useTranslation();
 
   // =========================
   // WEBSITE DATA
@@ -52,7 +54,9 @@ export default function Footer() {
       try {
 
         const response = await fetch(
-          `${API_BASE_URL}/api/content`
+          `${API_BASE_URL}/api/content?lang=${
+            i18n.language?.startsWith("te") ? "te" : "en"
+          }`
         );
 
         if (!response.ok) {
@@ -97,7 +101,7 @@ export default function Footer() {
 
     loadWebsiteData();
 
-  }, []);
+  }, [i18n.language]);
 
 
   return (
@@ -145,9 +149,7 @@ export default function Footer() {
 
             <p className="mt-6 leading-8 text-slate-400">
 
-              Dedicated to transparent governance,
-              inclusive development and improving
-              the quality of life for every citizen.
+              {t("footer.bio")}
 
             </p>
 
@@ -223,7 +225,7 @@ export default function Footer() {
 
             <h4 className="text-xl font-semibold">
 
-              Quick Links
+              {t("footer.quickLinks", "Quick Links")}
 
             </h4>
 
@@ -238,7 +240,7 @@ export default function Footer() {
                   className="group flex items-center justify-between text-slate-400 hover:text-orange-400 transition"
                 >
 
-                  {item.name}
+                  {t(`nav.${item.path === "/" ? "home" : item.path.slice(1)}`, item.name)}
 
                   <ArrowUpRight
                     size={16}
@@ -262,7 +264,7 @@ export default function Footer() {
 
             <h4 className="text-xl font-semibold">
 
-              Contact
+              {t("nav.contact")}
 
             </h4>
 
@@ -280,7 +282,7 @@ export default function Footer() {
 
                   <p className="text-slate-300">
 
-                    Phone
+                    {t("footer.phone")}
 
                   </p>
 
@@ -305,7 +307,7 @@ export default function Footer() {
 
                   <p className="text-slate-300">
 
-                    Email
+                    {t("footer.email")}
 
                   </p>
 
@@ -330,7 +332,7 @@ export default function Footer() {
 
                   <p className="text-slate-300">
 
-                    Office
+                    {t("footer.office")}
 
                   </p>
 
@@ -357,7 +359,7 @@ export default function Footer() {
 
             <h4 className="text-xl font-semibold">
 
-              Constituency
+              {t("footer.constituency")}
 
             </h4>
 
@@ -369,7 +371,7 @@ export default function Footer() {
 
                 <p className="text-slate-500 uppercase tracking-widest text-xs">
 
-                  Assembly Constituency
+                  {t("footer.assemblyConstituency")}
 
                 </p>
 

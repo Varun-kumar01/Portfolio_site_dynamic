@@ -4,6 +4,7 @@ import {
   HeartHandshake,
   Landmark,
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 const focusAreas = [
   {
@@ -33,6 +34,8 @@ const focusAreas = [
 ];
 
 export default function FocusAreas() {
+  const { t } = useTranslation();
+  const areaKeys = ["infrastructure", "education", "welfare", "governance"];
   return (
     <section className="relative py-16 lg:py-20 bg-[#fafafa] overflow-hidden">
 
@@ -50,21 +53,19 @@ export default function FocusAreas() {
 
           <span className="uppercase tracking-[0.3em] text-orange-600 font-semibold text-sm">
 
-            Focus Areas
+            {t("home.focusAreas.label")}
 
           </span>
 
           <h2 className="mt-5 text-2xl lg:text-4xl font-black text-slate-900 leading-tight">
 
-            Committed to Inclusive Development
+            {t("home.focusAreas.title")}
 
           </h2>
 
           <p className="mt-8 text-lg leading-9 text-gray-600">
 
-            Focused on strengthening infrastructure, education,
-            social welfare and citizen-centric governance to improve
-            the quality of life across the constituency.
+            {t("home.focusAreas.description")}
 
           </p>
 
@@ -133,7 +134,7 @@ export default function FocusAreas() {
 
                 <h3 className="mt-6 text-2xl font-bold text-slate-900 leading-snug">
 
-                  {item.title}
+                  {t(`home.focusAreas.areas.${areaKeys[index]}.title`)}
 
                 </h3>
 
@@ -141,7 +142,7 @@ export default function FocusAreas() {
 
                 <p className="mt-5 text-gray-600 leading-8">
 
-                  {item.description}
+                  {t(`home.focusAreas.areas.${areaKeys[index]}.description`)}
 
                 </p>
 
