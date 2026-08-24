@@ -156,7 +156,7 @@ const EditDevelopment = () => {
 
           {/* Back Button */}
 
-          <button
+          {/* <button
             type="button"
             onClick={() =>
               navigate("/secure/admin/development")
@@ -175,7 +175,7 @@ const EditDevelopment = () => {
             "
           >
             Back
-          </button>
+          </button> */}
 
         </div>
 

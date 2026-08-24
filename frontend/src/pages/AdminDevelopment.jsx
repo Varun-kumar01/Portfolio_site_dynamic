@@ -84,7 +84,7 @@ const AdminDevelopment = () => {
           </p>
 
 
-          <button
+          {/* <button
 
             onClick={() =>
               navigate("/secure/admin/development/edit")
@@ -98,7 +98,7 @@ const AdminDevelopment = () => {
 
             Edit Development Content
 
-          </button>
+          </button> */}
 
 
         </div>

@@ -88,11 +88,11 @@ const Dashboard = () => {
           icon: Landmark,
           path: "/secure/admin/political-career",
         },
-        {
-          name: "Development",
-          icon: Building2,
-          path: "/secure/admin/development",
-        },
+        // {
+        //   name: "Development",
+        //   icon: Building2,
+        //   path: "/secure/admin/development",
+        // },
       ],
     },
 
@@ -104,11 +104,11 @@ const Dashboard = () => {
           icon: Newspaper,
           path: "/secure/admin/news",
         },
-        {
-          name: "Articles",
-          icon: FileText,
-          path: "/secure/admin/articles",
-        },
+        // {
+        //   name: "Articles",
+        //   icon: FileText,
+        //   path: "/secure/admin/articles",
+        // },
         {
           name: "Gallery",
           icon: Image,
@@ -670,7 +670,7 @@ const Dashboard = () => {
 
               {/* ARTICLES */}
 
-              <button
+              {/* <button
                 onClick={() => navigate("/secure/admin/articles")}
                 className="
                   bg-white
@@ -697,7 +697,7 @@ const Dashboard = () => {
                   Create a new article.
                 </p>
 
-              </button>
+              </button> */}
 
               {/* VIDEOS */}
 

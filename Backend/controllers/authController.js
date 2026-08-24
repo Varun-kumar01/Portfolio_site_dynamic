@@ -6,6 +6,8 @@ const login = async (req, res) => {
   try {
     const { username, password } = req.body;
 
+    console.log("///////////// middleware triggered///////////")
+
     if (!username || !password) {
       return res.status(400).json({
         success: false,
@@ -32,7 +34,7 @@ const login = async (req, res) => {
     if (result.rows.length === 0) {
       return res.status(401).json({
         success: false,
-        message: "Invalid username or password",
+        message: "Invalid middleware username",
       });
     }
 
@@ -53,7 +55,7 @@ const login = async (req, res) => {
     if (!isPasswordCorrect) {
       return res.status(401).json({
         success: false,
-        message: "Invalid username or password",
+        message: "Invalid middleware password",
       });
     }
 

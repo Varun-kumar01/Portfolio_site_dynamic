@@ -505,7 +505,7 @@ app.post("/api/secure/admin/login", async (req, res) => {
 
       return res.status(401).json({
         success: false,
-        message: "Invalid username or password",
+        message: "Invalid username",
       });
     }
 

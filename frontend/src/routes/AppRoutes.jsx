@@ -195,7 +195,7 @@ export default function AppRoutes() {
             DEVELOPMENT ADMIN
         ===================================================== */}
 
-        <Route
+        {/* <Route
           path="/secure/admin/development"
           element={<AdminDevelopment />}
         />
@@ -203,7 +203,7 @@ export default function AppRoutes() {
         <Route
           path="/secure/admin/development/edit"
           element={<EditDevelopment />}
-        />
+        /> */}
 
 
         {/* =====================================================
@@ -230,10 +230,10 @@ export default function AppRoutes() {
             ARTICLES ADMIN
         ===================================================== */}
 
-        <Route
+        {/* <Route
           path="/secure/admin/articles"
           element={<AdminArticles />}
-        />
+        /> */}
 
 
         {/* =====================================================
