@@ -20,9 +20,17 @@ import {
 
 import { CSS } from "@dnd-kit/utilities";
 
+// =====================================================
+// API
+// =====================================================
+
 const API_URL = `${API_BASE_URL}/api/political-career`;
 
 const CACHE_KEY = "political_career_cache";
+
+// =====================================================
+// EMPTY FORM
+// =====================================================
 
 const emptyForm = {
   year: "",
@@ -32,6 +40,92 @@ const emptyForm = {
   description: "",
   category: "Political Career",
   display_order: 0,
+};
+
+// =====================================================
+// TIME PERIOD VALIDATOR
+//
+// REQUIRED:
+// YYYY-YYYY
+//
+// BOTH YEARS:
+// exactly 4 digits
+// minimum 1800
+// =====================================================
+
+const validateTimePeriod = (value) => {
+  const year = String(value || "").trim();
+
+  if (!year) {
+    return {
+      valid: false,
+      message: "Time Period is required.",
+    };
+  }
+
+  // Exactly 4 digits - 4 digits
+  const match = year.match(/^(\d{4})-(\d{4})$/);
+
+  if (!match) {
+    return {
+      valid: false,
+      message:
+        "Time Period must be in the format 2006-2011.",
+    };
+  }
+
+  const startYear = Number(match[1]);
+  const endYear = Number(match[2]);
+
+  if (startYear < 1800) {
+    return {
+      valid: false,
+      message:
+        "Starting year must be 1800 or later.",
+    };
+  }
+
+  if (endYear < 1800) {
+    return {
+      valid: false,
+      message:
+        "Ending year must be 1800 or later.",
+    };
+  }
+
+  return {
+    valid: true,
+    message: "",
+  };
+};
+
+// =====================================================
+// BACKEND IMAGE URL HELPER
+// =====================================================
+
+const getBackendImageUrl = (imagePath) => {
+  if (!imagePath) {
+    return "";
+  }
+
+  const path = String(imagePath).trim();
+
+  if (!path) {
+    return "";
+  }
+
+  if (
+    path.startsWith("http://") ||
+    path.startsWith("https://")
+  ) {
+    return path;
+  }
+
+  const cleanPath = path.startsWith("/")
+    ? path
+    : `/${path}`;
+
+  return `${API_BASE_URL}${cleanPath}`;
 };
 
 // =====================================================
@@ -61,6 +155,10 @@ function SortableCareerItem({
     zIndex: isDragging ? 20 : "auto",
   };
 
+  const imageUrl = getBackendImageUrl(
+    item.image_url
+  );
+
   return (
     <div
       ref={setNodeRef}
@@ -79,12 +177,21 @@ function SortableCareerItem({
         }
       `}
     >
-      <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+      <div
+        className="
+          flex
+          flex-col
+          gap-5
+          lg:flex-row
+          lg:items-center
+          lg:justify-between
+        "
+      >
+        {/* LEFT */}
 
-        {/* LEFT SIDE */}
         <div className="flex min-w-0 gap-4">
+          {/* DRAG */}
 
-          {/* DRAG HANDLE */}
           <button
             type="button"
             {...attributes}
@@ -109,9 +216,10 @@ function SortableCareerItem({
           </button>
 
           {/* IMAGE */}
-          {item.image_url ? (
+
+          {imageUrl ? (
             <img
-              src={item.image_url}
+              src={imageUrl}
               alt={
                 item.position ||
                 "Political career"
@@ -123,6 +231,10 @@ function SortableCareerItem({
                 rounded-lg
                 object-cover
               "
+              onError={(e) => {
+                e.currentTarget.style.display =
+                  "none";
+              }}
             />
           ) : (
             <div
@@ -144,8 +256,8 @@ function SortableCareerItem({
           )}
 
           {/* DETAILS */}
-          <div className="min-w-0">
 
+          <div className="min-w-0">
             <span
               className="
                 inline-block
@@ -221,8 +333,8 @@ function SortableCareerItem({
         </div>
 
         {/* ACTIONS */}
-        <div className="flex shrink-0 gap-3">
 
+        <div className="flex shrink-0 gap-3">
           <button
             type="button"
             onClick={() => onEdit(item)}
@@ -260,7 +372,6 @@ function SortableCareerItem({
           >
             Delete
           </button>
-
         </div>
       </div>
     </div>
@@ -275,6 +386,7 @@ export default function AdminPoliticalCareer() {
   const navigate = useNavigate();
 
   const [careerData, setCareerData] = useState([]);
+
   const [formData, setFormData] =
     useState(emptyForm);
 
@@ -312,7 +424,7 @@ export default function AdminPoliticalCareer() {
   );
 
   // =====================================================
-  // LOAD POLITICAL CAREER
+  // LOAD DATA
   // =====================================================
 
   const loadCareer = async () => {
@@ -328,8 +440,7 @@ export default function AdminPoliticalCareer() {
         }
       );
 
-      const text =
-        await response.text();
+      const text = await response.text();
 
       let result;
 
@@ -356,11 +467,18 @@ export default function AdminPoliticalCareer() {
           ? result.data
           : [];
 
-      setCareerData(latest);
+      const normalizedData =
+        latest.map((item) => ({
+          ...item,
+          image_url:
+            item.image_url || "",
+        }));
+
+      setCareerData(normalizedData);
 
       localStorage.setItem(
         CACHE_KEY,
-        JSON.stringify(latest)
+        JSON.stringify(normalizedData)
       );
     } catch (err) {
       console.error(
@@ -384,7 +502,7 @@ export default function AdminPoliticalCareer() {
         }
       } catch (cacheError) {
         console.error(
-          "POLITICAL CAREER CACHE ERROR:",
+          "CACHE ERROR:",
           cacheError
         );
       }
@@ -397,6 +515,10 @@ export default function AdminPoliticalCareer() {
       setLoading(false);
     }
   };
+
+  // =====================================================
+  // INITIAL LOAD
+  // =====================================================
 
   useEffect(() => {
     loadCareer();
@@ -412,26 +534,54 @@ export default function AdminPoliticalCareer() {
     // ===================================================
     // TIME PERIOD
     //
-    // ONLY numbers and one hyphen are allowed while typing.
+    // Only:
     //
-    // Examples:
-    // 2006-2011
+    // 1800-1805
     // 1996-2001
-    // 123456789-987654321
+    // 2006-2011
     //
-    // NO digit limit.
+    // While typing, allow incomplete:
+    // 2
+    // 20
+    // 200
+    // 2006
+    // 2006-
+    // 2006-2
+    //
+    // Final submit requires YYYY-YYYY.
     // ===================================================
 
     if (name === "year") {
-      // Remove everything except numbers and hyphen
-      const cleanedValue =
+      let cleanedValue =
         value.replace(/[^0-9-]/g, "");
 
-      // Allow only ONE hyphen
+      // Maximum 9 characters
+      cleanedValue =
+        cleanedValue.slice(0, 9);
+
+      // Only one hyphen
+      const hyphenCount =
+        (
+          cleanedValue.match(/-/g) || []
+        ).length;
+
+      if (hyphenCount > 1) {
+        return;
+      }
+
       const parts =
         cleanedValue.split("-");
 
-      if (parts.length > 2) {
+      // First year max 4 digits
+      if (parts[0].length > 4) {
+        return;
+      }
+
+      // Second year max 4 digits
+      if (
+        parts.length === 2 &&
+        parts[1].length > 4
+      ) {
         return;
       }
 
@@ -440,11 +590,13 @@ export default function AdminPoliticalCareer() {
         year: cleanedValue,
       }));
 
+      setError("");
+
       return;
     }
 
     // ===================================================
-    // DISPLAY ORDER - NUMBERS ONLY
+    // DISPLAY ORDER
     // ===================================================
 
     if (name === "display_order") {
@@ -470,7 +622,7 @@ export default function AdminPoliticalCareer() {
   };
 
   // =====================================================
-  // IMAGE
+  // IMAGE CHANGE
   // =====================================================
 
   const handleImageChange = (e) => {
@@ -515,8 +667,11 @@ export default function AdminPoliticalCareer() {
 
     setSelectedImage(file);
 
+    const temporaryPreview =
+      URL.createObjectURL(file);
+
     setImagePreview(
-      URL.createObjectURL(file)
+      temporaryPreview
     );
 
     setError("");
@@ -550,40 +705,27 @@ export default function AdminPoliticalCareer() {
 
     try {
       // =================================================
-      // REQUIRED TIME PERIOD
+      // TIME PERIOD VALIDATION
       // =================================================
 
       const cleanedYear =
-        formData.year.trim();
+        String(
+          formData.year || ""
+        ).trim();
 
-      if (!cleanedYear) {
-        throw new Error(
-          "Time Period is required."
-        );
-      }
-
-      // =================================================
-      // TIME PERIOD VALIDATION
-      //
-      // MUST BE:
-      //
-      // numbers-numbers
-      //
-      // NO LIMIT ON NUMBER OF DIGITS.
-      // =================================================
-
-      if (
-        !/^\d+-\d+$/.test(
+      const validation =
+        validateTimePeriod(
           cleanedYear
-        )
-      ) {
+        );
+
+      if (!validation.valid) {
         throw new Error(
-          "Time Period must be in the format 2006-2011."
+          validation.message
         );
       }
 
       // =================================================
-      // REQUIRED OTHER FIELDS
+      // REQUIRED FIELDS
       // =================================================
 
       if (
@@ -639,7 +781,7 @@ export default function AdminPoliticalCareer() {
 
       data.append(
         "description",
-        formData.description
+        formData.description.trim()
       );
 
       data.append(
@@ -657,6 +799,10 @@ export default function AdminPoliticalCareer() {
         )
       );
 
+      // =================================================
+      // IMAGE
+      // =================================================
+
       if (selectedImage) {
         data.append(
           "image",
@@ -665,12 +811,16 @@ export default function AdminPoliticalCareer() {
       }
 
       // =================================================
-      // POST / PUT
+      // URL
       // =================================================
 
       const url = editingId
         ? `${API_URL}/${editingId}`
         : API_URL;
+
+      // =================================================
+      // REQUEST
+      // =================================================
 
       const response =
         await authFetch(
@@ -708,8 +858,23 @@ export default function AdminPoliticalCareer() {
         );
       }
 
-      // Reload latest data
+      // =================================================
+      // CLEAR CACHE
+      // =================================================
+
+      localStorage.removeItem(
+        CACHE_KEY
+      );
+
+      // =================================================
+      // RELOAD
+      // =================================================
+
       await loadCareer();
+
+      // =================================================
+      // PUBLIC PAGE UPDATE
+      // =================================================
 
       window.dispatchEvent(
         new Event(
@@ -724,7 +889,6 @@ export default function AdminPoliticalCareer() {
       );
 
       resetForm();
-
     } catch (err) {
       console.error(
         "SAVE POLITICAL CAREER ERROR:",
@@ -745,17 +909,9 @@ export default function AdminPoliticalCareer() {
   // =====================================================
 
   const handleEdit = (item) => {
-    console.log(
-      "EDIT POLITICAL CAREER ITEM:",
-      item
-    );
-
     setEditingId(item.id);
 
     setFormData({
-      // IMPORTANT:
-      // Convert old value to STRING so it can
-      // be edited inside the text input.
       year:
         item.year !== null &&
         item.year !== undefined
@@ -785,7 +941,9 @@ export default function AdminPoliticalCareer() {
     setSelectedImage(null);
 
     setImagePreview(
-      item.image_url || ""
+      getBackendImageUrl(
+        item.image_url
+      )
     );
 
     setError("");
@@ -816,7 +974,7 @@ export default function AdminPoliticalCareer() {
       setSuccess("");
 
       const response =
-          await authFetch(
+        await authFetch(
           `${API_URL}/${id}`,
           {
             method: "DELETE",
@@ -847,6 +1005,10 @@ export default function AdminPoliticalCareer() {
         );
       }
 
+      localStorage.removeItem(
+        CACHE_KEY
+      );
+
       await loadCareer();
 
       window.dispatchEvent(
@@ -858,7 +1020,6 @@ export default function AdminPoliticalCareer() {
       setSuccess(
         "Political career entry deleted successfully."
       );
-
     } catch (err) {
       console.error(
         "DELETE POLITICAL CAREER ERROR:",
@@ -1024,7 +1185,6 @@ export default function AdminPoliticalCareer() {
       setSuccess(
         "Political career order updated successfully."
       );
-
     } catch (err) {
       console.error(
         "REORDER POLITICAL CAREER ERROR:",
@@ -1046,7 +1206,6 @@ export default function AdminPoliticalCareer() {
 
   return (
     <section className="min-h-screen bg-gray-50 py-10">
-
       <div
         className="
           mx-auto
@@ -1056,7 +1215,6 @@ export default function AdminPoliticalCareer() {
           lg:px-8
         "
       >
-
         {/* HEADER */}
 
         <div
@@ -1071,7 +1229,6 @@ export default function AdminPoliticalCareer() {
           "
         >
           <div>
-
             <h1
               className="
                 text-3xl
@@ -1091,13 +1248,14 @@ export default function AdminPoliticalCareer() {
               Add, edit, delete and reorder
               political career timeline entries.
             </p>
-
           </div>
 
           <button
             type="button"
             onClick={() =>
-              navigate("/secure/admin/dashboard")
+              navigate(
+                "/secure/admin/dashboard"
+              )
             }
             className="
               rounded-lg
@@ -1114,10 +1272,9 @@ export default function AdminPoliticalCareer() {
           >
             ← Back to Dashboard
           </button>
-
         </div>
 
-        {/* SUCCESS MESSAGE */}
+        {/* SUCCESS */}
 
         {success && (
           <div
@@ -1137,7 +1294,7 @@ export default function AdminPoliticalCareer() {
           </div>
         )}
 
-        {/* ERROR MESSAGE */}
+        {/* ERROR */}
 
         {error && (
           <div
@@ -1170,7 +1327,6 @@ export default function AdminPoliticalCareer() {
             sm:p-8
           "
         >
-
           <h2
             className="
               text-2xl
@@ -1204,13 +1360,9 @@ export default function AdminPoliticalCareer() {
               md:grid-cols-2
             "
           >
-
-            {/* =================================================
-                TIME PERIOD
-            ================================================= */}
+            {/* TIME PERIOD */}
 
             <div>
-
               <label
                 className="
                   mb-2
@@ -1230,6 +1382,7 @@ export default function AdminPoliticalCareer() {
                 onChange={handleChange}
                 inputMode="numeric"
                 autoComplete="off"
+                maxLength={9}
                 placeholder="2006-2011"
                 required
                 className="
@@ -1253,16 +1406,15 @@ export default function AdminPoliticalCareer() {
                   text-gray-400
                 "
               >
-                Format: 2006-2011. No limit
-                on the number of digits.
+                Format: YYYY-YYYY.
+                Both years must be 1800 or later.
+                Example: 2006-2011.
               </p>
-
             </div>
 
             {/* POSITION */}
 
             <div>
-
               <label
                 className="
                   mb-2
@@ -1291,13 +1443,11 @@ export default function AdminPoliticalCareer() {
                   py-3
                 "
               />
-
             </div>
 
             {/* ORGANIZATION */}
 
             <div>
-
               <label
                 className="
                   mb-2
@@ -1313,7 +1463,9 @@ export default function AdminPoliticalCareer() {
               <input
                 type="text"
                 name="organization"
-                value={formData.organization}
+                value={
+                  formData.organization
+                }
                 onChange={handleChange}
                 placeholder="Andhra Pradesh Youth Congress"
                 required
@@ -1326,13 +1478,11 @@ export default function AdminPoliticalCareer() {
                   py-3
                 "
               />
-
             </div>
 
             {/* LOCATION */}
 
             <div>
-
               <label
                 className="
                   mb-2
@@ -1361,13 +1511,11 @@ export default function AdminPoliticalCareer() {
                   py-3
                 "
               />
-
             </div>
 
             {/* CATEGORY */}
 
             <div>
-
               <label
                 className="
                   mb-2
@@ -1394,13 +1542,11 @@ export default function AdminPoliticalCareer() {
                   py-3
                 "
               />
-
             </div>
 
             {/* DISPLAY ORDER */}
 
             <div>
-
               <label
                 className="
                   mb-2
@@ -1416,7 +1562,9 @@ export default function AdminPoliticalCareer() {
               <input
                 type="text"
                 name="display_order"
-                value={formData.display_order}
+                value={
+                  formData.display_order
+                }
                 onChange={handleChange}
                 inputMode="numeric"
                 className="
@@ -1428,13 +1576,11 @@ export default function AdminPoliticalCareer() {
                   py-3
                 "
               />
-
             </div>
 
             {/* IMAGE */}
 
             <div className="md:col-span-2">
-
               <label
                 className="
                   mb-2
@@ -1493,13 +1639,11 @@ export default function AdminPoliticalCareer() {
                   />
                 </div>
               )}
-
             </div>
 
             {/* DESCRIPTION */}
 
             <div className="md:col-span-2">
-
               <label
                 className="
                   mb-2
@@ -1514,7 +1658,9 @@ export default function AdminPoliticalCareer() {
 
               <textarea
                 name="description"
-                value={formData.description}
+                value={
+                  formData.description
+                }
                 onChange={handleChange}
                 rows={6}
                 className="
@@ -1525,9 +1671,11 @@ export default function AdminPoliticalCareer() {
                   px-4
                   py-3
                   outline-none
+                  focus:border-orange-500
+                  focus:ring-2
+                  focus:ring-orange-100
                 "
               />
-
             </div>
 
             {/* BUTTONS */}
@@ -1540,7 +1688,6 @@ export default function AdminPoliticalCareer() {
                 md:col-span-2
               "
             >
-
               <button
                 type="submit"
                 disabled={saving}
@@ -1582,13 +1729,11 @@ export default function AdminPoliticalCareer() {
                   Cancel Edit
                 </button>
               )}
-
             </div>
-
           </form>
         </div>
 
-        {/* EXISTING POLITICAL CAREER */}
+        {/* EXISTING */}
 
         <div
           className="
@@ -1602,9 +1747,7 @@ export default function AdminPoliticalCareer() {
             sm:p-8
           "
         >
-
           <div className="mb-6">
-
             <h2
               className="
                 text-2xl
@@ -1625,11 +1768,9 @@ export default function AdminPoliticalCareer() {
               Drag cards up or down to change
               their order on the public page.
             </p>
-
           </div>
 
           {loading ? (
-
             <div
               className="
                 py-10
@@ -1639,9 +1780,7 @@ export default function AdminPoliticalCareer() {
             >
               Loading political career...
             </div>
-
           ) : careerData.length === 0 ? (
-
             <div
               className="
                 rounded-lg
@@ -1653,17 +1792,17 @@ export default function AdminPoliticalCareer() {
                 text-gray-500
               "
             >
-              No political career entries found.
+              No political career entries
+              found.
             </div>
-
           ) : (
-
             <DndContext
               sensors={sensors}
-              collisionDetection={closestCenter}
+              collisionDetection={
+                closestCenter
+              }
               onDragEnd={handleDragEnd}
             >
-
               <SortableContext
                 items={careerData.map(
                   (item) => item.id
@@ -1672,32 +1811,25 @@ export default function AdminPoliticalCareer() {
                   verticalListSortingStrategy
                 }
               >
-
                 <div className="space-y-4">
-
                   {careerData.map(
                     (item) => (
                       <SortableCareerItem
                         key={item.id}
                         item={item}
                         onEdit={handleEdit}
-                        onDelete={handleDelete}
+                        onDelete={
+                          handleDelete
+                        }
                       />
                     )
                   )}
-
                 </div>
-
               </SortableContext>
-
             </DndContext>
-
           )}
-
         </div>
-
       </div>
-
     </section>
   );
 }

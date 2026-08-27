@@ -447,7 +447,7 @@ export default function Footer() {
 
           <p className="text-slate-500 text-sm">
 
-            Designed & Developed with ❤️
+            Designed & Developed by ACS
 
           </p>
 

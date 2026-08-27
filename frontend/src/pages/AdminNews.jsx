@@ -20,6 +20,18 @@ import {
 
 import { CSS } from "@dnd-kit/utilities";
 
+import {
+  Image as ImageIcon,
+  Plus,
+  Edit,
+  Trash2,
+  GripVertical,
+  Save,
+  X,
+  RefreshCw,
+  LayoutDashboard,
+} from "lucide-react";
+
 const API_URL = `${API_BASE_URL}/api/news`;
 
 // =====================================================
@@ -36,11 +48,35 @@ const emptyForm = {
 };
 
 // =====================================================
+// IMAGE URL HELPER
+// =====================================================
+
+const getImageUrl = (image) => {
+  if (!image) {
+    return "";
+  }
+
+  if (
+    image.startsWith("http://") ||
+    image.startsWith("https://")
+  ) {
+    return image;
+  }
+
+  if (image.startsWith("/")) {
+    return `${API_BASE_URL}${image}`;
+  }
+
+  return `${API_BASE_URL}/${image}`;
+};
+
+// =====================================================
 // SORTABLE NEWS ITEM
 // =====================================================
 
 const SortableNewsItem = ({
   item,
+  index,
   handleEdit,
   handleDelete,
 }) => {
@@ -59,37 +95,36 @@ const SortableNewsItem = ({
     transform: CSS.Transform.toString(transform),
     transition,
     opacity: isDragging ? 0.6 : 1,
-    zIndex: isDragging ? 10 : "auto",
+    zIndex: isDragging ? 20 : "auto",
   };
+
+  const imageUrl = getImageUrl(item.image_url);
 
   return (
     <div
       ref={setNodeRef}
       style={style}
       className={`
-        rounded-xl
+        rounded-2xl
         border
-        border-gray-200
         bg-white
-        p-5
-        transition
+        p-4
+        sm:p-5
+        transition-all
         ${
           isDragging
-            ? "shadow-xl ring-2 ring-orange-300"
-            : "hover:border-orange-300"
+            ? "border-orange-400 shadow-xl ring-2 ring-orange-200"
+            : "border-gray-200 hover:border-orange-300 hover:shadow-sm"
         }
       `}
     >
-      <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+      <div className="flex flex-col gap-5 lg:flex-row lg:items-center">
 
         {/* =================================================
-            LEFT SIDE
+            DRAG HANDLE
         ================================================= */}
 
-        <div className="flex min-w-0 gap-4">
-
-          {/* DRAG HANDLE */}
-
+        <div className="flex shrink-0 items-center justify-center lg:self-center">
           <button
             type="button"
             {...attributes}
@@ -98,7 +133,6 @@ const SortableNewsItem = ({
               flex
               h-10
               w-10
-              shrink-0
               cursor-grab
               items-center
               justify-center
@@ -113,22 +147,54 @@ const SortableNewsItem = ({
             "
             title="Drag to reorder"
           >
-            ⋮⋮
+            <GripVertical size={20} />
           </button>
+        </div>
 
-          {/* IMAGE */}
+        {/* =================================================
+            POSITION
+        ================================================= */}
 
-          {item.image_url ? (
+        <div className="flex shrink-0 items-center justify-center">
+          <div
+            className="
+              flex
+              h-9
+              w-9
+              items-center
+              justify-center
+              rounded-full
+              bg-gray-900
+              text-sm
+              font-bold
+              text-white
+            "
+          >
+            {index + 1}
+          </div>
+        </div>
+
+        {/* =================================================
+            IMAGE
+        ================================================= */}
+
+        <div
+          className="
+            h-48
+            w-full
+            shrink-0
+            overflow-hidden
+            rounded-xl
+            bg-gray-100
+            sm:h-40
+            sm:w-56
+          "
+        >
+          {imageUrl ? (
             <img
-              src={item.image_url}
-              alt={item.title}
-              className="
-                h-28
-                w-40
-                shrink-0
-                rounded-lg
-                object-cover
-              "
+              src={imageUrl}
+              alt={item.title || "News image"}
+              className="h-full w-full object-cover"
               onError={(e) => {
                 e.currentTarget.style.display = "none";
               }}
@@ -137,28 +203,36 @@ const SortableNewsItem = ({
             <div
               className="
                 flex
-                h-28
-                w-40
-                shrink-0
+                h-full
+                w-full
                 items-center
                 justify-center
-                rounded-lg
-                bg-gray-100
-                text-xs
                 text-gray-400
               "
             >
-              No Image
+              <div className="text-center">
+                <ImageIcon
+                  size={40}
+                  className="mx-auto mb-2"
+                />
+                <span className="text-xs">
+                  No Image
+                </span>
+              </div>
             </div>
           )}
+        </div>
 
-          {/* DETAILS */}
+        {/* =================================================
+            DETAILS
+        ================================================= */}
 
-          <div className="min-w-0">
+        <div className="min-w-0 flex-1">
+
+          <div className="mb-2 flex flex-wrap items-center gap-2">
 
             <span
               className="
-                inline-block
                 rounded-full
                 bg-orange-50
                 px-3
@@ -171,44 +245,90 @@ const SortableNewsItem = ({
               {item.category || "News"}
             </span>
 
-            <h3 className="mt-2 text-lg font-bold text-gray-900">
-              {item.title}
-            </h3>
-
-            <p className="mt-1 text-sm text-gray-500">
-              {item.published_date
-                ? String(item.published_date).substring(
-                    0,
-                    10
-                  )
-                : ""}
-            </p>
-
-            {item.description && (
-              <p className="mt-2 max-w-3xl text-sm leading-6 text-gray-600">
-                {item.description}
-              </p>
-            )}
-
-            {/* ORDER NUMBER */}
-
-            <p className="mt-2 text-xs font-medium text-gray-400">
-              Display order: {item.display_order ?? 0}
-            </p>
+            <span
+              className="
+                rounded-full
+                bg-gray-100
+                px-3
+                py-1
+                text-xs
+                font-semibold
+                text-gray-600
+              "
+            >
+              Position #{index + 1}
+            </span>
 
           </div>
+
+          <h3
+            className="
+              break-words
+              text-lg
+              font-bold
+              text-gray-900
+              sm:text-xl
+            "
+          >
+            {item.title || "Untitled News"}
+          </h3>
+
+          {item.published_date && (
+            <p className="mt-1 text-sm text-gray-500">
+              Published:{" "}
+              {String(item.published_date).substring(
+                0,
+                10
+              )}
+            </p>
+          )}
+
+          {item.description && (
+            <p
+              className="
+                mt-2
+                max-w-3xl
+                break-words
+                text-sm
+                leading-6
+                text-gray-600
+              "
+            >
+              {item.description}
+            </p>
+          )}
+
+          <p className="mt-2 text-xs font-medium text-gray-400">
+            Database display order:{" "}
+            {item.display_order ?? index}
+          </p>
+
         </div>
 
         {/* =================================================
             ACTION BUTTONS
         ================================================= */}
 
-        <div className="flex shrink-0 gap-3">
+        <div
+          className="
+            flex
+            w-full
+            shrink-0
+            gap-3
+            lg:w-auto
+            lg:flex-col
+          "
+        >
 
           <button
             type="button"
             onClick={() => handleEdit(item)}
             className="
+              inline-flex
+              flex-1
+              items-center
+              justify-center
+              gap-2
               rounded-lg
               border
               border-blue-200
@@ -218,9 +338,12 @@ const SortableNewsItem = ({
               text-sm
               font-semibold
               text-blue-600
+              transition
               hover:bg-blue-100
+              lg:flex-none
             "
           >
+            <Edit size={17} />
             Edit
           </button>
 
@@ -230,6 +353,11 @@ const SortableNewsItem = ({
               handleDelete(item.id)
             }
             className="
+              inline-flex
+              flex-1
+              items-center
+              justify-center
+              gap-2
               rounded-lg
               border
               border-red-200
@@ -239,9 +367,12 @@ const SortableNewsItem = ({
               text-sm
               font-semibold
               text-red-600
+              transition
               hover:bg-red-100
+              lg:flex-none
             "
           >
+            <Trash2 size={17} />
             Delete
           </button>
 
@@ -258,6 +389,10 @@ const SortableNewsItem = ({
 
 const AdminNews = () => {
   const navigate = useNavigate();
+
+  // =====================================================
+  // STATE
+  // =====================================================
 
   const [newsData, setNewsData] = useState([]);
 
@@ -309,33 +444,47 @@ const AdminNews = () => {
       setLoading(true);
       setError("");
 
-      const response =
-        await authFetch(
-          `${API_URL}?t=${Date.now()}`
-        );
+      const response = await authFetch(
+        `${API_URL}?t=${Date.now()}`
+      );
+
+      const result = await response.json();
 
       if (!response.ok) {
         throw new Error(
-          `Server returned ${response.status}`
-        );
-      }
-
-      const result =
-        await response.json();
-
-      if (!result.success) {
-        throw new Error(
           result.message ||
-            "Unable to load news"
+            `Server returned ${response.status}`
         );
       }
 
-      const data =
-        Array.isArray(result.data)
-          ? result.data
-          : [];
+      /*
+       Backend response expected:
 
-      setNewsData(data);
+       {
+         success: true,
+         data: [...]
+       }
+      */
+
+      const data = Array.isArray(result.data)
+        ? result.data
+        : Array.isArray(result)
+        ? result
+        : [];
+
+      /*
+       Sort by database display_order.
+       This keeps frontend order synchronized
+       with PostgreSQL.
+      */
+
+      const sortedData = [...data].sort(
+        (a, b) =>
+          Number(a.display_order ?? 0) -
+          Number(b.display_order ?? 0)
+      );
+
+      setNewsData(sortedData);
 
     } catch (error) {
       console.error(
@@ -355,12 +504,16 @@ const AdminNews = () => {
     }
   };
 
+  // =====================================================
+  // INITIAL LOAD
+  // =====================================================
+
   useEffect(() => {
     loadNews();
   }, []);
 
   // =====================================================
-  // HANDLE TEXT INPUT
+  // TEXT INPUT
   // =====================================================
 
   const handleChange = (e) => {
@@ -369,16 +522,14 @@ const AdminNews = () => {
       value,
     } = e.target;
 
-    setFormData(
-      (previous) => ({
-        ...previous,
-        [name]: value,
-      })
-    );
+    setFormData((previous) => ({
+      ...previous,
+      [name]: value,
+    }));
   };
 
   // =====================================================
-  // HANDLE IMAGE
+  // IMAGE INPUT
   // =====================================================
 
   const handleImageChange = (e) => {
@@ -389,19 +540,17 @@ const AdminNews = () => {
       return;
     }
 
-    if (
-      !file.type.startsWith(
-        "image/"
-      )
-    ) {
+    // Check image type
+    if (!file.type.startsWith("image/")) {
       setError(
-        "Please select a valid image."
+        "Please select a valid image file."
       );
 
       e.target.value = "";
       return;
     }
 
+    // Maximum 5 MB
     if (
       file.size >
       5 * 1024 * 1024
@@ -415,15 +564,19 @@ const AdminNews = () => {
     }
 
     setError("");
+    setSuccess("");
 
     setSelectedImage(file);
+
+    /*
+      Revoke previous preview if needed
+      before creating another object URL.
+    */
 
     const previewUrl =
       URL.createObjectURL(file);
 
-    setImagePreview(
-      previewUrl
-    );
+    setImagePreview(previewUrl);
   };
 
   // =====================================================
@@ -431,16 +584,20 @@ const AdminNews = () => {
   // =====================================================
 
   const resetForm = () => {
-    setFormData(emptyForm);
+    setFormData({
+      ...emptyForm,
+    });
+
     setSelectedImage(null);
     setImagePreview("");
     setEditingId(null);
+
     setError("");
     setSuccess("");
   };
 
   // =====================================================
-  // ADD / UPDATE NEWS
+  // SUBMIT
   // =====================================================
 
   const handleSubmit = async (e) => {
@@ -451,22 +608,46 @@ const AdminNews = () => {
     setSuccess("");
 
     try {
-      const data =
-        new FormData();
+      // -----------------------------------------------
+      // VALIDATION
+      // -----------------------------------------------
+
+      if (!formData.title.trim()) {
+        throw new Error(
+          "Please enter a news title."
+        );
+      }
+
+      if (
+        formData.link &&
+        !/^https?:\/\/.+/i.test(
+          formData.link.trim()
+        )
+      ) {
+        throw new Error(
+          "Read More Link must start with http:// or https://."
+        );
+      }
+
+      // -----------------------------------------------
+      // FORM DATA
+      // -----------------------------------------------
+
+      const data = new FormData();
 
       data.append(
         "title",
-        formData.title
+        formData.title.trim()
       );
 
       data.append(
         "description",
-        formData.description
+        formData.description.trim()
       );
 
       data.append(
         "content",
-        formData.content
+        formData.content.trim()
       );
 
       data.append(
@@ -481,14 +662,15 @@ const AdminNews = () => {
 
       data.append(
         "link",
-        formData.link
+        formData.link.trim()
       );
 
       /*
-        Do NOT send display_order while adding/editing
-        unless you specifically want to change it.
-        Backend keeps the existing order during edit
-        and assigns a new item to the end during add.
+       Do not send display_order here.
+
+       Backend should:
+       - keep existing order while editing
+       - assign new news to the end while adding
       */
 
       if (selectedImage) {
@@ -498,24 +680,29 @@ const AdminNews = () => {
         );
       }
 
-      const url =
-        editingId
-          ? `${API_URL}/${editingId}`
-          : API_URL;
+      // -----------------------------------------------
+      // URL + METHOD
+      // -----------------------------------------------
 
-      const method =
-        editingId
-          ? "PUT"
-          : "POST";
+      const url = editingId
+        ? `${API_URL}/${editingId}`
+        : API_URL;
 
-      const response =
-        await authFetch(
-          url,
-          {
-            method,
-            body: data,
-          }
-        );
+      const method = editingId
+        ? "PUT"
+        : "POST";
+
+      // -----------------------------------------------
+      // API REQUEST
+      // -----------------------------------------------
+
+      const response = await authFetch(
+        url,
+        {
+          method,
+          body: data,
+        }
+      );
 
       const result =
         await response.json();
@@ -526,9 +713,17 @@ const AdminNews = () => {
       ) {
         throw new Error(
           result.message ||
-            "Unable to save news"
+            `Unable to ${
+              editingId
+                ? "update"
+                : "add"
+            } news.`
         );
       }
+
+      // -----------------------------------------------
+      // SUCCESS
+      // -----------------------------------------------
 
       setSuccess(
         editingId
@@ -557,17 +752,14 @@ const AdminNews = () => {
   };
 
   // =====================================================
-  // EDIT NEWS
+  // EDIT
   // =====================================================
 
   const handleEdit = (item) => {
-    setEditingId(
-      item.id
-    );
+    setEditingId(item.id);
 
     setFormData({
-      title:
-        item.title || "",
+      title: item.title || "",
 
       description:
         item.description || "",
@@ -593,7 +785,7 @@ const AdminNews = () => {
     setSelectedImage(null);
 
     setImagePreview(
-      item.image_url || ""
+      getImageUrl(item.image_url)
     );
 
     setError("");
@@ -606,67 +798,73 @@ const AdminNews = () => {
   };
 
   // =====================================================
-  // DELETE NEWS
+  // DELETE
   // =====================================================
 
-  const handleDelete =
-    async (id) => {
+  const handleDelete = async (id) => {
+    const confirmed =
+      window.confirm(
+        "Are you sure you want to delete this news?"
+      );
 
-      const confirmed =
-        window.confirm(
-          "Are you sure you want to delete this news?"
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      setError("");
+      setSuccess("");
+      setSaving(true);
+
+      const response =
+        await authFetch(
+          `${API_URL}/${id}`,
+          {
+            method: "DELETE",
+          }
         );
 
-      if (!confirmed) {
-        return;
-      }
+      const result =
+        await response.json();
 
-      try {
-        setError("");
-        setSuccess("");
-
-        const response =
-          await authFetch(
-            `${API_URL}/${id}`,
-            {
-              method: "DELETE",
-            }
-          );
-
-        const result =
-          await response.json();
-
-        if (
-          !response.ok ||
-          !result.success
-        ) {
-          throw new Error(
-            result.message ||
-              "Unable to delete news"
-          );
-        }
-
-        setSuccess(
-          "News deleted successfully."
-        );
-
-        await loadNews();
-
-      } catch (error) {
-        console.error(
-          "DELETE NEWS ERROR:",
-          error
-        );
-
-        setError(
-          error.message ||
+      if (
+        !response.ok ||
+        !result.success
+      ) {
+        throw new Error(
+          result.message ||
             "Unable to delete news."
         );
       }
-    };
+
+      setSuccess(
+        "News deleted successfully."
+      );
+
+      /*
+       Reload database order after delete.
+      */
+
+      await loadNews();
+
+    } catch (error) {
+      console.error(
+        "DELETE NEWS ERROR:",
+        error
+      );
+
+      setError(
+        error.message ||
+          "Unable to delete news."
+      );
+
+    } finally {
+      setSaving(false);
+    }
+  };
 
   // =====================================================
-  // SAVE DRAG ORDER
+  // SAVE ORDER
   // =====================================================
 
   const saveNewsOrder = async (
@@ -678,73 +876,51 @@ const AdminNews = () => {
       setSuccess("");
 
       /*
-        Send every item's new position
-        to PostgreSQL.
+       We update only display_order.
+
+       This avoids accidentally overwriting
+       title/content/image data during reorder.
       */
 
-      for (
-        let index = 0;
-        index < reorderedNews.length;
-        index++
+      const order = reorderedNews.map(
+        (item, index) => ({
+          id: item.id,
+          display_order: index,
+        })
+      );
+
+      const response =
+        await authFetch(
+          `${API_URL}/reorder`,
+          {
+            method: "PUT",
+
+            headers: {
+              "Content-Type":
+                "application/json",
+            },
+
+            body: JSON.stringify({
+              order,
+            }),
+          }
+        );
+
+      const result =
+        await response.json();
+
+      if (
+        !response.ok ||
+        !result.success
       ) {
-        const item =
-          reorderedNews[index];
-
-        const response =
-          await authFetch(
-            `${API_URL}/${item.id}`,
-            {
-              method: "PUT",
-
-              headers: {
-                "Content-Type":
-                  "application/json",
-              },
-
-              body: JSON.stringify({
-                title:
-                  item.title || "",
-
-                description:
-                  item.description || "",
-
-                content:
-                  item.content || "",
-
-                category:
-                  item.category ||
-                  "News",
-
-                published_date:
-                  item.published_date ||
-                  null,
-
-                display_order:
-                  index,
-
-                link:
-                  item.link || "",
-              }),
-            }
-          );
-
-        const result =
-          await response.json();
-
-        if (
-          !response.ok ||
-          !result.success
-        ) {
-          throw new Error(
-            result.message ||
-              `Failed to save order for news ID ${item.id}`
-          );
-        }
+        throw new Error(
+          result.message ||
+            "Unable to save news order."
+        );
       }
 
       /*
-        Reload from PostgreSQL after all
-        positions have been saved.
+       Get the real order from PostgreSQL.
       */
 
       await loadNews();
@@ -765,8 +941,7 @@ const AdminNews = () => {
       );
 
       /*
-        Restore actual database order
-        if saving fails.
+       Restore database order.
       */
 
       await loadNews();
@@ -780,86 +955,95 @@ const AdminNews = () => {
   // DRAG END
   // =====================================================
 
-  const handleDragEnd =
-    async (event) => {
+  const handleDragEnd = async (event) => {
+    const {
+      active,
+      over,
+    } = event;
 
-      const {
-        active,
-        over,
-      } = event;
+    if (
+      !over ||
+      active.id === over.id
+    ) {
+      return;
+    }
 
-      if (
-        !over ||
-        active.id === over.id
-      ) {
-        return;
-      }
+    const currentData =
+      [...newsData];
 
-      const currentData =
-        [...newsData];
-
-      const oldIndex =
-        currentData.findIndex(
-          (item) =>
-            item.id === active.id
-        );
-
-      const newIndex =
-        currentData.findIndex(
-          (item) =>
-            item.id === over.id
-        );
-
-      if (
-        oldIndex === -1 ||
-        newIndex === -1
-      ) {
-        return;
-      }
-
-      /*
-        Create new visual order.
-      */
-
-      const reorderedNews =
-        arrayMove(
-          currentData,
-          oldIndex,
-          newIndex
-        );
-
-      /*
-        Immediately update the screen.
-      */
-
-      const orderedWithDisplayOrder =
-        reorderedNews.map(
-          (item, index) => ({
-            ...item,
-            display_order:
-              index,
-          })
-        );
-
-      setNewsData(
-        orderedWithDisplayOrder
+    const oldIndex =
+      currentData.findIndex(
+        (item) =>
+          String(item.id) ===
+          String(active.id)
       );
 
-      /*
-        Save to PostgreSQL.
-      */
-
-      await saveNewsOrder(
-        orderedWithDisplayOrder
+    const newIndex =
+      currentData.findIndex(
+        (item) =>
+          String(item.id) ===
+          String(over.id)
       );
-    };
+
+    if (
+      oldIndex === -1 ||
+      newIndex === -1
+    ) {
+      return;
+    }
+
+    /*
+     Create new order.
+    */
+
+    const reorderedNews =
+      arrayMove(
+        currentData,
+        oldIndex,
+        newIndex
+      ).map(
+        (item, index) => ({
+          ...item,
+          display_order: index,
+        })
+      );
+
+    /*
+     Immediately update UI.
+    */
+
+    setNewsData(
+      reorderedNews
+    );
+
+    /*
+     Save to backend.
+    */
+
+    await saveNewsOrder(
+      reorderedNews
+    );
+  };
+
+  // =====================================================
+  // CANCEL EDIT
+  // =====================================================
+
+  const handleCancelEdit = () => {
+    resetForm();
+
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  };
 
   // =====================================================
   // PAGE
   // =====================================================
 
   return (
-    <section className="min-h-screen bg-gray-50 py-10">
+    <section className="min-h-screen bg-gray-50 py-6 sm:py-10">
 
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
 
@@ -880,25 +1064,34 @@ const AdminNews = () => {
         >
 
           <div>
-
-            <h1 className="text-3xl font-bold text-gray-900">
+            <h1
+              className="
+                text-2xl
+                font-bold
+                text-gray-900
+                sm:text-3xl
+              "
+            >
               News Management
             </h1>
 
-            <p className="mt-2 text-gray-600">
+            <p className="mt-2 text-sm text-gray-600 sm:text-base">
               Add, edit, delete and manage public news.
             </p>
-
           </div>
-
-          {/* BACK TO DASHBOARD */}
 
           <button
             type="button"
             onClick={() =>
-              navigate("/secure/admin/dashboard")
+              navigate(
+                "/secure/admin/dashboard"
+              )
             }
             className="
+              inline-flex
+              items-center
+              justify-center
+              gap-2
               rounded-lg
               border
               border-gray-300
@@ -908,23 +1101,25 @@ const AdminNews = () => {
               text-sm
               font-semibold
               text-gray-700
+              transition
               hover:bg-gray-50
             "
           >
-            ← Back to Dashboard
+            <LayoutDashboard size={18} />
+            Back to Dashboard
           </button>
 
         </div>
 
         {/* =================================================
-            SUCCESS MESSAGE
+            SUCCESS
         ================================================= */}
 
         {success && (
           <div
             className="
               mb-6
-              rounded-lg
+              rounded-xl
               border
               border-green-200
               bg-green-50
@@ -939,14 +1134,14 @@ const AdminNews = () => {
         )}
 
         {/* =================================================
-            ERROR MESSAGE
+            ERROR
         ================================================= */}
 
         {error && (
           <div
             className="
               mb-6
-              rounded-lg
+              rounded-xl
               border
               border-red-200
               bg-red-50
@@ -966,26 +1161,60 @@ const AdminNews = () => {
 
         <div
           className="
-            rounded-xl
+            rounded-2xl
             border
-            border-gray-300
+            border-gray-200
             bg-white
-            p-6
+            p-5
             shadow-sm
             sm:p-8
           "
         >
 
-          <h2 className="text-2xl font-bold text-gray-900">
-            {editingId
-              ? "Edit News"
-              : "Add News"}
-          </h2>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 
-          <p className="mt-1 text-sm text-gray-500">
-            Enter the information that should appear
-            on the public News page.
-          </p>
+            <div>
+
+              <h2 className="text-2xl font-bold text-gray-900">
+                {editingId
+                  ? "Edit News"
+                  : "Add News"}
+              </h2>
+
+              <p className="mt-1 text-sm text-gray-500">
+                Enter the information that should appear
+                on the public News page.
+              </p>
+
+            </div>
+
+            {editingId && (
+              <button
+                type="button"
+                onClick={
+                  handleCancelEdit
+                }
+                className="
+                  inline-flex
+                  items-center
+                  justify-center
+                  gap-2
+                  rounded-lg
+                  bg-gray-100
+                  px-4
+                  py-2
+                  text-sm
+                  font-semibold
+                  text-gray-700
+                  hover:bg-gray-200
+                "
+              >
+                <X size={17} />
+                Cancel Edit
+              </button>
+            )}
+
+          </div>
 
           <form
             onSubmit={handleSubmit}
@@ -1002,15 +1231,7 @@ const AdminNews = () => {
 
             <div className="md:col-span-2">
 
-              <label
-                className="
-                  mb-2
-                  block
-                  text-sm
-                  font-medium
-                  text-gray-700
-                "
-              >
+              <label className="mb-2 block text-sm font-medium text-gray-700">
                 Title
               </label>
 
@@ -1033,6 +1254,7 @@ const AdminNews = () => {
                   px-4
                   py-3
                   outline-none
+                  transition
                   focus:border-orange-500
                   focus:ring-2
                   focus:ring-orange-100
@@ -1045,15 +1267,7 @@ const AdminNews = () => {
 
             <div>
 
-              <label
-                className="
-                  mb-2
-                  block
-                  text-sm
-                  font-medium
-                  text-gray-700
-                "
-              >
+              <label className="mb-2 block text-sm font-medium text-gray-700">
                 Category
               </label>
 
@@ -1074,9 +1288,9 @@ const AdminNews = () => {
                   px-4
                   py-3
                   outline-none
+                  focus:border-orange-500
                 "
               >
-
                 <option value="Government">
                   Government
                 </option>
@@ -1096,7 +1310,6 @@ const AdminNews = () => {
                 <option value="Agriculture">
                   Agriculture
                 </option>
-
               </select>
 
             </div>
@@ -1105,15 +1318,7 @@ const AdminNews = () => {
 
             <div>
 
-              <label
-                className="
-                  mb-2
-                  block
-                  text-sm
-                  font-medium
-                  text-gray-700
-                "
-              >
+              <label className="mb-2 block text-sm font-medium text-gray-700">
                 Published Date
               </label>
 
@@ -1134,6 +1339,7 @@ const AdminNews = () => {
                   px-4
                   py-3
                   outline-none
+                  focus:border-orange-500
                 "
               />
 
@@ -1143,15 +1349,7 @@ const AdminNews = () => {
 
             <div className="md:col-span-2">
 
-              <label
-                className="
-                  mb-2
-                  block
-                  text-sm
-                  font-medium
-                  text-gray-700
-                "
-              >
+              <label className="mb-2 block text-sm font-medium text-gray-700">
                 Read More Link
               </label>
 
@@ -1173,6 +1371,7 @@ const AdminNews = () => {
                   px-4
                   py-3
                   outline-none
+                  focus:border-orange-500
                 "
               />
 
@@ -1182,21 +1381,20 @@ const AdminNews = () => {
 
             <div className="md:col-span-2">
 
-              <label
-                className="
-                  mb-2
-                  block
-                  text-sm
-                  font-medium
-                  text-gray-700
-                "
-              >
-                Upload Image
+              <label className="mb-2 block text-sm font-medium text-gray-700">
+                {editingId
+                  ? "Replace Image (Optional)"
+                  : "Upload Image"}
               </label>
 
               <input
                 type="file"
-                accept="image/jpeg,image/jpg,image/png,image/webp"
+                accept="
+                  image/jpeg,
+                  image/jpg,
+                  image/png,
+                  image/webp
+                "
                 onChange={
                   handleImageChange
                 }
@@ -1208,6 +1406,7 @@ const AdminNews = () => {
                   bg-white
                   px-4
                   py-3
+                  text-sm
                 "
               />
 
@@ -1216,8 +1415,15 @@ const AdminNews = () => {
                 Maximum 5 MB.
               </p>
 
+              {editingId && (
+                <p className="mt-1 text-xs text-gray-500">
+                  Leave the image empty to keep
+                  the current image.
+                </p>
+              )}
+
               {imagePreview && (
-                <div className="mt-4 overflow-hidden rounded-xl border border-gray-200">
+                <div className="mt-4 overflow-hidden rounded-xl border border-gray-200 bg-gray-100">
 
                   <img
                     src={imagePreview}
@@ -1226,7 +1432,12 @@ const AdminNews = () => {
                       h-64
                       w-full
                       object-cover
+                      sm:h-80
                     "
+                    onError={(e) => {
+                      e.currentTarget.style.display =
+                        "none";
+                    }}
                   />
 
                 </div>
@@ -1238,15 +1449,7 @@ const AdminNews = () => {
 
             <div className="md:col-span-2">
 
-              <label
-                className="
-                  mb-2
-                  block
-                  text-sm
-                  font-medium
-                  text-gray-700
-                "
-              >
+              <label className="mb-2 block text-sm font-medium text-gray-700">
                 Description
               </label>
 
@@ -1262,12 +1465,14 @@ const AdminNews = () => {
                 placeholder="Short description"
                 className="
                   w-full
+                  resize-y
                   rounded-lg
                   border
                   border-gray-300
                   px-4
                   py-3
                   outline-none
+                  focus:border-orange-500
                 "
               />
 
@@ -1277,15 +1482,7 @@ const AdminNews = () => {
 
             <div className="md:col-span-2">
 
-              <label
-                className="
-                  mb-2
-                  block
-                  text-sm
-                  font-medium
-                  text-gray-700
-                "
-              >
+              <label className="mb-2 block text-sm font-medium text-gray-700">
                 Full Content
               </label>
 
@@ -1301,12 +1498,14 @@ const AdminNews = () => {
                 placeholder="Full news content..."
                 className="
                   w-full
+                  resize-y
                   rounded-lg
                   border
                   border-gray-300
                   px-4
                   py-3
                   outline-none
+                  focus:border-orange-500
                 "
               />
 
@@ -1330,6 +1529,10 @@ const AdminNews = () => {
                   savingOrder
                 }
                 className="
+                  inline-flex
+                  items-center
+                  justify-center
+                  gap-2
                   rounded-lg
                   bg-orange-600
                   px-6
@@ -1342,38 +1545,60 @@ const AdminNews = () => {
                   disabled:opacity-50
                 "
               >
-                {saving
-                  ? "Saving..."
-                  : editingId
-                  ? "Update News"
-                  : "Add News"}
+
+                {saving ? (
+                  <>
+                    <RefreshCw
+                      size={18}
+                      className="animate-spin"
+                    />
+                    Saving...
+                  </>
+                ) : editingId ? (
+                  <>
+                    <Save size={18} />
+                    Update News
+                  </>
+                ) : (
+                  <>
+                    <Plus size={18} />
+                    Add News
+                  </>
+                )}
+
               </button>
 
-              {editingId && (
-                <button
-                  type="button"
-                  onClick={
-                    resetForm
-                  }
-                  className="
-                    rounded-lg
-                    border
-                    border-gray-300
-                    bg-white
-                    px-6
-                    py-3
-                    font-semibold
-                    text-gray-700
-                    hover:bg-gray-50
-                  "
-                >
-                  Cancel Edit
-                </button>
-              )}
+              <button
+                type="button"
+                onClick={
+                  resetForm
+                }
+                disabled={saving}
+                className="
+                  inline-flex
+                  items-center
+                  justify-center
+                  gap-2
+                  rounded-lg
+                  border
+                  border-gray-300
+                  bg-white
+                  px-6
+                  py-3
+                  font-semibold
+                  text-gray-700
+                  hover:bg-gray-50
+                  disabled:opacity-50
+                "
+              >
+                <X size={18} />
+                Clear
+              </button>
 
             </div>
 
           </form>
+
         </div>
 
         {/* =================================================
@@ -1383,11 +1608,11 @@ const AdminNews = () => {
         <div
           className="
             mt-10
-            rounded-xl
+            rounded-2xl
             border
-            border-gray-300
+            border-gray-200
             bg-white
-            p-6
+            p-5
             shadow-sm
             sm:p-8
           "
@@ -1400,7 +1625,7 @@ const AdminNews = () => {
               mb-6
               flex
               flex-col
-              gap-2
+              gap-4
               sm:flex-row
               sm:items-center
               sm:justify-between
@@ -1414,112 +1639,165 @@ const AdminNews = () => {
               </h2>
 
               <p className="mt-1 text-sm text-gray-500">
-                Drag the news cards up or down to
-                change the public website order.
+                Drag the news cards to change
+                their order on the public website.
               </p>
 
             </div>
 
-            {/* ORDER STATUS */}
+            <div className="flex flex-wrap items-center gap-3">
 
-            {savingOrder && (
-              <div
+              <span
                 className="
                   rounded-full
-                  bg-orange-50
+                  bg-gray-100
                   px-4
                   py-2
                   text-sm
                   font-semibold
-                  text-orange-600
+                  text-gray-700
                 "
               >
-                Saving order...
-              </div>
-            )}
+                {newsData.length} News
+              </span>
+
+              {savingOrder && (
+                <span
+                  className="
+                    inline-flex
+                    items-center
+                    gap-2
+                    rounded-full
+                    bg-orange-50
+                    px-4
+                    py-2
+                    text-sm
+                    font-semibold
+                    text-orange-600
+                  "
+                >
+                  <RefreshCw
+                    size={15}
+                    className="animate-spin"
+                  />
+                  Saving order...
+                </span>
+              )}
+
+            </div>
 
           </div>
 
-          {/* LIST */}
+          {/* =================================================
+              LOADING
+          ================================================= */}
 
-          {loading ? (
+          {loading && (
+            <div className="py-12 text-center text-gray-500">
+              <RefreshCw
+                size={30}
+                className="mx-auto mb-3 animate-spin"
+              />
 
-            <div className="py-10 text-center text-gray-500">
               Loading news...
             </div>
+          )}
 
-          ) : newsData.length === 0 ? (
+          {/* =================================================
+              EMPTY
+          ================================================= */}
 
-            <div
-              className="
-                rounded-lg
-                border
-                border-dashed
-                border-gray-300
-                py-10
-                text-center
-                text-gray-500
-              "
-            >
-              No news records found.
-            </div>
+          {!loading &&
+            newsData.length === 0 && (
+              <div
+                className="
+                  rounded-xl
+                  border-2
+                  border-dashed
+                  border-gray-300
+                  py-14
+                  text-center
+                "
+              >
 
-          ) : (
+                <ImageIcon
+                  size={45}
+                  className="mx-auto mb-4 text-gray-300"
+                />
 
-            <DndContext
-              sensors={
-                sensors
-              }
-              collisionDetection={
-                closestCenter
-              }
-              onDragEnd={
-                handleDragEnd
-              }
-            >
+                <h3 className="text-lg font-semibold text-gray-700">
+                  No news records found
+                </h3>
 
-              <SortableContext
-                items={newsData.map(
-                  (item) =>
-                    item.id
-                )}
-                strategy={
-                  verticalListSortingStrategy
+                <p className="mt-2 text-sm text-gray-500">
+                  Add your first news article
+                  using the form above.
+                </p>
+
+              </div>
+            )}
+
+          {/* =================================================
+              NEWS LIST
+          ================================================= */}
+
+          {!loading &&
+            newsData.length > 0 && (
+              <DndContext
+                sensors={sensors}
+                collisionDetection={
+                  closestCenter
+                }
+                onDragEnd={
+                  handleDragEnd
                 }
               >
 
-                <div className="space-y-4">
-
-                  {newsData.map(
-                    (item) => (
-                      <SortableNewsItem
-                        key={
-                          item.id
-                        }
-                        item={
-                          item
-                        }
-                        handleEdit={
-                          handleEdit
-                        }
-                        handleDelete={
-                          handleDelete
-                        }
-                      />
-                    )
+                <SortableContext
+                  items={newsData.map(
+                    (item) =>
+                      item.id
                   )}
+                  strategy={
+                    verticalListSortingStrategy
+                  }
+                >
 
-                </div>
+                  <div className="space-y-4">
 
-              </SortableContext>
+                    {newsData.map(
+                      (item, index) => (
+                        <SortableNewsItem
+                          key={
+                            item.id
+                          }
+                          item={
+                            item
+                          }
+                          index={
+                            index
+                          }
+                          handleEdit={
+                            handleEdit
+                          }
+                          handleDelete={
+                            handleDelete
+                          }
+                        />
+                      )
+                    )}
 
-            </DndContext>
+                  </div>
 
-          )}
+                </SortableContext>
+
+              </DndContext>
+            )}
 
         </div>
 
       </div>
+
     </section>
   );
 };

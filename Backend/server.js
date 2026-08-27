@@ -10,97 +10,80 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 
 const app = express();
+
 app.set("trust proxy", true);
 
 const PORT = process.env.PORT || 5000;
+
+// ============================================================
+// ROUTES
+// ============================================================
+
 const authRoutes = require("./routes/authRoutes");
 const contactRoutes = require("./routes/ContactRoutes");
-// =====================================
+
+// ============================================================
 // MIDDLEWARE
-// =====================================
+// ============================================================
 
-app.use(cors());
+app.use(
+  cors({
+    origin: true,
+    credentials: true,
+  })
+);
 
-app.use(express.json());
-app.use("/api/auth", authRoutes);
-app.use("/api/contacts", contactRoutes);
+app.use(
+  express.json({
+    limit: "20mb",
+  })
+);
 
 app.use(
   express.urlencoded({
     extended: true,
+    limit: "20mb",
   })
 );
-// =====================================
-// ADMIN JWT AUTHENTICATION
-// =====================================
 
-const authenticateAdmin = (req, res, next) => {
-  try {
-    const authHeader = req.headers.authorization;
+// ============================================================
+// AUTH ROUTES
+// ============================================================
 
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return res.status(401).json({
-        success: false,
-        message: "Authentication required",
-      });
-    }
+app.use("/api/auth", authRoutes);
+app.use("/api/contacts", contactRoutes);
 
-    const token = authHeader.split(" ")[1];
-
-    const decoded = jwt.verify(
-      token,
-      process.env.JWT_SECRET
-    );
-
-    if (decoded.role !== "admin") {
-      return res.status(403).json({
-        success: false,
-        message: "Admin access required",
-      });
-    }
-
-    req.admin = decoded;
-
-    next();
-
-  } catch (error) {
-    console.error("JWT AUTH ERROR:", error.message);
-
-    return res.status(401).json({
-      success: false,
-      message: "Invalid or expired token",
-    });
-  }
-};
-
-
-// =====================================
+// ============================================================
 // PATHS
-// =====================================
+// ============================================================
 
-const dataFolder = path.join(
-  __dirname,
-  "data"
-);
+const dataFolder = path.join(__dirname, "data");
 
 const dataFile = path.join(
   dataFolder,
   "leader.json"
 );
 
-const uploadsFolder = path.join(
+const uploadFolder = path.join(
   __dirname,
   "uploads"
 );
 
-// const dataFolder = path.join(
-//   __dirname,
-//   "data"
-// );
+const uploadsFolder = uploadFolder;
 
-const uploadFolder = path.join(
-  __dirname,
-  "uploads"
+const politicalCareerFolder = path.join(
+  uploadFolder,
+  "political_career"
+);
+
+const newsFolder = path.join(
+  uploadFolder,
+  "news"
+);
+
+const galleryFolder = path.join(
+  uploadFolder,
+  "gallery"
 );
 
 const videoFolder = path.join(
@@ -108,295 +91,363 @@ const videoFolder = path.join(
   "videos"
 );
 
-const videoStorage =
+const articleFolder = path.join(
+  uploadFolder,
+  "articles"
+);
+
+const homeFolder = path.join(
+  uploadFolder,
+  "home"
+);
+
+// ============================================================
+// CREATE REQUIRED FOLDERS
+// ============================================================
+
+[
+  dataFolder,
+  uploadFolder,
+  politicalCareerFolder,
+  newsFolder,
+  galleryFolder,
+  videoFolder,
+  articleFolder,
+  homeFolder,
+].forEach((folder) => {
+  if (!fs.existsSync(folder)) {
+    fs.mkdirSync(folder, {
+      recursive: true,
+    });
+  }
+});
+
+// ============================================================
+// SERVE UPLOADED FILES
+// ============================================================
+
+app.use(
+  "/uploads",
+  express.static(uploadFolder)
+);
+
+// ============================================================
+// HELPER - SAFE FILENAME
+// ============================================================
+
+const createSafeFilename = (originalName) => {
+  const extension = path
+    .extname(originalName || "")
+    .toLowerCase();
+
+  const originalBaseName = path.basename(
+    originalName || "file",
+    path.extname(originalName || "")
+  );
+
+  const baseName = originalBaseName
+    .replace(/\s+/g, "-")
+    .replace(/[^a-zA-Z0-9-_]/g, "")
+    .replace(/-+/g, "-")
+    .replace(/_+/g, "_")
+    .slice(0, 100);
+
+  return `${Date.now()}-${baseName || "file"}${extension}`;
+};
+
+// ============================================================
+// GENERIC STORAGE
+// ============================================================
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, uploadFolder);
+  },
+
+  filename: (req, file, cb) => {
+    cb(
+      null,
+      createSafeFilename(file.originalname)
+    );
+  },
+});
+
+// ============================================================
+// GENERIC UPLOAD
+// ============================================================
+
+const upload = multer({
+  storage,
+
+  limits: {
+    fileSize: 50 * 1024 * 1024,
+  },
+
+  fileFilter: (req, file, cb) => {
+    cb(null, true);
+  },
+});
+
+// ============================================================
+// POLITICAL CAREER STORAGE
+// ============================================================
+
+const politicalCareerStorage =
   multer.diskStorage({
-    destination: (
-      req,
-      file,
-      cb
-    ) => {
-      cb(null, videoFolder);
+    destination: (req, file, cb) => {
+      cb(null, politicalCareerFolder);
     },
 
-    filename: (
-      req,
-      file,
-      cb
-    ) => {
-      const extension =
-        path.extname(
-          file.originalname
-        );
-
-      const originalName =
-        path
-          .basename(
-            file.originalname,
-            extension
-          )
-          .replace(
-            /\s+/g,
-            "-"
-          )
-          .replace(
-            /[^a-zA-Z0-9-_]/g,
-            ""
-          );
-
-      const filename =
-        Date.now() +
-        "-" +
-        originalName +
-        extension;
-
+    filename: (req, file, cb) => {
       cb(
         null,
-        filename
+        createSafeFilename(
+          file.originalname
+        )
       );
     },
   });
 
-const videoUpload =
+// ============================================================
+// POLITICAL CAREER UPLOAD
+// ============================================================
+
+const politicalCareerUpload = multer({
+  storage: politicalCareerStorage,
+
+  limits: {
+    fileSize: 10 * 1024 * 1024,
+  },
+
+  fileFilter: (req, file, cb) => {
+    const allowedExtensions = [
+      ".jpg",
+      ".jpeg",
+      ".png",
+      ".webp",
+    ];
+
+    const extension = path
+      .extname(file.originalname)
+      .toLowerCase();
+
+    if (
+      allowedExtensions.includes(
+        extension
+      )
+    ) {
+      return cb(null, true);
+    }
+
+    cb(
+      new Error(
+        "Only JPG, JPEG, PNG and WEBP images are allowed."
+      )
+    );
+  },
+});
+
+// ============================================================
+// VIDEO STORAGE
+// ============================================================
+
+const videoStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, videoFolder);
+  },
+
+  filename: (req, file, cb) => {
+    cb(
+      null,
+      createSafeFilename(
+        file.originalname
+      )
+    );
+  },
+});
+
+// ============================================================
+// VIDEO UPLOAD
+// ============================================================
+
+const videoUpload = multer({
+  storage: videoStorage,
+
+  limits: {
+    fileSize: 200 * 1024 * 1024,
+  },
+
+  fileFilter: (req, file, cb) => {
+    const allowedExtensions = [
+      ".mp4",
+      ".webm",
+      ".ogg",
+      ".mov",
+      ".m4v",
+    ];
+
+    const extension = path
+      .extname(file.originalname)
+      .toLowerCase();
+
+    if (
+      allowedExtensions.includes(
+        extension
+      )
+    ) {
+      return cb(null, true);
+    }
+
+    cb(
+      new Error(
+        "Only MP4, WEBM, OGG, MOV and M4V videos are allowed."
+      )
+    );
+  },
+});
+
+// ============================================================
+// IMAGE STORAGE FACTORY
+// ============================================================
+
+const createImageStorage = (folder) =>
+  multer.diskStorage({
+    destination: (req, file, cb) => {
+      cb(null, folder);
+    },
+
+    filename: (req, file, cb) => {
+      cb(
+        null,
+        createSafeFilename(
+          file.originalname
+        )
+      );
+    },
+  });
+
+// ============================================================
+// IMAGE UPLOAD FACTORY
+// ============================================================
+
+const createImageUpload = (
+  folder,
+  maxSize = 10
+) =>
   multer({
-    storage:
-      videoStorage,
+    storage: createImageStorage(folder),
 
     limits: {
       fileSize:
-        500 *
-        1024 *
-        1024,
+        maxSize * 1024 * 1024,
     },
 
-    fileFilter: (
-      req,
-      file,
-      cb
-    ) => {
-      /*
-       * Accept ANY video MIME type:
-       *
-       * video/mp4
-       * video/webm
-       * video/quicktime
-       * video/x-msvideo
-       * video/x-matroska
-       * video/mpeg
-       * video/ogg
-       * video/3gpp
-       * etc.
-       */
-
-      if (
-        file.mimetype &&
-        file.mimetype.startsWith(
-          "video/"
-        )
-      ) {
-        return cb(
-          null,
-          true
-        );
-      }
-
-      /*
-       * Some browsers send
-       * unknown video files as
-       * application/octet-stream.
-       */
-
-      if (
-        file.mimetype ===
-        "application/octet-stream"
-      ) {
-        return cb(
-          null,
-          true
-        );
-      }
-
-      /*
-       * Fallback by extension.
-       */
-
-      const videoExtensions = [
-        ".mp4",
-        ".m4v",
-        ".webm",
-        ".mov",
-        ".qt",
-        ".avi",
-        ".mkv",
-        ".wmv",
-        ".flv",
-        ".f4v",
-        ".mpeg",
-        ".mpg",
-        ".mpe",
-        ".mpv",
-        ".3gp",
-        ".3g2",
-        ".ts",
-        ".mts",
-        ".m2ts",
-        ".vob",
-        ".ogv",
-        ".ogg",
-        ".rm",
-        ".rmvb",
-        ".asf",
-        ".amv",
-        ".divx",
-        ".mxf",
-        ".m2v",
-        ".m4p",
-        ".m4b",
-        ".m4a",
+    fileFilter: (req, file, cb) => {
+      const allowedExtensions = [
+        ".jpg",
+        ".jpeg",
+        ".png",
+        ".webp",
+        ".gif",
       ];
 
-      const extension =
-        path
-          .extname(
-            file.originalname
-          )
-          .toLowerCase();
+      const extension = path
+        .extname(file.originalname)
+        .toLowerCase();
 
       if (
-        videoExtensions.includes(
+        allowedExtensions.includes(
           extension
         )
       ) {
-        return cb(
-          null,
-          true
-        );
+        return cb(null, true);
       }
 
       cb(
         new Error(
-          "The selected file is not recognized as a video."
+          "Only JPG, JPEG, PNG, WEBP and GIF images are allowed."
         )
       );
     },
   });
 
+// ============================================================
+// SECTION-SPECIFIC IMAGE UPLOADS
+// ============================================================
 
-// =====================================
-// CREATE REQUIRED FOLDERS
-// =====================================
-
-if (!fs.existsSync(dataFolder)) {
-  fs.mkdirSync(dataFolder, {
-    recursive: true,
-  });
-}
-
-if (!fs.existsSync(uploadsFolder)) {
-  fs.mkdirSync(uploadsFolder, {
-    recursive: true,
-  });
-}
-
-
-// =====================================
-// SERVE UPLOADED IMAGES
-// =====================================
-
-app.use(
-  "/uploads",
-  express.static(uploadsFolder)
+const newsUpload = createImageUpload(
+  newsFolder,
+  10
 );
 
+const galleryUpload =
+  createImageUpload(
+    galleryFolder,
+    10
+  );
 
-// =====================================
-// MULTER CONFIGURATION
-// =====================================
+const articleUpload =
+  createImageUpload(
+    articleFolder,
+    10
+  );
 
-const storage = multer.diskStorage({
+const homeUpload =
+  createImageUpload(
+    homeFolder,
+    10
+  );
 
-  destination: (req, file, cb) => {
-    cb(
-      null,
-      uploadsFolder
-    );
-  },
+// ============================================================
+// DEFAULT CONTENT
+// ============================================================
 
-  filename: (req, file, cb) => {
-
-    const uniqueName =
-      Date.now() +
-      "-" +
-      Math.round(Math.random() * 1e9) +
-      path.extname(file.originalname);
-
-    cb(
-      null,
-      uniqueName
-    );
-
-  },
-
+const getDefaultContent = () => ({
+  profile: {},
+  contact: {},
+  social: {},
+  home: {},
+  about: {},
+  biography: {},
+  development: {},
 });
 
-
-const upload = multer({
-  storage: storage,
-});
-
-
-// =====================================
+// ============================================================
 // READ CONTENT
-// =====================================
+// ============================================================
 
 const readContent = () => {
-
   try {
-
     if (!fs.existsSync(dataFile)) {
-
-      return {
-        profile: {},
-        contact: {},
-        social: {},
-        home: {},
-      };
-
+      return getDefaultContent();
     }
 
-    const data = fs.readFileSync(
-      dataFile,
-      "utf8"
-    );
+    const data =
+      fs.readFileSync(
+        dataFile,
+        "utf8"
+      );
+
+    if (!data.trim()) {
+      return getDefaultContent();
+    }
 
     return JSON.parse(data);
-
   } catch (error) {
-
     console.error(
-      "Error reading content:",
+      "ERROR READING CONTENT:",
       error
     );
 
-    return {
-      profile: {},
-      contact: {},
-      social: {},
-      home: {},
-    };
-
+    return getDefaultContent();
   }
-
 };
 
-
-// =====================================
+// ============================================================
 // SAVE CONTENT
-// =====================================
+// ============================================================
 
-const saveContent = (
-  content
-) => {
-
+const saveContent = (content) => {
   fs.writeFileSync(
     dataFile,
     JSON.stringify(
@@ -406,23 +457,73 @@ const saveContent = (
     ),
     "utf8"
   );
-
 };
 
+// ============================================================
+// NORMALIZE UPLOAD PATH
+// ============================================================
 
-const resolveContentUrls = (value, req) => {
+const normalizeUploadPath = (
+  imageUrl
+) => {
+  if (!imageUrl) {
+    return "";
+  }
+
+  let value = String(imageUrl).trim();
+
+  if (!value) {
+    return "";
+  }
+
+  // Convert complete URL into path
+  value = value.replace(
+    /^https?:\/\/[^/]+/i,
+    ""
+  );
+
+  // Remove leading slash temporarily
+  value = value.replace(/^\/+/, "");
+
+  // Make sure uploads prefix exists
+  if (!value.startsWith("uploads/")) {
+    value = `uploads/${value}`;
+  }
+
+  return `/${value}`;
+};
+
+// ============================================================
+// RESOLVE CONTENT URLS
+// ============================================================
+
+const resolveContentUrls = (
+  value,
+  req
+) => {
   if (Array.isArray(value)) {
     return value.map((item) =>
-      resolveContentUrls(item, req)
+      resolveContentUrls(
+        item,
+        req
+      )
     );
   }
 
-  if (value && typeof value === "object") {
+  if (
+    value &&
+    typeof value === "object"
+  ) {
     return Object.fromEntries(
-      Object.entries(value).map(([key, item]) => [
-        key,
-        resolveContentUrls(item, req),
-      ])
+      Object.entries(value).map(
+        ([key, item]) => [
+          key,
+          resolveContentUrls(
+            item,
+            req
+          ),
+        ]
+      )
     );
   }
 
@@ -430,251 +531,440 @@ const resolveContentUrls = (value, req) => {
     typeof value === "string" &&
     value.startsWith("/uploads/")
   ) {
-    return `${req.protocol}://${req.get("host")}${value}`;
+    return `${req.protocol}://${req.get(
+      "host"
+    )}${value}`;
   }
 
   return value;
 };
 
-const resolveLocalizedContent = (value, language = "en") => {
+// ============================================================
+// LOCALIZED CONTENT
+// ============================================================
+
+const resolveLocalizedContent = (
+  value,
+  language = "en"
+) => {
   if (Array.isArray(value)) {
     return value.map((item) =>
-      resolveLocalizedContent(item, language)
+      resolveLocalizedContent(
+        item,
+        language
+      )
     );
   }
 
-  if (value && typeof value === "object") {
-    const localizedKeys = Object.keys(value);
+  if (
+    value &&
+    typeof value === "object"
+  ) {
+    const keys =
+      Object.keys(value);
 
     if (
-      localizedKeys.includes("en") ||
-      localizedKeys.includes("te")
+      keys.includes("en") ||
+      keys.includes("te")
     ) {
       return resolveLocalizedContent(
-        value[language] ?? value.en ?? value.te ?? "",
+        value[language] ??
+          value.en ??
+          value.te ??
+          "",
         language
       );
     }
 
     return Object.fromEntries(
-      Object.entries(value).map(([key, item]) => [
-        key,
-        resolveLocalizedContent(item, language),
-      ])
+      Object.entries(value).map(
+        ([key, item]) => [
+          key,
+          resolveLocalizedContent(
+            item,
+            language
+          ),
+        ]
+      )
     );
   }
 
   return value;
 };
 
-
-// =====================================
-// HELPER FUNCTION
-// =====================================
+// ============================================================
+// IMAGE HELPER
+// ============================================================
 
 const getUploadedImage = (
   files,
   fieldName,
   existingImage = ""
 ) => {
-
   if (
     files &&
     files[fieldName] &&
     files[fieldName][0]
   ) {
-
     return `/uploads/${files[fieldName][0].filename}`;
-
   }
 
-  return existingImage;
-
+  return existingImage || "";
 };
-// =====================================
-// ADMIN LOGIN
-// =====================================
 
-app.post("/api/secure/admin/login", async (req, res) => {
+// ============================================================
+// DELETE FILE SAFELY
+// ============================================================
+
+const deleteFileIfExists = (
+  filePath
+) => {
   try {
-    console.log("========== ADMIN LOGIN REQUEST ==========");
-
-    const username = String(
-      req.body.username || ""
-    ).trim();
-
-    const password = String(
-      req.body.password || ""
+    if (
+      filePath &&
+      fs.existsSync(filePath)
+    ) {
+      fs.unlinkSync(filePath);
+      return true;
+    }
+  } catch (error) {
+    console.error(
+      "FILE DELETE ERROR:",
+      error.message
     );
+  }
 
-    if (!username || !password) {
-      return res.status(400).json({
-        success: false,
-        message: "Username and password are required",
-      });
+  return false;
+};
+
+// ============================================================
+// DELETE UPLOAD FROM URL
+// ============================================================
+
+const deleteUploadByUrl = (
+  fileUrl
+) => {
+  if (!fileUrl) {
+    return false;
+  }
+
+  try {
+    const normalized =
+      normalizeUploadPath(
+        fileUrl
+      );
+
+    if (!normalized) {
+      return false;
     }
 
-    // Find admin in PostgreSQL
-    const result = await pool.query(
-      `
-      SELECT
-        id,
-        name,
-        email,
-        password_hash,
-        role,
-        is_active
-      FROM admins
-      WHERE name = $1
-      LIMIT 1
-      `,
-      [username]
+    const relativePath =
+      normalized.replace(
+        /^\/uploads\//,
+        ""
+      );
+
+    const absolutePath =
+      path.join(
+        uploadFolder,
+        relativePath
+      );
+
+    return deleteFileIfExists(
+      absolutePath
+    );
+  } catch (error) {
+    console.error(
+      "DELETE UPLOAD ERROR:",
+      error.message
     );
 
-    if (result.rows.length === 0) {
-      console.log("LOGIN FAILED: Admin not found");
+    return false;
+  }
+};
 
+// ============================================================
+// GET PUBLIC IMAGE URL
+// ============================================================
+
+const getPublicUploadPath = (
+  fileUrl
+) => {
+  return normalizeUploadPath(
+    fileUrl
+  );
+};
+
+// ============================================================
+// ADMIN JWT AUTHENTICATION
+// ============================================================
+
+const authenticateAdmin = (
+  req,
+  res,
+  next
+) => {
+  try {
+    const authHeader =
+      req.headers.authorization;
+
+    if (
+      !authHeader ||
+      !authHeader.startsWith(
+        "Bearer "
+      )
+    ) {
       return res.status(401).json({
         success: false,
-        message: "Invalid username",
+        message:
+          "Authentication required",
       });
     }
 
-    const admin = result.rows[0];
+    const token =
+      authHeader
+        .slice(7)
+        .trim();
 
-    // Check whether account is active
-    if (!admin.is_active) {
+    if (
+      !token ||
+      !process.env.JWT_SECRET
+    ) {
+      return res.status(401).json({
+        success: false,
+        message:
+          "Invalid authentication configuration",
+      });
+    }
+
+    const decoded =
+      jwt.verify(
+        token,
+        process.env.JWT_SECRET
+      );
+
+    if (
+      !decoded ||
+      decoded.role !== "admin"
+    ) {
       return res.status(403).json({
         success: false,
-        message: "Admin account is inactive",
+        message:
+          "Admin access required",
       });
     }
 
-    // Compare entered password with bcrypt hash
-    const passwordValid = await bcrypt.compare(
-      password,
-      admin.password_hash
+    req.admin = decoded;
+
+    next();
+  } catch (error) {
+    console.error(
+      "JWT AUTH ERROR:",
+      error.message
     );
 
-    if (!passwordValid) {
-      console.log("LOGIN FAILED: Invalid password");
+    return res.status(401).json({
+      success: false,
+      message:
+        "Invalid or expired token",
+    });
+  }
+};
 
-      return res.status(401).json({
-        success: false,
-        message: "Invalid username or password",
+// ============================================================
+// ADMIN LOGIN
+// ============================================================
+
+app.post(
+  "/api/secure/admin/login",
+  async (req, res) => {
+    try {
+      const username = String(
+        req.body.username || ""
+      ).trim();
+
+      const password = String(
+        req.body.password || ""
+      );
+
+      if (
+        !username ||
+        !password
+      ) {
+        return res.status(400).json({
+          success: false,
+          message:
+            "Username and password are required",
+        });
+      }
+
+      const result =
+        await pool.query(
+          `
+          SELECT
+            id,
+            name,
+            email,
+            password_hash,
+            role,
+            is_active
+          FROM admins
+          WHERE name = $1
+          LIMIT 1
+          `,
+          [username]
+        );
+
+      if (
+        result.rows.length === 0
+      ) {
+        return res.status(401).json({
+          success: false,
+          message:
+            "Invalid username or password",
+        });
+      }
+
+      const admin =
+        result.rows[0];
+
+      if (!admin.is_active) {
+        return res.status(403).json({
+          success: false,
+          message:
+            "Admin account is inactive",
+        });
+      }
+
+      const passwordValid =
+        await bcrypt.compare(
+          password,
+          admin.password_hash
+        );
+
+      if (!passwordValid) {
+        return res.status(401).json({
+          success: false,
+          message:
+            "Invalid username or password",
+        });
+      }
+
+      if (
+        !process.env.JWT_SECRET
+      ) {
+        return res.status(500).json({
+          success: false,
+          message:
+            "JWT_SECRET is not configured",
+        });
+      }
+
+      const token =
+        jwt.sign(
+          {
+            id: admin.id,
+            name: admin.name,
+            role: admin.role,
+          },
+          process.env.JWT_SECRET,
+          {
+            expiresIn: "1d",
+          }
+        );
+
+      return res.status(200).json({
+        success: true,
+        message:
+          "Login successful",
+
+        token,
+
+        admin: {
+          id: admin.id,
+          name: admin.name,
+          email: admin.email,
+          role: admin.role,
+        },
       });
-    }
-
-    // Make sure JWT secret exists
-    if (!process.env.JWT_SECRET) {
-      console.error("JWT_SECRET is missing");
+    } catch (error) {
+      console.error(
+        "ADMIN LOGIN ERROR:",
+        error
+      );
 
       return res.status(500).json({
         success: false,
-        message: "JWT_SECRET is not configured",
+        message:
+          "Unable to login",
       });
     }
-
-    // Create JWT
-    const token = jwt.sign(
-      {
-        id: admin.id,
-        name: admin.name,
-        role: admin.role,
-      },
-      process.env.JWT_SECRET,
-      {
-        expiresIn: "1d",
-      }
-    );
-
-    console.log("LOGIN SUCCESSFUL");
-
-    return res.status(200).json({
-      success: true,
-      message: "Login successful",
-      token,
-      admin: {
-        id: admin.id,
-        name: admin.name,
-        email: admin.email,
-        role: admin.role,
-      },
-    });
-
-  } catch (error) {
-    console.error("ADMIN LOGIN ERROR:", error);
-
-    return res.status(500).json({
-      success: false,
-      message: "Unable to login",
-    });
   }
-});
-// =====================================
+);
+
+// ============================================================
 // TEST ROUTE
-// =====================================
+// ============================================================
 
 app.get(
   "/",
   (req, res) => {
-
     res.json({
+      success: true,
       message:
         "Server is running successfully",
     });
-
   }
 );
 
-
-// =====================================
+// ============================================================
 // GET ALL WEBSITE CONTENT
-// =====================================
+// ============================================================
 
 app.get(
   "/api/content",
   (req, res) => {
-
     try {
+      const language =
+        req.query.lang === "te"
+          ? "te"
+          : "en";
 
-      const content = resolveLocalizedContent(
-        readContent(),
-        req.query.lang === "te" ? "te" : "en"
-      );
+      const content =
+        resolveLocalizedContent(
+          readContent(),
+          language
+        );
 
       res.status(200).json(
-        resolveContentUrls(content, req)
+        resolveContentUrls(
+          content,
+          req
+        )
       );
-
     } catch (error) {
-
       console.error(
-        "Error getting content:",
+        "GET CONTENT ERROR:",
         error
       );
 
       res.status(500).json({
+        success: false,
         message:
           "Failed to load website content",
       });
-
     }
-
   }
 );
 
-
-// =====================================
-// GET CONTACT DETAILS
-// =====================================
+// ============================================================
+// CONTACT DETAILS
+// ============================================================
 
 app.get(
   "/api/contacts/details",
   (req, res) => {
-
     try {
-
       const content =
         readContent();
 
@@ -684,12 +974,10 @@ app.get(
       const social =
         content.social || {};
 
-      res.status(200).json({
-
+      res.json({
         success: true,
 
         data: {
-
           email:
             contact.email || "",
 
@@ -716,49 +1004,34 @@ app.get(
 
           linkedin:
             social.linkedin || "",
-
         },
-
       });
-
     } catch (error) {
-
       console.error(
-        "Error getting contact details:",
+        "GET CONTACT DETAILS ERROR:",
         error
       );
 
       res.status(500).json({
-
         success: false,
-
         message:
           "Failed to load contact information",
-
       });
-
     }
-
   }
 );
 
-
-// =====================================
+// ============================================================
 // UPDATE CONTACT DETAILS
-// =====================================
+// ============================================================
 
 app.put(
   "/api/contacts/details",
   authenticateAdmin,
   (req, res) => {
-
     try {
-
       const content =
         readContent();
-
-
-      // Create objects if they don't exist
 
       if (!content.contact) {
         content.contact = {};
@@ -768,11 +1041,6 @@ app.put(
         content.social = {};
       }
 
-
-      // =====================================
-      // UPDATE CONTACT
-      // =====================================
-
       content.contact.email =
         req.body.email || "";
 
@@ -780,15 +1048,12 @@ app.put(
         req.body.phone || "";
 
       content.contact.address =
-        req.body.office_address || "";
+        req.body.office_address ||
+        "";
 
       content.contact.officeHours =
-        req.body.office_timings || "";
-
-
-      // =====================================
-      // UPDATE SOCIAL MEDIA
-      // =====================================
+        req.body.office_timings ||
+        "";
 
       content.social.facebook =
         req.body.facebook || "";
@@ -805,29 +1070,14 @@ app.put(
       content.social.linkedin =
         req.body.linkedin || "";
 
+      saveContent(content);
 
-      // =====================================
-      // SAVE CONTENT
-      // =====================================
-
-      saveContent(
-        content
-      );
-
-
-      // =====================================
-      // SEND RESPONSE
-      // =====================================
-
-      res.status(200).json({
-
+      res.json({
         success: true,
-
         message:
           "Contact information updated successfully!",
 
         data: {
-
           email:
             content.contact.email,
 
@@ -854,81 +1104,92 @@ app.put(
 
           linkedin:
             content.social.linkedin,
-
         },
-
       });
-
     } catch (error) {
-
       console.error(
-        "Error updating contact details:",
+        "UPDATE CONTACT ERROR:",
         error
       );
 
       res.status(500).json({
-
         success: false,
-
         message:
           "Failed to update contact information",
-
-        error:
-          error.message,
-
       });
-
     }
-
   }
 );
 
-
-// =====================================
-// UPDATE HOME PAGE
-// =====================================
+// ============================================================
+// UPDATE HOME
+// ============================================================
 
 app.put(
-
   "/api/content/home",
   authenticateAdmin,
 
-  upload.fields([
-
-    { name: "heroImage", maxCount: 1 },
-
-    { name: "aboutImage", maxCount: 1 },
-
-    { name: "development1Image", maxCount: 1 },
-
-    { name: "development2Image", maxCount: 1 },
-
-    { name: "development3Image", maxCount: 1 },
-
-    { name: "development4Image", maxCount: 1 },
-
-    { name: "galleryImage1", maxCount: 1 },
-
-    { name: "galleryImage2", maxCount: 1 },
-
-    { name: "galleryImage3", maxCount: 1 },
-
-    { name: "galleryImage4", maxCount: 1 },
-
-    { name: "galleryImage5", maxCount: 1 },
-
-    { name: "newsFeaturedImage", maxCount: 1 },
-
-    { name: "newsImage1", maxCount: 1 },
-
-    { name: "newsImage2", maxCount: 1 },
-
+  homeUpload.fields([
+    {
+      name: "heroImage",
+      maxCount: 1,
+    },
+    {
+      name: "aboutImage",
+      maxCount: 1,
+    },
+    {
+      name: "development1Image",
+      maxCount: 1,
+    },
+    {
+      name: "development2Image",
+      maxCount: 1,
+    },
+    {
+      name: "development3Image",
+      maxCount: 1,
+    },
+    {
+      name: "development4Image",
+      maxCount: 1,
+    },
+    {
+      name: "galleryImage1",
+      maxCount: 1,
+    },
+    {
+      name: "galleryImage2",
+      maxCount: 1,
+    },
+    {
+      name: "galleryImage3",
+      maxCount: 1,
+    },
+    {
+      name: "galleryImage4",
+      maxCount: 1,
+    },
+    {
+      name: "galleryImage5",
+      maxCount: 1,
+    },
+    {
+      name: "newsFeaturedImage",
+      maxCount: 1,
+    },
+    {
+      name: "newsImage1",
+      maxCount: 1,
+    },
+    {
+      name: "newsImage2",
+      maxCount: 1,
+    },
   ]),
 
   (req, res) => {
-
     try {
-
       const content =
         readContent();
 
@@ -936,11 +1197,7 @@ app.put(
         content.home = {};
       }
 
-
-      // =====================================
       // HERO
-      // =====================================
-
       content.home.heroTitle =
         req.body.heroTitle || "";
 
@@ -957,11 +1214,7 @@ app.put(
           content.home.heroImage
         );
 
-
-      // =====================================
       // ABOUT
-      // =====================================
-
       content.home.aboutHeading =
         req.body.aboutHeading || "";
 
@@ -975,55 +1228,32 @@ app.put(
           content.home.aboutImage
         );
 
-
-      // =====================================
       // FEATURES
-      // =====================================
-
       content.home.features = [
-
         req.body.feature1 || "",
-
         req.body.feature2 || "",
-
         req.body.feature3 || "",
-
         req.body.feature4 || "",
-
       ];
 
-
-      // =====================================
-      // STATISTICS
-      // =====================================
-
+      // STATS
       content.home.stats = [
-
         {
           number:
             req.body.stat1Number || "",
-
           text:
             req.body.stat1Text || "",
         },
-
         {
           number:
             req.body.stat2Number || "",
-
           text:
             req.body.stat2Text || "",
         },
-
       ];
 
-
-      // =====================================
       // FOCUS AREAS
-      // =====================================
-
       content.home.focusAreas = {
-
         label:
           req.body.focusLabel || "",
 
@@ -1031,145 +1261,142 @@ app.put(
           req.body.focusHeading || "",
 
         description:
-          req.body.focusDescription || "",
+          req.body.focusDescription ||
+          "",
 
         items: [
-
           {
             title:
               req.body.focus1Title || "",
-
             description:
-              req.body.focus1Description || "",
+              req.body.focus1Description ||
+              "",
           },
-
           {
             title:
               req.body.focus2Title || "",
-
             description:
-              req.body.focus2Description || "",
+              req.body.focus2Description ||
+              "",
           },
-
           {
             title:
               req.body.focus3Title || "",
-
             description:
-              req.body.focus3Description || "",
+              req.body.focus3Description ||
+              "",
           },
-
           {
             title:
               req.body.focus4Title || "",
-
             description:
-              req.body.focus4Description || "",
+              req.body.focus4Description ||
+              "",
           },
-
         ],
-
       };
 
-
-      // =====================================
-      // DEVELOPMENT HIGHLIGHTS
-      // =====================================
-
+      // DEVELOPMENT
       const existingDevelopments =
-        content.home.developmentHighlights
+        content.home
+          .developmentHighlights
           ?.items || [];
 
-
       content.home.developmentHighlights = {
-
         label:
-          req.body.developmentLabel || "",
+          req.body.developmentLabel ||
+          "",
 
         heading:
-          req.body.developmentHeading || "",
+          req.body.developmentHeading ||
+          "",
 
         description:
-          req.body.developmentDescription || "",
+          req.body.developmentDescription ||
+          "",
 
         items: [
-
           {
             title:
-              req.body.development1Title || "",
+              req.body.development1Title ||
+              "",
 
             description:
-              req.body.development1Description || "",
+              req.body.development1Description ||
+              "",
 
             image:
               getUploadedImage(
                 req.files,
                 "development1Image",
-                existingDevelopments[0]?.image || ""
+                existingDevelopments[0]
+                  ?.image || ""
               ),
           },
 
           {
             title:
-              req.body.development2Title || "",
+              req.body.development2Title ||
+              "",
 
             description:
-              req.body.development2Description || "",
+              req.body.development2Description ||
+              "",
 
             image:
               getUploadedImage(
                 req.files,
                 "development2Image",
-                existingDevelopments[1]?.image || ""
+                existingDevelopments[1]
+                  ?.image || ""
               ),
           },
 
           {
             title:
-              req.body.development3Title || "",
+              req.body.development3Title ||
+              "",
 
             description:
-              req.body.development3Description || "",
+              req.body.development3Description ||
+              "",
 
             image:
               getUploadedImage(
                 req.files,
                 "development3Image",
-                existingDevelopments[2]?.image || ""
+                existingDevelopments[2]
+                  ?.image || ""
               ),
           },
 
           {
             title:
-              req.body.development4Title || "",
+              req.body.development4Title ||
+              "",
 
             description:
-              req.body.development4Description || "",
+              req.body.development4Description ||
+              "",
 
             image:
               getUploadedImage(
                 req.files,
                 "development4Image",
-                existingDevelopments[3]?.image || ""
+                existingDevelopments[3]
+                  ?.image || ""
               ),
           },
-
         ],
-
       };
 
-
-      // =====================================
       // GALLERY PREVIEW
-      // =====================================
-
       const existingGalleryImages =
-        content.home.galleryPreview
+        content.home
+          .galleryPreview
           ?.images || [];
 
-
       content.home.galleryPreview = {
-
         label:
           req.body.galleryLabel || "",
 
@@ -1177,19 +1404,22 @@ app.put(
           req.body.galleryHeading || "",
 
         description:
-          req.body.galleryDescription || "",
+          req.body.galleryDescription ||
+          "",
 
         mainTitle:
-          req.body.galleryMainTitle || "",
+          req.body.galleryMainTitle ||
+          "",
 
         momentsNumber:
-          req.body.galleryMomentsNumber || "",
+          req.body.galleryMomentsNumber ||
+          "",
 
         momentsText:
-          req.body.galleryMomentsText || "",
+          req.body.galleryMomentsText ||
+          "",
 
         images: [
-
           getUploadedImage(
             req.files,
             "galleryImage1",
@@ -1219,25 +1449,18 @@ app.put(
             "galleryImage5",
             existingGalleryImages[4] || ""
           ),
-
         ],
-
       };
 
-
-      // =====================================
       // NEWS PREVIEW
-      // =====================================
-
       const existingNews =
-        content.home.newsPreview || {};
+        content.home.newsPreview ||
+        {};
 
       const existingNewsItems =
         existingNews.news || [];
 
-
       content.home.newsPreview = {
-
         label:
           req.body.newsLabel ||
           existingNews.label ||
@@ -1254,272 +1477,284 @@ app.put(
           "",
 
         featured: {
-
           image:
             getUploadedImage(
               req.files,
               "newsFeaturedImage",
-              existingNews.featured?.image || ""
+              existingNews.featured
+                ?.image || ""
             ),
 
           date:
             req.body.newsFeaturedDate ||
-            existingNews.featured?.date ||
+            existingNews.featured
+              ?.date ||
             "",
 
           title:
             req.body.newsFeaturedTitle ||
-            existingNews.featured?.title ||
+            existingNews.featured
+              ?.title ||
             "",
 
           description:
             req.body.newsFeaturedDescription ||
-            existingNews.featured?.description ||
+            existingNews.featured
+              ?.description ||
             "",
-
         },
 
         news: [
-
           {
-
             image:
               getUploadedImage(
                 req.files,
                 "newsImage1",
-                existingNewsItems[0]?.image || ""
+                existingNewsItems[0]
+                  ?.image || ""
               ),
 
             date:
               req.body.news1Date ||
-              existingNewsItems[0]?.date ||
+              existingNewsItems[0]
+                ?.date ||
               "",
 
             title:
               req.body.news1Title ||
-              existingNewsItems[0]?.title ||
+              existingNewsItems[0]
+                ?.title ||
               "",
-
           },
 
           {
-
             image:
               getUploadedImage(
                 req.files,
                 "newsImage2",
-                existingNewsItems[1]?.image || ""
+                existingNewsItems[1]
+                  ?.image || ""
               ),
 
             date:
               req.body.news2Date ||
-              existingNewsItems[1]?.date ||
+              existingNewsItems[1]
+                ?.date ||
               "",
 
             title:
               req.body.news2Title ||
-              existingNewsItems[1]?.title ||
+              existingNewsItems[1]
+                ?.title ||
               "",
-
           },
-
         ],
-
       };
 
-
-      // =====================================
       // CONTACT CTA
-      // =====================================
-
       content.home.contactCTA = {
-
         label:
           req.body.contactCTALabel ||
-          content.home.contactCTA?.label ||
+          content.home.contactCTA
+            ?.label ||
           "Get In Touch",
 
         heading:
           req.body.contactCTAHeading ||
-          content.home.contactCTA?.heading ||
+          content.home.contactCTA
+            ?.heading ||
           "",
 
         description:
           req.body.contactCTADescription ||
-          content.home.contactCTA?.description ||
+          content.home.contactCTA
+            ?.description ||
           "",
 
         buttonText:
           req.body.contactCTAButtonText ||
-          content.home.contactCTA?.buttonText ||
+          content.home.contactCTA
+            ?.buttonText ||
           "Contact Office",
-
       };
 
+      saveContent(content);
 
-      // =====================================
-      // SAVE
-      // =====================================
-
-      saveContent(
-        content
-      );
-
-
-      res.status(200).json({
-
+      res.json({
+        success: true,
         message:
           "Home content updated successfully!",
-
         home:
           content.home,
-
       });
-
     } catch (error) {
-
       console.error(
-        "Error updating Home content:",
+        "UPDATE HOME ERROR:",
         error
       );
 
       res.status(500).json({
-
+        success: false,
         message:
           "Failed to update Home content",
-
         error:
           error.message,
-
       });
-
     }
-
   }
-
 );
 
-
-// =====================================
-// UPDATE ABOUT CONTENT
-// =====================================
+// ============================================================
+// UPDATE ABOUT
+// ============================================================
 
 app.put(
   "/api/content/about",
   authenticateAdmin,
   (req, res) => {
     try {
-      const content = readContent();
+      const content =
+        readContent();
 
       content.about = {
         ...(content.about || {}),
-        aboutName: req.body.aboutName || "",
-        aboutPosition: req.body.aboutPosition || "",
-        aboutDescription: req.body.aboutDescription || "",
+
+        aboutName:
+          req.body.aboutName || "",
+
+        aboutPosition:
+          req.body.aboutPosition || "",
+
+        aboutDescription:
+          req.body.aboutDescription ||
+          "",
       };
 
       saveContent(content);
 
-      res.status(200).json({
+      res.json({
         success: true,
-        message: "About content updated successfully!",
-        about: content.about,
+        message:
+          "About content updated successfully!",
+        about:
+          content.about,
       });
     } catch (error) {
-      console.error("Error updating About content:", error);
+      console.error(
+        "UPDATE ABOUT ERROR:",
+        error
+      );
 
       res.status(500).json({
         success: false,
-        message: "Failed to update About content",
+        message:
+          "Failed to update About content",
       });
     }
   }
 );
 
-
-// =====================================
-// UPDATE BIOGRAPHY CONTENT
-// =====================================
+// ============================================================
+// UPDATE BIOGRAPHY
+// ============================================================
 
 app.put(
   "/api/content/biography",
   authenticateAdmin,
   (req, res) => {
     try {
-      const content = readContent();
+      const content =
+        readContent();
 
       content.biography = {
         ...(content.biography || {}),
-        biographyContent: req.body.biographyContent || "",
+
+        biographyContent:
+          req.body.biographyContent ||
+          "",
       };
 
       saveContent(content);
 
-      res.status(200).json({
+      res.json({
         success: true,
-        message: "Biography updated successfully!",
-        biography: content.biography,
+        message:
+          "Biography updated successfully!",
+        biography:
+          content.biography,
       });
     } catch (error) {
-      console.error("Error updating biography:", error);
+      console.error(
+        "UPDATE BIOGRAPHY ERROR:",
+        error
+      );
 
       res.status(500).json({
         success: false,
-        message: "Failed to update biography",
+        message:
+          "Failed to update biography",
       });
     }
   }
 );
 
-
-// =====================================
-// UPDATE DEVELOPMENT CONTENT
-// =====================================
+// ============================================================
+// UPDATE DEVELOPMENT
+// ============================================================
 
 app.put(
   "/api/content/development",
   authenticateAdmin,
   (req, res) => {
     try {
-      const content = readContent();
+      const content =
+        readContent();
 
       content.development = {
         ...(content.development || {}),
-        title: req.body.developmentTitle || "",
-        description: req.body.developmentDescription || "",
+
+        title:
+          req.body.developmentTitle ||
+          "",
+
+        description:
+          req.body.developmentDescription ||
+          "",
       };
 
       saveContent(content);
 
-      res.status(200).json({
+      res.json({
         success: true,
-        message: "Development content updated successfully!",
-        development: content.development,
+        message:
+          "Development content updated successfully!",
+        development:
+          content.development,
       });
     } catch (error) {
-      console.error("Error updating development content:", error);
+      console.error(
+        "UPDATE DEVELOPMENT ERROR:",
+        error
+      );
 
       res.status(500).json({
         success: false,
-        message: "Failed to update development content",
+        message:
+          "Failed to update development content",
       });
     }
   }
 );
 
-
-// =====================================
-// OLD CONTACT UPDATE ROUTE
-// KEPT FOR COMPATIBILITY
-// =====================================
+// ============================================================
+// OLD CONTACT ROUTE
+// ============================================================
 
 app.put(
   "/api/content/contact",
   authenticateAdmin,
   (req, res) => {
-
     try {
-
       const content =
         readContent();
 
@@ -1558,55 +1793,41 @@ app.put(
       content.social.linkedin =
         req.body.linkedin || "";
 
-      saveContent(
-        content
-      );
+      saveContent(content);
 
-      res.status(200).json({
-
+      res.json({
+        success: true,
         message:
           "Contact information updated successfully!",
-
         contact:
           content.contact,
-
         social:
           content.social,
-
       });
-
     } catch (error) {
-
       console.error(
-        "Error updating contact:",
+        "UPDATE CONTACT ERROR:",
         error
       );
 
       res.status(500).json({
-
+        success: false,
         message:
           "Failed to update contact information",
-
-        error:
-          error.message,
-
       });
-
     }
-
   }
 );
 
+// ============================================================
+// POLITICAL CAREER
+// ============================================================
 
-//secure/admin political_journey
+// GET ALL POLITICAL CAREER
 app.get(
   "/api/political-career",
-  async (
-    req,
-    res
-  ) => {
+  async (req, res) => {
     try {
-      console.log("triggered ////////////")
       const result =
         await pool.query(`
           SELECT
@@ -1626,17 +1847,29 @@ app.get(
             display_order ASC,
             id ASC
         `);
-          console.log("\\\\\\\\\\")
-        console.log("GET POLITICAL CAREER RESULT:");
-        console.log(result);
+
+        console.log("//////////////// from politi")
+        console.log(result.rows[0].image_url)
+
+      const data =
+        result.rows.map(
+          (row) => ({
+            ...row,
+
+            image_url:
+              getPublicUploadPath(
+                row.image_url
+              ),
+          })
+        );
+
       res.json({
         success: true,
-        data:
-          result.rows,
+        data,
       });
     } catch (error) {
       console.error(
-        "GET POLITICAL CAREER ERROR 12334434:",
+        "GET POLITICAL CAREER ERROR:",
         error
       );
 
@@ -1651,14 +1884,14 @@ app.get(
   }
 );
 
+// ADD POLITICAL CAREER
 app.post(
   "/api/political-career",
   authenticateAdmin,
-  upload.single("image"),
-  async (
-    req,
-    res
-  ) => {
+  politicalCareerUpload.single(
+    "image"
+  ),
+  async (req, res) => {
     try {
       const {
         year,
@@ -1687,9 +1920,7 @@ app.post(
 
       if (req.file) {
         imageUrl =
-          `${req.protocol}://${req.get(
-            "host"
-          )}/uploads/${req.file.filename}`;
+          `/uploads/political_career/${req.file.filename}`;
       }
 
       let orderValue;
@@ -1697,13 +1928,22 @@ app.post(
       if (
         display_order !==
           undefined &&
-        display_order !==
-          ""
+        display_order !== ""
       ) {
-        orderValue =
-          Number(
-            display_order
-          );
+        const parsed =
+          Number(display_order);
+
+        if (
+          !Number.isFinite(parsed)
+        ) {
+          return res.status(400).json({
+            success: false,
+            message:
+              "Display order must be a valid number",
+          });
+        }
+
+        orderValue = parsed;
       } else {
         const orderResult =
           await pool.query(`
@@ -1737,24 +1977,13 @@ app.post(
           )
           VALUES
           ($1,$2,$3,$4,$5,$6,$7,$8)
-          RETURNING
-            id,
-            year,
-            position,
-            organization,
-            location,
-            description,
-            category,
-            display_order,
-            image_url,
-            created_at,
-            updated_at
+          RETURNING *
           `,
           [
-            year,
-            position,
-            organization,
-            location,
+            year.trim(),
+            position.trim(),
+            organization.trim(),
+            location.trim(),
             description || "",
             category ||
               "Political Career",
@@ -1767,14 +1996,30 @@ app.post(
         success: true,
         message:
           "Political career entry added successfully",
-        data:
-          result.rows[0],
+
+        data: {
+          ...result.rows[0],
+          image_url:
+            getPublicUploadPath(
+              result.rows[0]
+                .image_url
+            ),
+        },
       });
     } catch (error) {
       console.error(
         "ADD POLITICAL CAREER ERROR:",
         error
       );
+
+      if (req.file) {
+        deleteFileIfExists(
+          path.join(
+            politicalCareerFolder,
+            req.file.filename
+          )
+        );
+      }
 
       res.status(500).json({
         success: false,
@@ -1787,18 +2032,17 @@ app.post(
   }
 );
 
+// UPDATE POLITICAL CAREER
 app.put(
   "/api/political-career/:id",
   authenticateAdmin,
-  upload.single("image"),
-  async (
-    req,
-    res
-  ) => {
+  politicalCareerUpload.single(
+    "image"
+  ),
+  async (req, res) => {
     try {
-      const {
-        id,
-      } = req.params;
+      const { id } =
+        req.params;
 
       const {
         year,
@@ -1846,15 +2090,18 @@ app.put(
         });
       }
 
-      let imageUrl =
+      const oldImageUrl =
         existing.rows[0]
           .image_url || "";
 
+      let imageUrl =
+        normalizeUploadPath(
+          oldImageUrl
+        );
+
       if (req.file) {
         imageUrl =
-          `${req.protocol}://${req.get(
-            "host"
-          )}/uploads/${req.file.filename}`;
+          `/uploads/political_career/${req.file.filename}`;
       }
 
       let orderValue =
@@ -1864,13 +2111,22 @@ app.put(
       if (
         display_order !==
           undefined &&
-        display_order !==
-          ""
+        display_order !== ""
       ) {
-        orderValue =
-          Number(
-            display_order
-          );
+        const parsed =
+          Number(display_order);
+
+        if (
+          !Number.isFinite(parsed)
+        ) {
+          return res.status(400).json({
+            success: false,
+            message:
+              "Display order must be a valid number",
+          });
+        }
+
+        orderValue = parsed;
       }
 
       const result =
@@ -1888,24 +2144,13 @@ app.put(
             image_url = $8,
             updated_at = CURRENT_TIMESTAMP
           WHERE id = $9
-          RETURNING
-            id,
-            year,
-            position,
-            organization,
-            location,
-            description,
-            category,
-            display_order,
-            image_url,
-            created_at,
-            updated_at
+          RETURNING *
           `,
           [
-            year,
-            position,
-            organization,
-            location,
+            year.trim(),
+            position.trim(),
+            organization.trim(),
+            location.trim(),
             description || "",
             category ||
               "Political Career",
@@ -1915,18 +2160,43 @@ app.put(
           ]
         );
 
+      if (
+        req.file &&
+        oldImageUrl
+      ) {
+        deleteUploadByUrl(
+          oldImageUrl
+        );
+      }
+
       res.json({
         success: true,
         message:
           "Political career entry updated successfully",
-        data:
-          result.rows[0],
+
+        data: {
+          ...result.rows[0],
+          image_url:
+            getPublicUploadPath(
+              result.rows[0]
+                .image_url
+            ),
+        },
       });
     } catch (error) {
       console.error(
         "UPDATE POLITICAL CAREER ERROR:",
         error
       );
+
+      if (req.file) {
+        deleteFileIfExists(
+          path.join(
+            politicalCareerFolder,
+            req.file.filename
+          )
+        );
+      }
 
       res.status(500).json({
         success: false,
@@ -1939,22 +2209,19 @@ app.put(
   }
 );
 
+// DELETE POLITICAL CAREER
 app.delete(
   "/api/political-career/:id",
-  async (
-    req,
-    res
-  ) => {
+  authenticateAdmin,
+  async (req, res) => {
     try {
-      const {
-        id,
-      } = req.params;
+      const { id } =
+        req.params;
 
       const existing =
         await pool.query(
           `
-          SELECT
-            image_url
+          SELECT image_url
           FROM political_career
           WHERE id = $1
           `,
@@ -1985,33 +2252,9 @@ app.delete(
       );
 
       if (imageUrl) {
-        try {
-          const filename =
-            path.basename(
-              imageUrl
-            );
-
-          const filePath =
-            path.join(
-              uploadFolder,
-              filename
-            );
-
-          if (
-            fs.existsSync(
-              filePath
-            )
-          ) {
-            fs.unlinkSync(
-              filePath
-            );
-          }
-        } catch (imageError) {
-          console.error(
-            "IMAGE DELETE WARNING:",
-            imageError.message
-          );
-        }
+        deleteUploadByUrl(
+          imageUrl
+        );
       }
 
       res.json({
@@ -2036,15 +2279,14 @@ app.delete(
   }
 );
 
+// ============================================================
+// VIDEOS
+// ============================================================
 
-//Gallery---Videos
-
+// GET ALL VIDEOS
 app.get(
   "/api/videos",
-  async (
-    req,
-    res
-  ) => {
+  async (req, res) => {
     try {
       const result =
         await pool.query(`
@@ -2066,10 +2308,28 @@ app.get(
             id ASC
         `);
 
-      return res.status(200).json({
+      const data =
+        result.rows.map(
+          (row) => ({
+            ...row,
+
+            video_url:
+              getPublicUploadPath(
+                row.video_url
+              ),
+
+            thumbnail_url:
+              row.thumbnail_url
+                ? getPublicUploadPath(
+                    row.thumbnail_url
+                  )
+                : "",
+          })
+        );
+
+      res.json({
         success: true,
-        data:
-          result.rows,
+        data,
       });
     } catch (error) {
       console.error(
@@ -2077,7 +2337,7 @@ app.get(
         error
       );
 
-      return res.status(500).json({
+      res.status(500).json({
         success: false,
         message:
           "Unable to load videos",
@@ -2088,36 +2348,19 @@ app.get(
   }
 );
 
+// GET VIDEO
 app.get(
   "/api/videos/:id",
-  async (
-    req,
-    res
-  ) => {
+  async (req, res) => {
     try {
-      const {
-        id,
-      } = req.params;
-
       const result =
         await pool.query(
           `
-          SELECT
-            id,
-            title,
-            description,
-            video_url,
-            thumbnail_url,
-            category,
-            published_date,
-            link,
-            display_order,
-            created_at,
-            updated_at
+          SELECT *
           FROM videos
           WHERE id = $1
           `,
-          [id]
+          [req.params.id]
         );
 
       if (
@@ -2131,10 +2374,28 @@ app.get(
         });
       }
 
-      return res.json({
+      const video = {
+        ...result.rows[0],
+
+        video_url:
+          getPublicUploadPath(
+            result.rows[0]
+              .video_url
+          ),
+
+        thumbnail_url:
+          result.rows[0]
+            .thumbnail_url
+            ? getPublicUploadPath(
+                result.rows[0]
+                  .thumbnail_url
+              )
+            : "",
+      };
+
+      res.json({
         success: true,
-        data:
-          result.rows[0],
+        data: video,
       });
     } catch (error) {
       console.error(
@@ -2142,27 +2403,23 @@ app.get(
         error
       );
 
-      return res.status(500).json({
+      res.status(500).json({
         success: false,
         message:
           "Unable to load video",
-        error:
-          error.message,
       });
     }
   }
 );
 
+// ADD VIDEO
 app.post(
   "/api/videos",
   authenticateAdmin,
   videoUpload.single(
     "video"
   ),
-  async (
-    req,
-    res
-  ) => {
+  async (req, res) => {
     try {
       const {
         title,
@@ -2194,22 +2451,29 @@ app.post(
       }
 
       const videoUrl =
-        `${req.protocol}://${req.get(
-          "host"
-        )}/uploads/videos/${req.file.filename}`;
+        `/uploads/videos/${req.file.filename}`;
 
       let orderValue;
 
       if (
         display_order !==
           undefined &&
-        display_order !==
-          ""
+        display_order !== ""
       ) {
-        orderValue =
-          Number(
-            display_order
-          );
+        const parsed =
+          Number(display_order);
+
+        if (
+          !Number.isFinite(parsed)
+        ) {
+          return res.status(400).json({
+            success: false,
+            message:
+              "Display order must be a valid number",
+          });
+        }
+
+        orderValue = parsed;
       } else {
         const orderResult =
           await pool.query(`
@@ -2243,26 +2507,14 @@ app.post(
           )
           VALUES
           ($1,$2,$3,$4,$5,$6,$7,$8)
-          RETURNING
-            id,
-            title,
-            description,
-            video_url,
-            thumbnail_url,
-            category,
-            published_date,
-            link,
-            display_order,
-            created_at,
-            updated_at
+          RETURNING *
           `,
           [
             title.trim(),
             description || "",
             videoUrl,
             thumbnail_url || "",
-            category ||
-              "Video",
+            category || "Video",
             published_date ||
               null,
             link || "",
@@ -2270,12 +2522,19 @@ app.post(
           ]
         );
 
-      return res.status(201).json({
+      res.status(201).json({
         success: true,
         message:
           "Video added successfully",
-        data:
-          result.rows[0],
+
+        data: {
+          ...result.rows[0],
+          video_url:
+            getPublicUploadPath(
+              result.rows[0]
+                .video_url
+            ),
+        },
       });
     } catch (error) {
       console.error(
@@ -2283,37 +2542,16 @@ app.post(
         error
       );
 
-      /*
-       * If database insert fails after
-       * file upload, remove uploaded file.
-       */
-
       if (req.file) {
-        try {
-          const filePath =
-            path.join(
-              videoFolder,
-              req.file.filename
-            );
-
-          if (
-            fs.existsSync(
-              filePath
-            )
-          ) {
-            fs.unlinkSync(
-              filePath
-            );
-          }
-        } catch (fileError) {
-          console.error(
-            "VIDEO CLEANUP ERROR:",
-            fileError.message
-          );
-        }
+        deleteFileIfExists(
+          path.join(
+            videoFolder,
+            req.file.filename
+          )
+        );
       }
 
-      return res.status(500).json({
+      res.status(500).json({
         success: false,
         message:
           "Unable to add video",
@@ -2324,20 +2562,17 @@ app.post(
   }
 );
 
+// UPDATE VIDEO
 app.put(
   "/api/videos/:id",
   authenticateAdmin,
   videoUpload.single(
     "video"
   ),
-  async (
-    req,
-    res
-  ) => {
+  async (req, res) => {
     try {
-      const {
-        id,
-      } = req.params;
+      const { id } =
+        req.params;
 
       const {
         title,
@@ -2389,9 +2624,7 @@ app.put(
 
       if (req.file) {
         videoUrl =
-          `${req.protocol}://${req.get(
-            "host"
-          )}/uploads/videos/${req.file.filename}`;
+          `/uploads/videos/${req.file.filename}`;
       }
 
       let orderValue =
@@ -2401,22 +2634,22 @@ app.put(
       if (
         display_order !==
           undefined &&
-        display_order !==
-          ""
+        display_order !== ""
       ) {
-        const parsedOrder =
-          Number(
-            display_order
-          );
+        const parsed =
+          Number(display_order);
 
         if (
-          Number.isFinite(
-            parsedOrder
-          )
+          !Number.isFinite(parsed)
         ) {
-          orderValue =
-            parsedOrder;
+          return res.status(400).json({
+            success: false,
+            message:
+              "Display order must be a valid number",
+          });
         }
+
+        orderValue = parsed;
       }
 
       const result =
@@ -2434,26 +2667,14 @@ app.put(
             display_order = $8,
             updated_at = CURRENT_TIMESTAMP
           WHERE id = $9
-          RETURNING
-            id,
-            title,
-            description,
-            video_url,
-            thumbnail_url,
-            category,
-            published_date,
-            link,
-            display_order,
-            created_at,
-            updated_at
+          RETURNING *
           `,
           [
             title.trim(),
             description || "",
             videoUrl,
             thumbnail_url || "",
-            category ||
-              "Video",
+            category || "Video",
             published_date ||
               null,
             link || "",
@@ -2462,52 +2683,30 @@ app.put(
           ]
         );
 
-      /*
-       * Delete old video only after
-       * successful database update.
-       */
-
       if (
         req.file &&
         existing.rows[0]
           .video_url
       ) {
-        try {
-          const oldFilename =
-            path.basename(
-              existing.rows[0]
-                .video_url
-            );
-
-          const oldPath =
-            path.join(
-              videoFolder,
-              oldFilename
-            );
-
-          if (
-            fs.existsSync(
-              oldPath
-            )
-          ) {
-            fs.unlinkSync(
-              oldPath
-            );
-          }
-        } catch (fileError) {
-          console.error(
-            "OLD VIDEO DELETE WARNING:",
-            fileError.message
-          );
-        }
+        deleteUploadByUrl(
+          existing.rows[0]
+            .video_url
+        );
       }
 
-      return res.json({
+      res.json({
         success: true,
         message:
           "Video updated successfully",
-        data:
-          result.rows[0],
+
+        data: {
+          ...result.rows[0],
+          video_url:
+            getPublicUploadPath(
+              result.rows[0]
+                .video_url
+            ),
+        },
       });
     } catch (error) {
       console.error(
@@ -2516,31 +2715,15 @@ app.put(
       );
 
       if (req.file) {
-        try {
-          const filePath =
-            path.join(
-              videoFolder,
-              req.file.filename
-            );
-
-          if (
-            fs.existsSync(
-              filePath
-            )
-          ) {
-            fs.unlinkSync(
-              filePath
-            );
-          }
-        } catch (fileError) {
-          console.error(
-            "VIDEO CLEANUP ERROR:",
-            fileError.message
-          );
-        }
+        deleteFileIfExists(
+          path.join(
+            videoFolder,
+            req.file.filename
+          )
+        );
       }
 
-      return res.status(500).json({
+      res.status(500).json({
         success: false,
         message:
           "Unable to update video",
@@ -2551,27 +2734,20 @@ app.put(
   }
 );
 
+// DELETE VIDEO
 app.delete(
   "/api/videos/:id",
   authenticateAdmin,
-  async (
-    req,
-    res
-  ) => {
+  async (req, res) => {
     try {
-      const {
-        id,
-      } = req.params;
-
       const existing =
         await pool.query(
           `
-          SELECT
-            video_url
+          SELECT video_url
           FROM videos
           WHERE id = $1
           `,
-          [id]
+          [req.params.id]
         );
 
       if (
@@ -2594,40 +2770,16 @@ app.delete(
         DELETE FROM videos
         WHERE id = $1
         `,
-        [id]
+        [req.params.id]
       );
 
       if (videoUrl) {
-        try {
-          const filename =
-            path.basename(
-              videoUrl
-            );
-
-          const filePath =
-            path.join(
-              videoFolder,
-              filename
-            );
-
-          if (
-            fs.existsSync(
-              filePath
-            )
-          ) {
-            fs.unlinkSync(
-              filePath
-            );
-          }
-        } catch (fileError) {
-          console.error(
-            "VIDEO FILE DELETE WARNING:",
-            fileError.message
-          );
-        }
+        deleteUploadByUrl(
+          videoUrl
+        );
       }
 
-      return res.json({
+      res.json({
         success: true,
         message:
           "Video deleted successfully",
@@ -2638,7 +2790,7 @@ app.delete(
         error
       );
 
-      return res.status(500).json({
+      res.status(500).json({
         success: false,
         message:
           "Unable to delete video",
@@ -2648,49 +2800,75 @@ app.delete(
     }
   }
 );
-// =====================================
-// ARTICLES API
-// =====================================
 
+// ============================================================
+// ARTICLES
+// ============================================================
+
+// GET ARTICLES
 app.get(
   "/api/articles",
   async (req, res) => {
     try {
-      const result = await pool.query(`
-        SELECT
-          id,
-          title,
-          summary,
-          content,
-          category,
-          image_url,
-          published_date,
-          link,
-          created_at,
-          updated_at
-        FROM articles
-        ORDER BY published_date DESC NULLS LAST, id DESC
-      `);
+      const result =
+        await pool.query(`
+          SELECT
+            id,
+            title,
+            summary,
+            content,
+            category,
+            image_url,
+            published_date,
+            link,
+            created_at,
+            updated_at
+          FROM articles
+          ORDER BY
+            published_date DESC NULLS LAST,
+            id DESC
+        `);
+
+      const data =
+        result.rows.map(
+          (row) => ({
+            ...row,
+
+            image_url:
+              getPublicUploadPath(
+                row.image_url
+              ),
+          })
+        );
 
       res.json({
         success: true,
-        data: result.rows,
+        data,
       });
     } catch (error) {
-      console.error("GET ARTICLES ERROR:", error);
+      console.error(
+        "GET ARTICLES ERROR:",
+        error
+      );
 
       res.status(500).json({
         success: false,
-        message: "Unable to load articles",
+        message:
+          "Unable to load articles",
+        error:
+          error.message,
       });
     }
   }
 );
 
+// ADD ARTICLE
 app.post(
   "/api/articles",
   authenticateAdmin,
-  upload.single("image"),
+  articleUpload.single(
+    "image"
+  ),
   async (req, res) => {
     try {
       const {
@@ -2702,66 +2880,118 @@ app.post(
         link,
       } = req.body;
 
-      if (!title || !title.trim()) {
+      if (
+        !title ||
+        !title.trim()
+      ) {
         return res.status(400).json({
           success: false,
-          message: "Article title is required",
+          message:
+            "Article title is required",
         });
       }
 
-      const imageUrl = req.file
-        ? `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`
-        : "";
+      const imageUrl =
+        req.file
+          ? `/uploads/articles/${req.file.filename}`
+          : "";
 
-      const result = await pool.query(
-        `
-        INSERT INTO articles
-          (title, summary, content, category, image_url, published_date, link)
-        VALUES ($1, $2, $3, $4, $5, $6, $7)
-        RETURNING *
-        `,
-        [
-          title.trim(),
-          summary || "",
-          content || "",
-          category || "Article",
-          imageUrl,
-          published_date || null,
-          link || "",
-        ]
-      );
+      const result =
+        await pool.query(
+          `
+          INSERT INTO articles
+          (
+            title,
+            summary,
+            content,
+            category,
+            image_url,
+            published_date,
+            link
+          )
+          VALUES
+          ($1,$2,$3,$4,$5,$6,$7)
+          RETURNING *
+          `,
+          [
+            title.trim(),
+            summary || "",
+            content || "",
+            category || "Article",
+            imageUrl,
+            published_date ||
+              null,
+            link || "",
+          ]
+        );
 
       res.status(201).json({
         success: true,
-        message: "Article added successfully",
-        data: result.rows[0],
+        message:
+          "Article added successfully",
+
+        data: {
+          ...result.rows[0],
+          image_url:
+            getPublicUploadPath(
+              result.rows[0]
+                .image_url
+            ),
+        },
       });
     } catch (error) {
-      console.error("CREATE ARTICLE ERROR:", error);
+      console.error(
+        "CREATE ARTICLE ERROR:",
+        error
+      );
+
+      if (req.file) {
+        deleteFileIfExists(
+          path.join(
+            articleFolder,
+            req.file.filename
+          )
+        );
+      }
 
       res.status(500).json({
         success: false,
-        message: "Unable to create article",
+        message:
+          "Unable to create article",
+        error:
+          error.message,
       });
     }
   }
 );
 
+// UPDATE ARTICLE
 app.put(
   "/api/articles/:id",
   authenticateAdmin,
-  upload.single("image"),
+  articleUpload.single(
+    "image"
+  ),
   async (req, res) => {
     try {
-      const existing = await pool.query(
-        "SELECT image_url FROM articles WHERE id = $1",
-        [req.params.id]
-      );
+      const existing =
+        await pool.query(
+          `
+          SELECT image_url
+          FROM articles
+          WHERE id = $1
+          `,
+          [req.params.id]
+        );
 
-      if (existing.rows.length === 0) {
+      if (
+        existing.rows.length ===
+        0
+      ) {
         return res.status(404).json({
           success: false,
-          message: "Article not found",
+          message:
+            "Article not found",
         });
       }
 
@@ -2774,99 +3004,173 @@ app.put(
         link,
       } = req.body;
 
-      if (!title || !title.trim()) {
+      if (
+        !title ||
+        !title.trim()
+      ) {
         return res.status(400).json({
           success: false,
-          message: "Article title is required",
+          message:
+            "Article title is required",
         });
       }
 
-      const imageUrl = req.file
-        ? `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`
-        : existing.rows[0].image_url || "";
+      const oldImage =
+        existing.rows[0]
+          .image_url || "";
 
-      const result = await pool.query(
-        `
-        UPDATE articles
-        SET
-          title = $1,
-          summary = $2,
-          content = $3,
-          category = $4,
-          image_url = $5,
-          published_date = $6,
-          link = $7,
-          updated_at = CURRENT_TIMESTAMP
-        WHERE id = $8
-        RETURNING *
-        `,
-        [
-          title.trim(),
-          summary || "",
-          content || "",
-          category || "Article",
-          imageUrl,
-          published_date || null,
-          link || "",
-          req.params.id,
-        ]
-      );
+      const imageUrl =
+        req.file
+          ? `/uploads/articles/${req.file.filename}`
+          : normalizeUploadPath(
+              oldImage
+            );
+
+      const result =
+        await pool.query(
+          `
+          UPDATE articles
+          SET
+            title = $1,
+            summary = $2,
+            content = $3,
+            category = $4,
+            image_url = $5,
+            published_date = $6,
+            link = $7,
+            updated_at = CURRENT_TIMESTAMP
+          WHERE id = $8
+          RETURNING *
+          `,
+          [
+            title.trim(),
+            summary || "",
+            content || "",
+            category || "Article",
+            imageUrl,
+            published_date ||
+              null,
+            link || "",
+            req.params.id,
+          ]
+        );
+
+      if (
+        req.file &&
+        oldImage
+      ) {
+        deleteUploadByUrl(
+          oldImage
+        );
+      }
 
       res.json({
         success: true,
-        message: "Article updated successfully",
-        data: result.rows[0],
+        message:
+          "Article updated successfully",
+
+        data: {
+          ...result.rows[0],
+          image_url:
+            getPublicUploadPath(
+              result.rows[0]
+                .image_url
+            ),
+        },
       });
     } catch (error) {
-      console.error("UPDATE ARTICLE ERROR:", error);
+      console.error(
+        "UPDATE ARTICLE ERROR:",
+        error
+      );
+
+      if (req.file) {
+        deleteFileIfExists(
+          path.join(
+            articleFolder,
+            req.file.filename
+          )
+        );
+      }
 
       res.status(500).json({
         success: false,
-        message: "Unable to update article",
+        message:
+          "Unable to update article",
+        error:
+          error.message,
       });
     }
   }
 );
 
+// DELETE ARTICLE
 app.delete(
   "/api/articles/:id",
   authenticateAdmin,
   async (req, res) => {
     try {
-      const result = await pool.query(
-        "DELETE FROM articles WHERE id = $1 RETURNING id",
-        [req.params.id]
-      );
+      const result =
+        await pool.query(
+          `
+          DELETE FROM articles
+          WHERE id = $1
+          RETURNING image_url
+          `,
+          [req.params.id]
+        );
 
-      if (result.rows.length === 0) {
+      if (
+        result.rows.length ===
+        0
+      ) {
         return res.status(404).json({
           success: false,
-          message: "Article not found",
+          message:
+            "Article not found",
         });
+      }
+
+      const imageUrl =
+        result.rows[0]
+          .image_url || "";
+
+      if (imageUrl) {
+        deleteUploadByUrl(
+          imageUrl
+        );
       }
 
       res.json({
         success: true,
-        message: "Article deleted successfully",
+        message:
+          "Article deleted successfully",
       });
     } catch (error) {
-      console.error("DELETE ARTICLE ERROR:", error);
+      console.error(
+        "DELETE ARTICLE ERROR:",
+        error
+      );
 
       res.status(500).json({
         success: false,
-        message: "Unable to delete article",
+        message:
+          "Unable to delete article",
+        error:
+          error.message,
       });
     }
   }
 );
 
-//NEW API
+// ============================================================
+// NEWS
+// ============================================================
+
+// GET NEWS
 app.get(
   "/api/news",
-  async (
-    req,
-    res
-  ) => {
+  async (req, res) => {
     try {
       const result =
         await pool.query(`
@@ -2887,11 +3191,24 @@ app.get(
             display_order ASC,
             id ASC
         `);
+          console.log("////////////////")
+        console.log(result.rows[0].image_url)
+
+      const data =
+        result.rows.map(
+          (row) => ({
+            ...row,
+
+            image_url:
+              getPublicUploadPath(
+                row.image_url
+              ),
+          })
+        );
 
       res.json({
         success: true,
-        data:
-          result.rows,
+        data,
       });
     } catch (error) {
       console.error(
@@ -2909,36 +3226,20 @@ app.get(
     }
   }
 );
+
+// GET NEWS BY ID
 app.get(
   "/api/news/:id",
-  async (
-    req,
-    res
-  ) => {
+  async (req, res) => {
     try {
-      const {
-        id,
-      } = req.params;
-
       const result =
         await pool.query(
           `
-          SELECT
-            id,
-            title,
-            description,
-            content,
-            category,
-            image_url,
-            published_date,
-            display_order,
-            link,
-            created_at,
-            updated_at
+          SELECT *
           FROM news
           WHERE id = $1
           `,
-          [id]
+          [req.params.id]
         );
 
       if (
@@ -2952,10 +3253,19 @@ app.get(
         });
       }
 
+      const data = {
+        ...result.rows[0],
+
+        image_url:
+          getPublicUploadPath(
+            result.rows[0]
+              .image_url
+          ),
+      };
+
       res.json({
         success: true,
-        data:
-          result.rows[0],
+        data,
       });
     } catch (error) {
       console.error(
@@ -2967,20 +3277,19 @@ app.get(
         success: false,
         message:
           "Unable to load news",
-        error:
-          error.message,
       });
     }
   }
 );
+
+// ADD NEWS
 app.post(
   "/api/news",
   authenticateAdmin,
-  upload.single("image"),
-  async (
-    req,
-    res
-  ) => {
+  newsUpload.single(
+    "image"
+  ),
+  async (req, res) => {
     try {
       const {
         title,
@@ -3007,9 +3316,7 @@ app.post(
 
       if (req.file) {
         imageUrl =
-          `${req.protocol}://${req.get(
-            "host"
-          )}/uploads/${req.file.filename}`;
+          `/uploads/news/${req.file.filename}`;
       }
 
       let orderValue;
@@ -3017,13 +3324,22 @@ app.post(
       if (
         display_order !==
           undefined &&
-        display_order !==
-          ""
+        display_order !== ""
       ) {
-        orderValue =
-          Number(
-            display_order
-          );
+        const parsed =
+          Number(display_order);
+
+        if (
+          !Number.isFinite(parsed)
+        ) {
+          return res.status(400).json({
+            success: false,
+            message:
+              "Display order must be a valid number",
+          });
+        }
+
+        orderValue = parsed;
       } else {
         const orderResult =
           await pool.query(`
@@ -3057,25 +3373,13 @@ app.post(
           )
           VALUES
           ($1,$2,$3,$4,$5,$6,$7,$8)
-          RETURNING
-            id,
-            title,
-            description,
-            content,
-            category,
-            image_url,
-            published_date,
-            display_order,
-            link,
-            created_at,
-            updated_at
+          RETURNING *
           `,
           [
             title.trim(),
             description || "",
             content || "",
-            category ||
-              "News",
+            category || "News",
             imageUrl,
             published_date ||
               null,
@@ -3088,14 +3392,30 @@ app.post(
         success: true,
         message:
           "News added successfully",
-        data:
-          result.rows[0],
+
+        data: {
+          ...result.rows[0],
+          image_url:
+            getPublicUploadPath(
+              result.rows[0]
+                .image_url
+            ),
+        },
       });
     } catch (error) {
       console.error(
         "ADD NEWS ERROR:",
         error
       );
+
+      if (req.file) {
+        deleteFileIfExists(
+          path.join(
+            newsFolder,
+            req.file.filename
+          )
+        );
+      }
 
       res.status(500).json({
         success: false,
@@ -3107,39 +3427,18 @@ app.post(
     }
   }
 );
+
+// UPDATE NEWS
 app.put(
   "/api/news/:id",
   authenticateAdmin,
-  upload.single("image"),
-  async (
-    req,
-    res
-  ) => {
+  newsUpload.single(
+    "image"
+  ),
+  async (req, res) => {
     try {
-      const {
-        id,
-      } = req.params;
-
-      const {
-        title,
-        description,
-        content,
-        category,
-        published_date,
-        display_order,
-        link,
-      } = req.body;
-
-      if (
-        !title ||
-        !title.trim()
-      ) {
-        return res.status(400).json({
-          success: false,
-          message:
-            "Title is required",
-        });
-      }
+      const { id } =
+        req.params;
 
       const existing =
         await pool.query(
@@ -3165,15 +3464,39 @@ app.put(
         });
       }
 
-      let imageUrl =
+      const {
+        title,
+        description,
+        content,
+        category,
+        published_date,
+        display_order,
+        link,
+      } = req.body;
+
+      if (
+        !title ||
+        !title.trim()
+      ) {
+        return res.status(400).json({
+          success: false,
+          message:
+            "Title is required",
+        });
+      }
+
+      const oldImage =
         existing.rows[0]
           .image_url || "";
 
+      let imageUrl =
+        normalizeUploadPath(
+          oldImage
+        );
+
       if (req.file) {
         imageUrl =
-          `${req.protocol}://${req.get(
-            "host"
-          )}/uploads/${req.file.filename}`;
+          `/uploads/news/${req.file.filename}`;
       }
 
       let orderValue =
@@ -3183,22 +3506,22 @@ app.put(
       if (
         display_order !==
           undefined &&
-        display_order !==
-          ""
+        display_order !== ""
       ) {
-        const parsedOrder =
-          Number(
-            display_order
-          );
+        const parsed =
+          Number(display_order);
 
         if (
-          Number.isFinite(
-            parsedOrder
-          )
+          !Number.isFinite(parsed)
         ) {
-          orderValue =
-            parsedOrder;
+          return res.status(400).json({
+            success: false,
+            message:
+              "Display order must be a valid number",
+          });
         }
+
+        orderValue = parsed;
       }
 
       const linkValue =
@@ -3222,25 +3545,13 @@ app.put(
             link = $8,
             updated_at = CURRENT_TIMESTAMP
           WHERE id = $9
-          RETURNING
-            id,
-            title,
-            description,
-            content,
-            category,
-            image_url,
-            published_date,
-            display_order,
-            link,
-            created_at,
-            updated_at
+          RETURNING *
           `,
           [
             title.trim(),
             description || "",
             content || "",
-            category ||
-              "News",
+            category || "News",
             imageUrl,
             published_date ||
               null,
@@ -3250,18 +3561,43 @@ app.put(
           ]
         );
 
+      if (
+        req.file &&
+        oldImage
+      ) {
+        deleteUploadByUrl(
+          oldImage
+        );
+      }
+
       res.json({
         success: true,
         message:
           "News updated successfully",
-        data:
-          result.rows[0],
+
+        data: {
+          ...result.rows[0],
+          image_url:
+            getPublicUploadPath(
+              result.rows[0]
+                .image_url
+            ),
+        },
       });
     } catch (error) {
       console.error(
         "UPDATE NEWS ERROR:",
         error
       );
+
+      if (req.file) {
+        deleteFileIfExists(
+          path.join(
+            newsFolder,
+            req.file.filename
+          )
+        );
+      }
 
       res.status(500).json({
         success: false,
@@ -3273,31 +3609,25 @@ app.put(
     }
   }
 );
+
+// DELETE NEWS
 app.delete(
   "/api/news/:id",
   authenticateAdmin,
-  async (
-    req,
-    res
-  ) => {
+  async (req, res) => {
     try {
-      const {
-        id,
-      } = req.params;
-
-      const existing =
+      const result =
         await pool.query(
           `
-          SELECT
-            image_url
-          FROM news
+          DELETE FROM news
           WHERE id = $1
+          RETURNING image_url
           `,
-          [id]
+          [req.params.id]
         );
 
       if (
-        existing.rows.length ===
+        result.rows.length ===
         0
       ) {
         return res.status(404).json({
@@ -3308,45 +3638,13 @@ app.delete(
       }
 
       const imageUrl =
-        existing.rows[0]
+        result.rows[0]
           .image_url || "";
 
-      await pool.query(
-        `
-        DELETE FROM news
-        WHERE id = $1
-        `,
-        [id]
-      );
-
       if (imageUrl) {
-        try {
-          const filename =
-            path.basename(
-              imageUrl
-            );
-
-          const filePath =
-            path.join(
-              uploadFolder,
-              filename
-            );
-
-          if (
-            fs.existsSync(
-              filePath
-            )
-          ) {
-            fs.unlinkSync(
-              filePath
-            );
-          }
-        } catch (imageError) {
-          console.error(
-            "NEWS IMAGE DELETE WARNING:",
-            imageError.message
-          );
-        }
+        deleteUploadByUrl(
+          imageUrl
+        );
       }
 
       res.json({
@@ -3370,64 +3668,86 @@ app.delete(
     }
   }
 );
-//gallery
-// =====================================
+
+// ============================================================
 // GALLERY
-// =====================================
+// ============================================================
 
-// GET ALL GALLERY IMAGES
-app.get("/api/gallery", async (req, res) => {
-  try {
-    const result = await pool.query(`
-      SELECT
-        id,
-        title,
-        caption,
-        category,
-        image_filename,
-        image_path,
-        created_at,
-        updated_at
-      FROM gallery
-      ORDER BY created_at DESC
-    `);
+// GET GALLERY
+app.get(
+  "/api/gallery",
+  async (req, res) => {
+    try {
+      const result =
+        await pool.query(`
+          SELECT
+            id,
+            title,
+            caption,
+            category,
+            image_filename,
+            image_path,
+            created_at,
+            updated_at
+          FROM gallery
+          ORDER BY created_at DESC
+        `);
 
-    res.status(200).json({
-      success: true,
-      data: result.rows,
-    });
-  } catch (error) {
-    console.error("GET GALLERY ERROR:", error);
+      const data =
+        result.rows.map(
+          (row) => ({
+            ...row,
 
-    res.status(500).json({
-      success: false,
-      message: "Failed to load gallery images",
-      error: error.message,
-    });
+            image_path:
+              getPublicUploadPath(
+                row.image_path
+              ),
+          })
+        );
+
+      res.json({
+        success: true,
+        data,
+      });
+    } catch (error) {
+      console.error(
+        "GET GALLERY ERROR:",
+        error
+      );
+
+      res.status(500).json({
+        success: false,
+        message:
+          "Failed to load gallery images",
+        error:
+          error.message,
+      });
+    }
   }
-});
+);
 
-
-// ADD NEW GALLERY IMAGE
+// ADD GALLERY
 app.post(
   "/api/gallery",
   authenticateAdmin,
-  upload.single("image"),
+  galleryUpload.single(
+    "image"
+  ),
   async (req, res) => {
     try {
-      const { title, caption, category } = req.body;
+      const {
+        title,
+        caption,
+        category,
+      } = req.body;
 
       if (!req.file) {
         return res.status(400).json({
           success: false,
-          message: "Please select an image",
+          message:
+            "Please select an image",
         });
       }
-
-      const imageFilename = req.file.filename;
-
-      const imagePath =
-        `${req.protocol}://${req.get("host")}/uploads/${imageFilename}`;
 
       const allowedCategories = [
         "Public Events",
@@ -3437,108 +3757,138 @@ app.post(
       ];
 
       const selectedCategory =
-        allowedCategories.includes(category)
+        allowedCategories.includes(
+          category
+        )
           ? category
           : "Public Events";
 
-      const result = await pool.query(
-        `
-        INSERT INTO gallery
-        (
-          title,
-          caption,
-          category,
-          image_filename,
-          image_path
-        )
-        VALUES ($1,$2,$3,$4,$5)
-        RETURNING *
-        `,
-        [
-          title || "",
-          caption || "",
-          selectedCategory,
-          imageFilename,
-          imagePath,
-        ]
-      );
+      const imageFilename =
+        req.file.filename;
+
+      const imagePath =
+        `/uploads/gallery/${imageFilename}`;
+
+      const result =
+        await pool.query(
+          `
+          INSERT INTO gallery
+          (
+            title,
+            caption,
+            category,
+            image_filename,
+            image_path
+          )
+          VALUES
+          ($1,$2,$3,$4,$5)
+          RETURNING *
+          `,
+          [
+            title || "",
+            caption || "",
+            selectedCategory,
+            imageFilename,
+            imagePath,
+          ]
+        );
 
       res.status(201).json({
         success: true,
-        message: "Gallery image uploaded successfully",
-        data: result.rows[0],
+        message:
+          "Gallery image uploaded successfully",
+
+        data: {
+          ...result.rows[0],
+          image_path:
+            getPublicUploadPath(
+              result.rows[0]
+                .image_path
+            ),
+        },
       });
     } catch (error) {
-      console.error("POST GALLERY ERROR:", error);
+      console.error(
+        "POST GALLERY ERROR:",
+        error
+      );
 
       if (req.file) {
-        try {
-          const filePath = path.join(
-            uploadFolder,
+        deleteFileIfExists(
+          path.join(
+            galleryFolder,
             req.file.filename
-          );
-
-          if (fs.existsSync(filePath)) {
-            fs.unlinkSync(filePath);
-          }
-        } catch (fileError) {
-          console.error(
-            "IMAGE CLEANUP ERROR:",
-            fileError.message
-          );
-        }
+          )
+        );
       }
 
       res.status(500).json({
         success: false,
-        message: "Failed to upload gallery image",
-        error: error.message,
+        message:
+          "Failed to upload gallery image",
+        error:
+          error.message,
       });
     }
   }
 );
 
-
-// UPDATE GALLERY IMAGE
+// UPDATE GALLERY
 app.put(
   "/api/gallery/:id",
   authenticateAdmin,
-  upload.single("image"),
+  galleryUpload.single(
+    "image"
+  ),
   async (req, res) => {
     try {
-      const { id } = req.params;
-      const { title, caption, category } = req.body;
+      const { id } =
+        req.params;
 
-      const existing = await pool.query(
-        `
-        SELECT *
-        FROM gallery
-        WHERE id = $1
-        `,
-        [id]
-      );
+      const {
+        title,
+        caption,
+        category,
+      } = req.body;
 
-      if (existing.rows.length === 0) {
+      const existing =
+        await pool.query(
+          `
+          SELECT *
+          FROM gallery
+          WHERE id = $1
+          `,
+          [id]
+        );
+
+      if (
+        existing.rows.length ===
+        0
+      ) {
         return res.status(404).json({
           success: false,
-          message: "Gallery image not found",
+          message:
+            "Gallery image not found",
         });
       }
 
-      const oldImage = existing.rows[0];
+      const oldImage =
+        existing.rows[0];
 
       let imageFilename =
         oldImage.image_filename;
 
       let imagePath =
-        oldImage.image_path;
+        normalizeUploadPath(
+          oldImage.image_path
+        );
 
       if (req.file) {
         imageFilename =
           req.file.filename;
 
         imagePath =
-          `${req.protocol}://${req.get("host")}/uploads/${imageFilename}`;
+          `/uploads/gallery/${req.file.filename}`;
       }
 
       const allowedCategories = [
@@ -3549,193 +3899,328 @@ app.put(
       ];
 
       const selectedCategory =
-        allowedCategories.includes(category)
+        allowedCategories.includes(
+          category
+        )
           ? category
           : oldImage.category;
 
-      const result = await pool.query(
-        `
-        UPDATE gallery
-        SET
-          title = $1,
-          caption = $2,
-          category = $3,
-          image_filename = $4,
-          image_path = $5,
-          updated_at = CURRENT_TIMESTAMP
-        WHERE id = $6
-        RETURNING *
-        `,
-        [
-          title || "",
-          caption || "",
-          selectedCategory,
-          imageFilename,
-          imagePath,
-          id,
-        ]
-      );
+      const result =
+        await pool.query(
+          `
+          UPDATE gallery
+          SET
+            title = $1,
+            caption = $2,
+            category = $3,
+            image_filename = $4,
+            image_path = $5,
+            updated_at = CURRENT_TIMESTAMP
+          WHERE id = $6
+          RETURNING *
+          `,
+          [
+            title || "",
+            caption || "",
+            selectedCategory,
+            imageFilename,
+            imagePath,
+            id,
+          ]
+        );
 
-      if (req.file && oldImage.image_filename) {
-        try {
-          const oldFilePath = path.join(
-            uploadFolder,
-            oldImage.image_filename
-          );
-
-          if (fs.existsSync(oldFilePath)) {
-            fs.unlinkSync(oldFilePath);
-          }
-        } catch (fileError) {
-          console.error(
-            "OLD IMAGE DELETE WARNING:",
-            fileError.message
-          );
-        }
+      if (
+        req.file &&
+        oldImage.image_path
+      ) {
+        deleteUploadByUrl(
+          oldImage.image_path
+        );
       }
 
-      res.status(200).json({
+      res.json({
         success: true,
-        message: "Gallery image updated successfully",
-        data: result.rows[0],
+        message:
+          "Gallery image updated successfully",
+
+        data: {
+          ...result.rows[0],
+          image_path:
+            getPublicUploadPath(
+              result.rows[0]
+                .image_path
+            ),
+        },
       });
     } catch (error) {
-      console.error("UPDATE GALLERY ERROR:", error);
+      console.error(
+        "UPDATE GALLERY ERROR:",
+        error
+      );
 
       if (req.file) {
-        try {
-          const newFilePath = path.join(
-            uploadFolder,
+        deleteFileIfExists(
+          path.join(
+            galleryFolder,
             req.file.filename
-          );
-
-          if (fs.existsSync(newFilePath)) {
-            fs.unlinkSync(newFilePath);
-          }
-        } catch (fileError) {
-          console.error(
-            "NEW IMAGE CLEANUP ERROR:",
-            fileError.message
-          );
-        }
+          )
+        );
       }
 
       res.status(500).json({
         success: false,
-        message: "Failed to update gallery image",
-        error: error.message,
+        message:
+          "Failed to update gallery image",
+        error:
+          error.message,
       });
     }
   }
 );
 
-
-// DELETE GALLERY IMAGE
+// DELETE GALLERY
 app.delete(
   "/api/gallery/:id",
   authenticateAdmin,
   async (req, res) => {
     try {
-      const { id } = req.params;
+      const result =
+        await pool.query(
+          `
+          DELETE FROM gallery
+          WHERE id = $1
+          RETURNING image_filename, image_path
+          `,
+          [req.params.id]
+        );
 
-      const existing = await pool.query(
-        `
-        SELECT *
-        FROM gallery
-        WHERE id = $1
-        `,
-        [id]
-      );
-
-      if (existing.rows.length === 0) {
+      if (
+        result.rows.length ===
+        0
+      ) {
         return res.status(404).json({
           success: false,
-          message: "Gallery image not found",
+          message:
+            "Gallery image not found",
         });
       }
 
-      const image = existing.rows[0];
+      const imagePath =
+        result.rows[0]
+          .image_path;
 
-      await pool.query(
-        `
-        DELETE FROM gallery
-        WHERE id = $1
-        `,
-        [id]
-      );
-
-      if (image.image_filename) {
-        try {
-          const imageFilePath = path.join(
-            uploadFolder,
-            image.image_filename
-          );
-
-          if (fs.existsSync(imageFilePath)) {
-            fs.unlinkSync(imageFilePath);
-          }
-        } catch (fileError) {
-          console.error(
-            "IMAGE DELETE WARNING:",
-            fileError.message
-          );
-        }
+      if (imagePath) {
+        deleteUploadByUrl(
+          imagePath
+        );
+      } else if (
+        result.rows[0]
+          .image_filename
+      ) {
+        deleteFileIfExists(
+          path.join(
+            galleryFolder,
+            result.rows[0]
+              .image_filename
+          )
+        );
       }
 
-      res.status(200).json({
+      res.json({
         success: true,
-        message: "Gallery image deleted successfully",
+        message:
+          "Gallery image deleted successfully",
       });
     } catch (error) {
-      console.error("DELETE GALLERY ERROR:", error);
+      console.error(
+        "DELETE GALLERY ERROR:",
+        error
+      );
 
       res.status(500).json({
         success: false,
-        message: "Failed to delete gallery image",
-        error: error.message,
+        message:
+          "Failed to delete gallery image",
+        error:
+          error.message,
       });
     }
   }
 );
-// =====================================
+
+// ============================================================
 // TEST ENVIRONMENT
-// =====================================
+// ============================================================
 
-app.get("/api/test-env", (req, res) => {
-  res.json({
-    success: true,
-    adminAuthentication: "PostgreSQL admins table",
-    jwtSecretConfigured:
-      !!process.env.JWT_SECRET,
+app.get(
+  "/api/test-env",
+  (req, res) => {
+    res.json({
+      success: true,
 
-    dbHost:
-      process.env.DB_HOST || "NOT FOUND",
+      adminAuthentication:
+        "PostgreSQL admins table",
 
-    dbName:
-      process.env.DB_NAME || "NOT FOUND",
-  });
-});
+      jwtSecretConfigured:
+        Boolean(
+          process.env.JWT_SECRET
+        ),
 
-// =====================================
+      databaseConfigured:
+        Boolean(
+          process.env.DB_HOST &&
+            process.env.DB_NAME &&
+            process.env.DB_USER &&
+            process.env.DB_PASSWORD
+        ),
+
+      serverPort:
+        Number(PORT),
+    });
+  }
+);
+
+// ============================================================
+// 404 API HANDLER
+// ============================================================
+
+app.use(
+  (req, res) => {
+    res.status(404).json({
+      success: false,
+      message:
+        "API endpoint not found",
+      path: req.originalUrl,
+    });
+  }
+);
+
+// ============================================================
+// MULTER / GLOBAL ERROR HANDLER
+// ============================================================
+
+app.use(
+  (
+    error,
+    req,
+    res,
+    next
+  ) => {
+    console.error(
+      "GLOBAL ERROR:",
+      error
+    );
+
+    if (
+      error instanceof
+      multer.MulterError
+    ) {
+      return res.status(400).json({
+        success: false,
+        message:
+          `Upload error: ${error.message}`,
+      });
+    }
+
+    if (
+      error &&
+      error.message
+    ) {
+      return res.status(400).json({
+        success: false,
+        message:
+          error.message,
+      });
+    }
+
+    res.status(500).json({
+      success: false,
+      message:
+        "Internal server error",
+    });
+  }
+);
+
+// ============================================================
 // START SERVER
-// =====================================
+// ============================================================
 
-app.listen(PORT, () => {
-  console.log(
-    `Server running on port ${PORT}`
-  );
+app.listen(
+  PORT,
+  () => {
+    console.log(
+      "========================================"
+    );
 
-  console.log(
-    "Admin authentication: PostgreSQL admins table"
-  );
+    console.log(
+      `Server running on port ${PORT}`
+    );
 
-  console.log(
-    "Database configured:",
-    process.env.DB_HOST && process.env.DB_NAME ? "YES" : "NO"
-  );
+    console.log(
+      `http://localhost:${PORT}`
+    );
 
-  console.log(
-    "JWT_SECRET configured:",
-    process.env.JWT_SECRET ? "YES" : "NO"
-  );
-});
+    console.log(
+      "========================================"
+    );
+
+    console.log(
+      "Admin authentication:",
+      "PostgreSQL admins table"
+    );
+
+    console.log(
+      "Database configured:",
+      process.env.DB_HOST &&
+        process.env.DB_NAME
+        ? "YES"
+        : "NO"
+    );
+
+    console.log(
+      "JWT_SECRET configured:",
+      process.env.JWT_SECRET
+        ? "YES"
+        : "NO"
+    );
+
+    console.log(
+      "Upload folder:",
+      uploadFolder
+    );
+
+    console.log(
+      "Political Career folder:",
+      politicalCareerFolder
+    );
+
+    console.log(
+      "News folder:",
+      newsFolder
+    );
+
+    console.log(
+      "Gallery folder:",
+      galleryFolder
+    );
+
+    console.log(
+      "Video folder:",
+      videoFolder
+    );
+
+    console.log(
+      "Article folder:",
+      articleFolder
+    );
+
+    console.log(
+      "Home folder:",
+      homeFolder
+    );
+
+    console.log(
+      "========================================"
+    );
+  }
+);

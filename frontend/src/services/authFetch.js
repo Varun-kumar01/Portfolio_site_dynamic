@@ -10,5 +10,6 @@ export async function authFetch(input, init = {}) {
   return fetch(input, {
     ...init,
     headers,
+    cache: "no-store",
   });
 }

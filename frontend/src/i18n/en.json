@@ -485,7 +485,7 @@
     "state": "State",
     "telangana": "Telangana",
     "rights": "All Rights Reserved.",
-    "designed": "Designed & Developed with ❤️"
+    "designed": "Designed & Developed By ACS"
   },
 
   "contactCTA": {
@@ -494,6 +494,7 @@
     "titleLine2": "A Better Tomorrow",
     "description": "Your ideas, suggestions and concerns matter. Stay connected and work together towards stronger communities, better development and transparent governance.",
     "phone": "Phone",
+    
     "email": "Email",
     "office": "Office",
     "officeAddress": "Dharmapuri, Telangana",

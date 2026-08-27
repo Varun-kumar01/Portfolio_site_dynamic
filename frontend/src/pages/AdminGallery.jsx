@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+
 import {
   Image,
   Plus,
@@ -10,6 +11,7 @@ import {
   GripVertical,
   LayoutDashboard,
 } from "lucide-react";
+
 import { API_BASE_URL } from "../config";
 
 const API_URL = `${API_BASE_URL}/api/gallery`;
@@ -79,7 +81,7 @@ export default function AdminGallery() {
   const [error, setError] = useState("");
 
   // =========================================
-  // TOKEN
+  // GET TOKEN
   // =========================================
 
   const getToken = () => {
@@ -90,32 +92,77 @@ export default function AdminGallery() {
   };
 
   // =========================================
-  // IMAGE URL
+  // BUILD BACKEND IMAGE URL
+  // =========================================
+  //
+  // IMPORTANT:
+  //
+  // Database should ideally contain:
+  //
+  // /uploads/gallery/gallery1.jpeg
+  //
+  // NOT:
+  //
+  // http://localhost:5000/uploads/gallery/gallery1.jpeg
+  //
+  // This function supports both old and new records.
   // =========================================
 
   const getImageUrl = (item) => {
     const image =
-      item.image_url ||
-      item.image ||
-      item.image_path ||
-      item.photo;
+      item?.image_url ||
+      item?.image ||
+      item?.image_path ||
+      item?.photo ||
+      "";
 
     if (!image) {
       return "";
     }
 
-    if (
-      image.startsWith("http://") ||
-      image.startsWith("https://")
-    ) {
-      return image;
+    let imagePath = String(image).trim();
+
+    if (!imagePath) {
+      return "";
     }
 
-    if (image.startsWith("/")) {
-      return `${API_BASE_URL}${image}`;
+    // =========================================
+    // REMOVE OLD LOCALHOST URL
+    // =========================================
+
+    imagePath = imagePath.replace(
+      /^https?:\/\/localhost:\d+/i,
+      ""
+    );
+
+    // =========================================
+    // REMOVE POSSIBLE FRONTEND ORIGIN
+    // =========================================
+
+    imagePath = imagePath.replace(
+      /^https?:\/\/127\.0\.0\.1:\d+/i,
+      ""
+    );
+
+    // =========================================
+    // NORMALIZE SLASHES
+    // =========================================
+
+    imagePath = imagePath.replace(/\\/g, "/");
+
+    // =========================================
+    // MAKE SURE PATH STARTS WITH /
+    // =========================================
+
+    if (!imagePath.startsWith("/")) {
+      imagePath = `/${imagePath}`;
     }
 
-    return `${API_BASE_URL}/${image}`;
+    // =========================================
+    // FINAL BACKEND URL
+    // =========================================
+
+    return `${API_BASE_URL}${imagePath}`;
   };
 
   // =========================================
@@ -126,9 +173,25 @@ export default function AdminGallery() {
     try {
       setError("");
 
-      const response = await fetch(API_URL);
+      const response = await fetch(
+        `${API_URL}?t=${Date.now()}`,
+        {
+          method: "GET",
+          cache: "no-store",
+        }
+      );
 
-      const data = await response.json();
+      const text = await response.text();
+
+      let data;
+
+      try {
+        data = JSON.parse(text);
+      } catch {
+        throw new Error(
+          "Backend returned invalid gallery data."
+        );
+      }
 
       if (!response.ok) {
         throw new Error(
@@ -139,14 +202,16 @@ export default function AdminGallery() {
 
       const items = Array.isArray(data)
         ? data
-        : data.gallery ||
-          data.data ||
-          [];
+        : Array.isArray(data.gallery)
+        ? data.gallery
+        : Array.isArray(data.data)
+        ? data.data
+        : [];
 
       setGalleryItems(items);
     } catch (error) {
       console.error(
-        "Gallery fetch error:",
+        "GALLERY FETCH ERROR:",
         error
       );
 
@@ -212,6 +277,49 @@ export default function AdminGallery() {
       return;
     }
 
+    // =========================================
+    // IMAGE TYPE VALIDATION
+    // =========================================
+
+    const allowedTypes = [
+      "image/jpeg",
+      "image/jpg",
+      "image/png",
+      "image/webp",
+    ];
+
+    if (!allowedTypes.includes(file.type)) {
+      setError(
+        "Only JPG, JPEG, PNG and WEBP images are allowed."
+      );
+
+      e.target.value = "";
+      return;
+    }
+
+    // =========================================
+    // IMAGE SIZE VALIDATION
+    // =========================================
+
+    if (file.size > 5 * 1024 * 1024) {
+      setError(
+        "Image must be less than 5 MB."
+      );
+
+      e.target.value = "";
+      return;
+    }
+
+    // =========================================
+    // TEMPORARY FRONTEND PREVIEW
+    // =========================================
+    //
+    // This is ONLY for preview.
+    //
+    // The actual image will be uploaded
+    // to backend when Submit is clicked.
+    // =========================================
+
     setSelectedFile(file);
 
     const imageUrl =
@@ -224,7 +332,7 @@ export default function AdminGallery() {
   };
 
   // =========================================
-  // ADD / UPDATE
+  // ADD / UPDATE GALLERY
   // =========================================
 
   const handleGallerySubmit = async (e) => {
@@ -233,12 +341,20 @@ export default function AdminGallery() {
     setMessage("");
     setError("");
 
+    // =========================================
+    // TITLE VALIDATION
+    // =========================================
+
     if (!title.trim()) {
       setError(
         "Please enter an image title."
       );
       return;
     }
+
+    // =========================================
+    // IMAGE REQUIRED FOR NEW RECORD
+    // =========================================
 
     if (!editingId && !selectedFile) {
       setError(
@@ -249,6 +365,10 @@ export default function AdminGallery() {
 
     try {
       setLoading(true);
+
+      // =========================================
+      // FORM DATA
+      // =========================================
 
       const formData = new FormData();
 
@@ -267,6 +387,11 @@ export default function AdminGallery() {
         category
       );
 
+      // =========================================
+      // IMPORTANT:
+      // IMAGE GOES TO BACKEND
+      // =========================================
+
       if (selectedFile) {
         formData.append(
           "image",
@@ -284,22 +409,43 @@ export default function AdminGallery() {
         ? "PUT"
         : "POST";
 
+      // =========================================
+      // SEND TO BACKEND
+      // =========================================
+
       const response = await fetch(
         url,
         {
           method,
+
           headers: token
             ? {
                 Authorization:
                   `Bearer ${token}`,
               }
             : undefined,
+
+          // DO NOT SET Content-Type HERE
+          //
+          // Browser automatically sets:
+          // multipart/form-data boundary
+          //
           body: formData,
         }
       );
 
-      const data =
-        await response.json();
+      const text =
+        await response.text();
+
+      let data;
+
+      try {
+        data = JSON.parse(text);
+      } catch {
+        throw new Error(
+          "Backend returned an invalid response."
+        );
+      }
 
       if (!response.ok) {
         throw new Error(
@@ -312,13 +458,25 @@ export default function AdminGallery() {
         );
       }
 
+      // =========================================
+      // SUCCESS
+      // =========================================
+
       setMessage(
         editingId
           ? "Gallery photo updated successfully."
           : "Gallery photo uploaded successfully."
       );
 
+      // =========================================
+      // GET FRESH DATA FROM BACKEND
+      // =========================================
+
       await fetchGallery();
+
+      // =========================================
+      // CLEAR FORM
+      // =========================================
 
       clearGalleryForm();
 
@@ -327,7 +485,7 @@ export default function AdminGallery() {
       setShowGalleryManager(false);
     } catch (error) {
       console.error(
-        "Gallery save error:",
+        "GALLERY SAVE ERROR:",
         error
       );
 
@@ -347,17 +505,23 @@ export default function AdminGallery() {
   const handleEdit = (item) => {
     setEditingId(item.id);
 
-    setTitle(item.title || "");
+    setTitle(
+      item.title || ""
+    );
 
-    setCaption(item.caption || "");
+    setCaption(
+      item.caption || ""
+    );
 
     setCategory(
       item.category ||
         "Public Events"
     );
 
+    // No new file selected initially
     setSelectedFile(null);
 
+    // Existing image comes from BACKEND
     setPreview(
       getImageUrl(item)
     );
@@ -410,8 +574,18 @@ export default function AdminGallery() {
           }
         );
 
-      const data =
-        await response.json();
+      const text =
+        await response.text();
+
+      let data;
+
+      try {
+        data = JSON.parse(text);
+      } catch {
+        throw new Error(
+          "Backend returned an invalid response."
+        );
+      }
 
       if (!response.ok) {
         throw new Error(
@@ -427,7 +601,7 @@ export default function AdminGallery() {
       await fetchGallery();
     } catch (error) {
       console.error(
-        "Gallery delete error:",
+        "GALLERY DELETE ERROR:",
         error
       );
 
@@ -458,7 +632,6 @@ export default function AdminGallery() {
     setPreview("");
 
     setMessage("");
-
     setError("");
   };
 
@@ -607,7 +780,6 @@ export default function AdminGallery() {
       const order = items.map(
         (item, index) => ({
           id: item.id,
-
           display_order:
             index + 1,
         })
@@ -637,8 +809,18 @@ export default function AdminGallery() {
           }
         );
 
-      const data =
-        await response.json();
+      const text =
+        await response.text();
+
+      let data;
+
+      try {
+        data = JSON.parse(text);
+      } catch {
+        throw new Error(
+          "Backend returned an invalid reorder response."
+        );
+      }
 
       if (!response.ok) {
         throw new Error(
@@ -652,7 +834,7 @@ export default function AdminGallery() {
       );
     } catch (error) {
       console.error(
-        "Gallery reorder error:",
+        "GALLERY REORDER ERROR:",
         error
       );
 
@@ -689,12 +871,12 @@ export default function AdminGallery() {
           </p>
         </div>
 
-        {/* BACK TO DASHBOARD */}
-
         <button
           type="button"
           onClick={() =>
-            navigate("/secure/admin/dashboard")
+            navigate(
+              "/secure/admin/dashboard"
+            )
           }
           className="inline-flex items-center justify-center gap-2 bg-gray-900 hover:bg-gray-800 text-white px-5 py-3 rounded-xl font-semibold transition"
         >
@@ -734,6 +916,7 @@ export default function AdminGallery() {
             </p>
 
             <button
+              type="button"
               onClick={
                 openGalleryManager
               }
@@ -779,6 +962,7 @@ export default function AdminGallery() {
             </div>
 
             <button
+              type="button"
               onClick={
                 closeGalleryManager
               }
@@ -814,6 +998,8 @@ export default function AdminGallery() {
 
             <div className="space-y-6">
 
+              {/* TITLE */}
+
               <div>
 
                 <label className="block font-medium text-gray-800 mb-2">
@@ -834,6 +1020,8 @@ export default function AdminGallery() {
 
               </div>
 
+              {/* CAPTION */}
+
               <div>
 
                 <label className="block font-medium text-gray-800 mb-2">
@@ -853,6 +1041,8 @@ export default function AdminGallery() {
                 />
 
               </div>
+
+              {/* CATEGORY */}
 
               <div>
 
@@ -890,6 +1080,8 @@ export default function AdminGallery() {
 
               </div>
 
+              {/* IMAGE */}
+
               <div>
 
                 <label className="block font-medium text-gray-800 mb-2">
@@ -902,7 +1094,7 @@ export default function AdminGallery() {
 
                 <input
                   type="file"
-                  accept="image/*"
+                  accept="image/jpeg,image/jpg,image/png,image/webp"
                   onChange={
                     handleFileChange
                   }
@@ -911,11 +1103,13 @@ export default function AdminGallery() {
 
                 {editingId && (
                   <p className="text-sm text-gray-500 mt-2">
-                    Leave empty to keep the existing image.
+                    Leave empty to keep the existing backend image.
                   </p>
                 )}
 
               </div>
+
+              {/* BUTTONS */}
 
               <div className="flex flex-wrap gap-4">
 
@@ -974,6 +1168,10 @@ export default function AdminGallery() {
                     src={preview}
                     alt="Gallery preview"
                     className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.currentTarget.style.display =
+                        "none";
+                    }}
                   />
                 ) : (
                   <div className="text-center text-gray-400">
@@ -1027,6 +1225,7 @@ export default function AdminGallery() {
             </span>
 
             <button
+              type="button"
               onClick={
                 openGalleryManager
               }
@@ -1085,6 +1284,11 @@ export default function AdminGallery() {
 
             {galleryItems.map(
               (item, index) => {
+
+                // =================================
+                // IMAGE COMES FROM BACKEND
+                // =================================
+
                 const imageUrl =
                   getImageUrl(item);
 
@@ -1146,16 +1350,22 @@ export default function AdminGallery() {
                     `}
                   >
 
+                    {/* DRAG HANDLE */}
+
                     <div className="flex items-center justify-center">
 
                       <div
                         className="w-10 h-10 rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-500"
                         title="Drag to reorder"
                       >
-                        <GripVertical size={22} />
+                        <GripVertical
+                          size={22}
+                        />
                       </div>
 
                     </div>
+
+                    {/* POSITION */}
 
                     <div className="flex items-center justify-center">
 
@@ -1164,6 +1374,8 @@ export default function AdminGallery() {
                       </div>
 
                     </div>
+
+                    {/* BACKEND IMAGE */}
 
                     <div className="w-full lg:w-52 h-40 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0">
 
@@ -1175,16 +1387,29 @@ export default function AdminGallery() {
                             "Gallery image"
                           }
                           className="w-full h-full object-cover"
+                          onError={(e) => {
+                            console.error(
+                              "IMAGE LOAD ERROR:",
+                              imageUrl
+                            );
+
+                            e.currentTarget.style.display =
+                              "none";
+                          }}
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-gray-400">
 
-                          <Image size={40} />
+                          <Image
+                            size={40}
+                          />
 
                         </div>
                       )}
 
                     </div>
+
+                    {/* DETAILS */}
 
                     <div className="flex-1 min-w-0">
 
@@ -1196,7 +1421,8 @@ export default function AdminGallery() {
                         </span>
 
                         <span className="text-xs font-semibold text-gray-600 bg-gray-100 px-3 py-1 rounded-full">
-                          Position #{index + 1}
+                          Position #
+                          {index + 1}
                         </span>
 
                       </div>
@@ -1211,7 +1437,17 @@ export default function AdminGallery() {
                           "No caption"}
                       </p>
 
+                      {/* BACKEND PATH */}
+
+                      {item.image_url && (
+                        <p className="mt-3 text-xs text-gray-400 break-all">
+                          {item.image_url}
+                        </p>
+                      )}
+
                     </div>
+
+                    {/* ACTIONS */}
 
                     <div className="flex lg:flex-col gap-3 justify-center">
 
@@ -1219,13 +1455,18 @@ export default function AdminGallery() {
                         type="button"
                         onClick={(e) => {
                           e.stopPropagation();
-                          handleEdit(item);
+
+                          handleEdit(
+                            item
+                          );
                         }}
                         draggable={false}
                         className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg border border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100 font-medium transition"
                       >
 
-                        <Edit size={17} />
+                        <Edit
+                          size={17}
+                        />
 
                         Edit
 
@@ -1235,13 +1476,18 @@ export default function AdminGallery() {
                         type="button"
                         onClick={(e) => {
                           e.stopPropagation();
-                          handleDelete(item.id);
+
+                          handleDelete(
+                            item.id
+                          );
                         }}
                         draggable={false}
                         className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg border border-red-200 bg-red-50 text-red-700 hover:bg-red-100 font-medium transition"
                       >
 
-                        <Trash2 size={17} />
+                        <Trash2
+                          size={17}
+                        />
 
                         Delete
 
