@@ -38,7 +38,7 @@ const existingPhotos = [
     id: "static-1",
     type: "photo",
     category: "Public Events",
-    image: "/gallery/1.png",
+    image: "/gallery12/1.png",
     title: "Public Meetings",
     caption: "",
     isStatic: true,
@@ -48,7 +48,7 @@ const existingPhotos = [
     id: "static-2",
     type: "photo",
     category: "Meetings",
-    image: "/gallery/2.png",
+    image: "/gallery12/2.png",
     title: "Public Meetings",
     caption: "",
     isStatic: true,
@@ -58,7 +58,7 @@ const existingPhotos = [
     id: "static-3",
     type: "photo",
     category: "Constituency",
-    image: "/gallery/3.png",
+    image: "/gallery12/3.png",
     title: "Public Meetings",
     caption: "",
     isStatic: true,
@@ -68,7 +68,7 @@ const existingPhotos = [
     id: "static-4",
     type: "photo",
     category: "Events",
-    image: "/gallery/4.png",
+    image: "/gallery12/4.png",
     title: "Public Meetings",
     caption: "",
     isStatic: true,
@@ -78,7 +78,7 @@ const existingPhotos = [
     id: "static-5",
     type: "photo",
     category: "Public Events",
-    image: "/gallery/5.png",
+    image: "/gallery12/5.png",
     title: "Public Meetings",
     caption: "",
     isStatic: true,
@@ -88,7 +88,7 @@ const existingPhotos = [
     id: "static-6",
     type: "photo",
     category: "Meetings",
-    image: "/gallery/6.png",
+    image: "/gallery12/6.png",
     title: "Public Meetings",
     caption: "",
     isStatic: true,
@@ -98,7 +98,7 @@ const existingPhotos = [
     id: "static-7",
     type: "photo",
     category: "Public Events",
-    image: "/gallery/7.png",
+    image: "/gallery12/7.png",
     title: "Public Interaction",
     caption: "",
     isStatic: true,
@@ -108,7 +108,7 @@ const existingPhotos = [
     id: "static-8",
     type: "photo",
     category: "Meetings",
-    image: "/gallery/8.png",
+    image: "/gallery12/8.png",
     title: "Official Meeting",
     caption: "",
     isStatic: true,
@@ -118,7 +118,7 @@ const existingPhotos = [
     id: "static-9",
     type: "photo",
     category: "Constituency",
-    image: "/gallery/9.png",
+    image: "/gallery12/9.png",
     title: "Constituency Visit",
     caption: "",
     isStatic: true,
@@ -128,7 +128,7 @@ const existingPhotos = [
     id: "static-10",
     type: "photo",
     category: "Events",
-    image: "/gallery/10.png",
+    image: "/gallery12/10.png",
     title: "Public Programme",
     caption: "",
     isStatic: true,
@@ -138,7 +138,7 @@ const existingPhotos = [
     id: "static-11",
     type: "photo",
     category: "Public Events",
-    image: "/gallery/11.png",
+    image: "/gallery12/11.png",
     title: "Community Interaction",
     caption: "",
     isStatic: true,
@@ -148,7 +148,7 @@ const existingPhotos = [
     id: "static-12",
     type: "photo",
     category: "Meetings",
-    image: "/gallery/12.png",
+    image: "/gallery12/12.png",
     title: "Leadership Meeting",
     caption: "",
     isStatic: true,
@@ -244,12 +244,46 @@ function getImageUrl(imagePath) {
 
   if (
     cleanPath.startsWith("/gallery/") ||
+    cleanPath.startsWith("/gallery12/") ||
     cleanPath.startsWith("/images/")
   ) {
     return cleanPath;
   }
 
   /* Backend upload */
+
+  return `${API_BASE_URL}${
+    cleanPath.startsWith("/") ? "" : "/"
+  }${cleanPath}`;
+}
+
+/* =========================================================
+   VIDEO URL HELPER
+
+   Ensures video URLs have full base URL for cross-domain requests.
+========================================================= */
+
+function getVideoUrl(videoPath) {
+  if (!videoPath) {
+    return "";
+  }
+
+  const cleanPath = String(videoPath).trim();
+
+  if (!cleanPath) {
+    return "";
+  }
+
+  /* Already a complete URL (YouTube or other) */
+
+  if (
+    cleanPath.startsWith("http://") ||
+    cleanPath.startsWith("https://")
+  ) {
+    return cleanPath;
+  }
+
+  /* Backend upload - needs full URL */
 
   return `${API_BASE_URL}${
     cleanPath.startsWith("/") ? "" : "/"
@@ -274,6 +308,7 @@ function getFreshImageUrl(imageUrl, updatedAt = "") {
 
   if (
     imageUrl.startsWith("/gallery/") ||
+    imageUrl.startsWith("/gallery12/") ||
     imageUrl.startsWith("/images/")
   ) {
     return imageUrl;
@@ -627,13 +662,13 @@ export default function Gallery() {
       );
 
       /* ---------------------------------------------------
-         MERGE BACKEND + EXISTING STATIC
+         USE BACKEND PHOTOS IF AVAILABLE
+         FALLBACK TO STATIC ONLY IF BACKEND IS EMPTY
       --------------------------------------------------- */
 
-      const allPhotos = mergePhotos(
-        formattedPhotos,
-        existingPhotos
-      );
+      const allPhotos = formattedPhotos.length > 0 
+        ? formattedPhotos 
+        : existingPhotos;
 
       console.log(
         "================================"
@@ -1157,8 +1192,7 @@ export default function Gallery() {
           ================================================= */}
 
           {!isLoading &&
-            type === "photo" &&
-            !currentError && (
+            type === "photo" && (
               <div className="mt-8 text-sm text-gray-500">
                 {t("gallery.showing")} {" "}
                 <span className="font-semibold text-gray-800">
@@ -1176,7 +1210,6 @@ export default function Gallery() {
           ================================================= */}
 
           {!isLoading &&
-            !currentError &&
             filteredItems.length >
               0 && (
 
@@ -1215,12 +1248,15 @@ export default function Gallery() {
                     --------------------------------------- */
 
                     const thumbnail =
-                      item.thumbnailUrl ||
-                      (youtube
-                        ? youtubeThumbnail(
-                            item.videoUrl
+                      item.thumbnailUrl
+                        ? getImageUrl(
+                            item.thumbnailUrl
                           )
-                        : "");
+                        : (youtube
+                            ? youtubeThumbnail(
+                                item.videoUrl
+                              )
+                            : "");
 
                     return (
                       <article
@@ -1244,7 +1280,9 @@ export default function Gallery() {
                                 item.videoUrl
                               }
                               src={
-                                item.videoUrl
+                                getVideoUrl(
+                                  item.videoUrl
+                                )
                               }
                               controls
                               playsInline
@@ -1263,7 +1301,9 @@ export default function Gallery() {
                               ) => {
                                 console.error(
                                   "VIDEO ERROR:",
-                                  item.videoUrl,
+                                  getVideoUrl(
+                                    item.videoUrl
+                                  ),
                                   event
                                 );
                               }}
@@ -1304,9 +1344,11 @@ export default function Gallery() {
                               src={
                                 item.type ===
                                 "photo"
-                                  ? item.image
+                                  ? getImageUrl(
+                                      item.image
+                                    )
                                   : thumbnail ||
-                                    "/gallery/placeholder.png"
+                                    "/gallery12/placeholder.png"
                               }
                               alt={
                                 item.title ||
@@ -1322,7 +1364,9 @@ export default function Gallery() {
                                   "photo"
                                 ) {
                                   setSelectedImage(
-                                    item.image
+                                    getImageUrl(
+                                      item.image
+                                    )
                                   );
                                 }
 
@@ -1352,7 +1396,7 @@ export default function Gallery() {
                                 */
 
                                 event.currentTarget.src =
-                                  "/gallery/placeholder.png";
+                                  "/gallery12/placeholder.png";
                               }}
                               className={`w-full object-cover transition duration-700 group-hover:scale-105 ${
                                 item.type ===

@@ -508,9 +508,14 @@ const PoliticalJourney = () => {
               ? result.data
               : [];
 
+              console.log("LATEST CAREER DATA:");
+              console.log(latestCareer);
           setCareerJourney(
             latestCareer
           );
+
+          console.log("///////////////////////Rendering careerJourney:");
+          console.log(careerJourney);
 
           saveCareerData(
             latestCareer
@@ -960,6 +965,8 @@ const PoliticalJourney = () => {
             />
 
             {/* CAREER */}
+
+            
 
             {careerJourney.map(
               (item, index) => {

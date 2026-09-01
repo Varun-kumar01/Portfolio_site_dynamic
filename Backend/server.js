@@ -16,6 +16,18 @@ app.set("trust proxy", true);
 const PORT = process.env.PORT || 5000;
 
 // ============================================================
+// DATABASE INITIALIZATION
+// ============================================================
+
+const initializeDatabase = require("./init-db");
+
+// Initialize database tables on startup
+initializeDatabase().catch((error) => {
+  console.error("Database initialization error:", error.message);
+  // Don't exit - allow server to run even if initialization fails
+});
+
+// ============================================================
 // ROUTES
 // ============================================================
 
@@ -116,10 +128,13 @@ const homeFolder = path.join(
   homeFolder,
 ].forEach((folder) => {
   if (!fs.existsSync(folder)) {
-    fs.mkdirSync(folder, {
+    fs.mkdirSync(uploadfolder, {
       recursive: true,
     });
   }
+    fs.mkdirSync(videoFolder,{
+      recursive: true
+    });
 });
 
 // ============================================================
@@ -251,60 +266,79 @@ const politicalCareerUpload = multer({
 // VIDEO STORAGE
 // ============================================================
 
-const videoStorage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, videoFolder);
-  },
-
-  filename: (req, file, cb) => {
-    cb(
-      null,
-      createSafeFilename(
-        file.originalname
-      )
-    );
-  },
-});
 
 // ============================================================
 // VIDEO UPLOAD
 // ============================================================
+const videoStorage =
+  multer.diskStorage({
+    destination: (req, file, cb) => {
+      cb(null, videoFolder);
+    },
 
-const videoUpload = multer({
-  storage: videoStorage,
+    filename: (req, file, cb) => {
+      const ext =
+        path.extname(file.originalname);
 
-  limits: {
-    fileSize: 200 * 1024 * 1024,
-  },
+      const name =
+        path
+          .basename(
+            file.originalname,
+            ext
+          )
+          .replace(
+            /[^a-zA-Z0-9-_]/g,
+            "_"
+          );
 
-  fileFilter: (req, file, cb) => {
-    const allowedExtensions = [
-      ".mp4",
-      ".webm",
-      ".ogg",
-      ".mov",
-      ".m4v",
-    ];
+      cb(
+        null,
+        `${name}-${Date.now()}${ext}`
+      );
+    },
+  });
 
-    const extension = path
-      .extname(file.originalname)
-      .toLowerCase();
+const videoUpload =
+  multer({
+    storage: videoStorage,
 
-    if (
-      allowedExtensions.includes(
-        extension
-      )
-    ) {
-      return cb(null, true);
-    }
+    limits: {
+      fileSize:
+        200 * 1024 * 1024,
+    },
 
-    cb(
-      new Error(
-        "Only MP4, WEBM, OGG, MOV and M4V videos are allowed."
-      )
-    );
-  },
-});
+    fileFilter:
+      (req, file, cb) => {
+        const allowedExtensions = [
+          ".mp4",
+          ".webm",
+          ".ogg",
+          ".mov",
+          ".m4v",
+        ];
+
+        const extension =
+          path
+            .extname(
+              file.originalname
+            )
+            .toLowerCase();
+
+        if (
+          allowedExtensions.includes(
+            extension
+          )
+        ) {
+          cb(null, true);
+        } else {
+          cb(
+            new Error(
+              "Only MP4, WEBM, OGG, MOV and M4V video files are allowed"
+            )
+          );
+        }
+      },
+  });
 
 // ============================================================
 // IMAGE STORAGE FACTORY
@@ -462,10 +496,7 @@ const saveContent = (content) => {
 // ============================================================
 // NORMALIZE UPLOAD PATH
 // ============================================================
-
-const normalizeUploadPath = (
-  imageUrl
-) => {
+const normalizeUploadPath = (imageUrl) => {
   if (!imageUrl) {
     return "";
   }
@@ -476,23 +507,21 @@ const normalizeUploadPath = (
     return "";
   }
 
-  // Convert complete URL into path
-  value = value.replace(
-    /^https?:\/\/[^/]+/i,
-    ""
-  );
+  // Remove localhost / any complete HTTP or HTTPS URL
+  value = value.replace(/^https?:\/\/[^/]+/i, "");
 
-  // Remove leading slash temporarily
+  // Remove leading slashes
   value = value.replace(/^\/+/, "");
 
-  // Make sure uploads prefix exists
+  // If it already starts with uploads/, keep it
+  // Otherwise add uploads/
   if (!value.startsWith("uploads/")) {
     value = `uploads/${value}`;
   }
 
+  // Return as /uploads/...
   return `/${value}`;
 };
-
 // ============================================================
 // RESOLVE CONTENT URLS
 // ============================================================
@@ -569,9 +598,9 @@ const resolveLocalizedContent = (
     ) {
       return resolveLocalizedContent(
         value[language] ??
-          value.en ??
-          value.te ??
-          "",
+        value.en ??
+        value.te ??
+        "",
         language
       );
     }
@@ -1848,8 +1877,8 @@ app.get(
             id ASC
         `);
 
-        console.log("//////////////// from politi")
-        console.log(result.rows[0].image_url)
+      console.log("//////////////// from politi")
+      console.log(result.rows[0].image_url)
 
       const data =
         result.rows.map(
@@ -1927,7 +1956,7 @@ app.post(
 
       if (
         display_order !==
-          undefined &&
+        undefined &&
         display_order !== ""
       ) {
         const parsed =
@@ -1986,7 +2015,7 @@ app.post(
             location.trim(),
             description || "",
             category ||
-              "Political Career",
+            "Political Career",
             orderValue,
             imageUrl,
           ]
@@ -2110,7 +2139,7 @@ app.put(
 
       if (
         display_order !==
-          undefined &&
+        undefined &&
         display_order !== ""
       ) {
         const parsed =
@@ -2153,7 +2182,7 @@ app.put(
             location.trim(),
             description || "",
             category ||
-              "Political Career",
+            "Political Career",
             orderValue,
             imageUrl,
             id,
@@ -2283,7 +2312,12 @@ app.delete(
 // VIDEOS
 // ============================================================
 
+
+
+// ============================================================
 // GET ALL VIDEOS
+// ============================================================
+
 app.get(
   "/api/videos",
   async (req, res) => {
@@ -2341,6 +2375,7 @@ app.get(
         success: false,
         message:
           "Unable to load videos",
+
         error:
           error.message,
       });
@@ -2348,7 +2383,11 @@ app.get(
   }
 );
 
-// GET VIDEO
+
+// ============================================================
+// GET VIDEO BY ID
+// ============================================================
+
 app.get(
   "/api/videos/:id",
   async (req, res) => {
@@ -2374,24 +2413,20 @@ app.get(
         });
       }
 
-      const video = {
-        ...result.rows[0],
+      const video =
+        result.rows[0];
 
-        video_url:
-          getPublicUploadPath(
-            result.rows[0]
-              .video_url
-          ),
+      video.video_url =
+        getPublicUploadPath(
+          video.video_url
+        );
 
-        thumbnail_url:
-          result.rows[0]
-            .thumbnail_url
-            ? getPublicUploadPath(
-                result.rows[0]
-                  .thumbnail_url
-              )
-            : "",
-      };
+      video.thumbnail_url =
+        video.thumbnail_url
+          ? getPublicUploadPath(
+              video.thumbnail_url
+            )
+          : "";
 
       res.json({
         success: true,
@@ -2407,18 +2442,27 @@ app.get(
         success: false,
         message:
           "Unable to load video",
+
+        error:
+          error.message,
       });
     }
   }
 );
 
+
+// ============================================================
 // ADD VIDEO
+// ============================================================
+
 app.post(
   "/api/videos",
   authenticateAdmin,
+
   videoUpload.single(
     "video"
   ),
+
   async (req, res) => {
     try {
       const {
@@ -2431,16 +2475,35 @@ app.post(
         display_order,
       } = req.body;
 
+
+      // --------------------------------------------------------
+      // VALIDATE TITLE
+      // --------------------------------------------------------
+
       if (
         !title ||
         !title.trim()
       ) {
+        if (req.file) {
+          deleteFileIfExists(
+            path.join(
+              videoFolder,
+              req.file.filename
+            )
+          );
+        }
+
         return res.status(400).json({
           success: false,
           message:
             "Video title is required",
         });
       }
+
+
+      // --------------------------------------------------------
+      // VALIDATE VIDEO
+      // --------------------------------------------------------
 
       if (!req.file) {
         return res.status(400).json({
@@ -2450,8 +2513,32 @@ app.post(
         });
       }
 
+
+      // --------------------------------------------------------
+      // VIDEO PATH STORED IN DATABASE
+      // --------------------------------------------------------
+
       const videoUrl =
         `/uploads/videos/${req.file.filename}`;
+
+
+      console.log(
+        "Video saved at:",
+        path.join(
+          videoFolder,
+          req.file.filename
+        )
+      );
+
+      console.log(
+        "Video database path:",
+        videoUrl
+      );
+
+
+      // --------------------------------------------------------
+      // DISPLAY ORDER
+      // --------------------------------------------------------
 
       let orderValue;
 
@@ -2461,11 +2548,22 @@ app.post(
         display_order !== ""
       ) {
         const parsed =
-          Number(display_order);
+          Number(
+            display_order
+          );
 
         if (
-          !Number.isFinite(parsed)
+          !Number.isFinite(
+            parsed
+          )
         ) {
+          deleteFileIfExists(
+            path.join(
+              videoFolder,
+              req.file.filename
+            )
+          );
+
           return res.status(400).json({
             success: false,
             message:
@@ -2473,7 +2571,8 @@ app.post(
           });
         }
 
-        orderValue = parsed;
+        orderValue =
+          parsed;
       } else {
         const orderResult =
           await pool.query(`
@@ -2491,6 +2590,29 @@ app.post(
           );
       }
 
+
+      // --------------------------------------------------------
+      // THUMBNAIL
+      // --------------------------------------------------------
+
+      let thumbnailPath =
+        "";
+
+      if (
+        thumbnail_url &&
+        thumbnail_url.trim()
+      ) {
+        thumbnailPath =
+          normalizeUploadPath(
+            thumbnail_url
+          );
+      }
+
+
+      // --------------------------------------------------------
+      // INSERT DATABASE
+      // --------------------------------------------------------
+
       const result =
         await pool.query(
           `
@@ -2506,41 +2628,82 @@ app.post(
             display_order
           )
           VALUES
-          ($1,$2,$3,$4,$5,$6,$7,$8)
+          (
+            $1,
+            $2,
+            $3,
+            $4,
+            $5,
+            $6,
+            $7,
+            $8
+          )
           RETURNING *
           `,
           [
             title.trim(),
-            description || "",
+
+            description ||
+              "",
+
             videoUrl,
-            thumbnail_url || "",
-            category || "Video",
+
+            thumbnailPath,
+
+            category ||
+              "Video",
+
             published_date ||
               null,
-            link || "",
+
+            link ||
+              "",
+
             orderValue,
           ]
         );
 
+
+      // --------------------------------------------------------
+      // RESPONSE
+      // --------------------------------------------------------
+
+      const savedVideo =
+        result.rows[0];
+
       res.status(201).json({
         success: true,
+
         message:
           "Video added successfully",
 
         data: {
-          ...result.rows[0],
+          ...savedVideo,
+
           video_url:
             getPublicUploadPath(
-              result.rows[0]
-                .video_url
+              savedVideo.video_url
             ),
+
+          thumbnail_url:
+            savedVideo.thumbnail_url
+              ? getPublicUploadPath(
+                  savedVideo.thumbnail_url
+                )
+              : "",
         },
       });
+
     } catch (error) {
+
       console.error(
         "ADD VIDEO ERROR:",
         error
       );
+
+
+      // Delete uploaded file if
+      // database insertion failed
 
       if (req.file) {
         deleteFileIfExists(
@@ -2551,10 +2714,13 @@ app.post(
         );
       }
 
+
       res.status(500).json({
         success: false,
+
         message:
           "Unable to add video",
+
         error:
           error.message,
       });
@@ -2562,17 +2728,27 @@ app.post(
   }
 );
 
+
+// ============================================================
 // UPDATE VIDEO
+// ============================================================
+
 app.put(
   "/api/videos/:id",
+
   authenticateAdmin,
+
   videoUpload.single(
     "video"
   ),
+
   async (req, res) => {
     try {
-      const { id } =
-        req.params;
+
+      const {
+        id,
+      } = req.params;
+
 
       const {
         title,
@@ -2584,10 +2760,25 @@ app.put(
         display_order,
       } = req.body;
 
+
+      // --------------------------------------------------------
+      // VALIDATE TITLE
+      // --------------------------------------------------------
+
       if (
         !title ||
         !title.trim()
       ) {
+
+        if (req.file) {
+          deleteFileIfExists(
+            path.join(
+              videoFolder,
+              req.file.filename
+            )
+          );
+        }
+
         return res.status(400).json({
           success: false,
           message:
@@ -2595,22 +2786,40 @@ app.put(
         });
       }
 
+
+      // --------------------------------------------------------
+      // GET EXISTING VIDEO
+      // --------------------------------------------------------
+
       const existing =
         await pool.query(
           `
           SELECT
             video_url,
-            display_order
+            thumbnail_url,
+            display_order,
+            link
           FROM videos
           WHERE id = $1
           `,
           [id]
         );
 
+
       if (
         existing.rows.length ===
         0
       ) {
+
+        if (req.file) {
+          deleteFileIfExists(
+            path.join(
+              videoFolder,
+              req.file.filename
+            )
+          );
+        }
+
         return res.status(404).json({
           success: false,
           message:
@@ -2618,30 +2827,97 @@ app.put(
         });
       }
 
-      let videoUrl =
+
+      const oldVideoUrl =
         existing.rows[0]
           .video_url || "";
 
+
+      // --------------------------------------------------------
+      // VIDEO PATH
+      // --------------------------------------------------------
+
+      let videoUrl =
+        normalizeUploadPath(
+          oldVideoUrl
+        );
+
+
       if (req.file) {
+
         videoUrl =
           `/uploads/videos/${req.file.filename}`;
+
+        console.log(
+          "New video saved at:",
+          path.join(
+            videoFolder,
+            req.file.filename
+          )
+        );
+
       }
+
+
+      // --------------------------------------------------------
+      // THUMBNAIL
+      // --------------------------------------------------------
+
+      let thumbnailPath =
+        existing.rows[0]
+          .thumbnail_url || "";
+
+
+      if (
+        thumbnail_url !==
+        undefined
+      ) {
+
+        thumbnailPath =
+          thumbnail_url
+            ? normalizeUploadPath(
+                thumbnail_url
+              )
+            : "";
+      }
+
+
+      // --------------------------------------------------------
+      // DISPLAY ORDER
+      // --------------------------------------------------------
 
       let orderValue =
         existing.rows[0]
           .display_order;
+
 
       if (
         display_order !==
           undefined &&
         display_order !== ""
       ) {
+
         const parsed =
-          Number(display_order);
+          Number(
+            display_order
+          );
+
 
         if (
-          !Number.isFinite(parsed)
+          !Number.isFinite(
+            parsed
+          )
         ) {
+
+          if (req.file) {
+            deleteFileIfExists(
+              path.join(
+                videoFolder,
+                req.file.filename
+              )
+            );
+          }
+
           return res.status(400).json({
             success: false,
             message:
@@ -2649,8 +2925,25 @@ app.put(
           });
         }
 
-        orderValue = parsed;
+        orderValue =
+          parsed;
       }
+
+
+      // --------------------------------------------------------
+      // LINK
+      // --------------------------------------------------------
+
+      const linkValue =
+        link !== undefined
+          ? link || ""
+          : existing.rows[0]
+              .link || "";
+
+
+      // --------------------------------------------------------
+      // UPDATE DATABASE
+      // --------------------------------------------------------
 
       const result =
         await pool.query(
@@ -2671,48 +2964,82 @@ app.put(
           `,
           [
             title.trim(),
-            description || "",
+
+            description ||
+              "",
+
             videoUrl,
-            thumbnail_url || "",
-            category || "Video",
+
+            thumbnailPath,
+
+            category ||
+              "Video",
+
             published_date ||
               null,
-            link || "",
+
+            linkValue,
+
             orderValue,
+
             id,
           ]
         );
 
+
+      // --------------------------------------------------------
+      // DELETE OLD VIDEO
+      // --------------------------------------------------------
+
       if (
         req.file &&
-        existing.rows[0]
-          .video_url
+        oldVideoUrl
       ) {
+
         deleteUploadByUrl(
-          existing.rows[0]
-            .video_url
+          oldVideoUrl
         );
       }
 
+
+      // --------------------------------------------------------
+      // RESPONSE
+      // --------------------------------------------------------
+
+      const updatedVideo =
+        result.rows[0];
+
+
       res.json({
         success: true,
+
         message:
           "Video updated successfully",
 
         data: {
-          ...result.rows[0],
+          ...updatedVideo,
+
           video_url:
             getPublicUploadPath(
-              result.rows[0]
-                .video_url
+              updatedVideo.video_url
             ),
+
+          thumbnail_url:
+            updatedVideo.thumbnail_url
+              ? getPublicUploadPath(
+                  updatedVideo.thumbnail_url
+                )
+              : "",
         },
       });
+
     } catch (error) {
+
       console.error(
         "UPDATE VIDEO ERROR:",
         error
       );
+
 
       if (req.file) {
         deleteFileIfExists(
@@ -2723,10 +3050,13 @@ app.put(
         );
       }
 
+
       res.status(500).json({
         success: false,
+
         message:
           "Unable to update video",
+
         error:
           error.message,
       });
@@ -2734,24 +3064,32 @@ app.put(
   }
 );
 
+
+// ============================================================
 // DELETE VIDEO
+// ============================================================
+
 app.delete(
   "/api/videos/:id",
+
   authenticateAdmin,
+
   async (req, res) => {
     try {
-      const existing =
+
+      const result =
         await pool.query(
           `
-          SELECT video_url
-          FROM videos
+          DELETE FROM videos
           WHERE id = $1
+          RETURNING video_url
           `,
           [req.params.id]
         );
 
+
       if (
-        existing.rows.length ===
+        result.rows.length ===
         0
       ) {
         return res.status(404).json({
@@ -2761,17 +3099,14 @@ app.delete(
         });
       }
 
+
       const videoUrl =
-        existing.rows[0]
+        result.rows[0]
           .video_url || "";
 
-      await pool.query(
-        `
-        DELETE FROM videos
-        WHERE id = $1
-        `,
-        [req.params.id]
-      );
+
+      // Delete physical video
+      // from backend/uploads/videos
 
       if (videoUrl) {
         deleteUploadByUrl(
@@ -2779,21 +3114,28 @@ app.delete(
         );
       }
 
+
       res.json({
         success: true,
+
         message:
           "Video deleted successfully",
       });
+
     } catch (error) {
+
       console.error(
         "DELETE VIDEO ERROR:",
         error
       );
 
+
       res.status(500).json({
         success: false,
+
         message:
           "Unable to delete video",
+
         error:
           error.message,
       });
@@ -2920,7 +3262,7 @@ app.post(
             category || "Article",
             imageUrl,
             published_date ||
-              null,
+            null,
             link || "",
           ]
         );
@@ -3023,8 +3365,8 @@ app.put(
         req.file
           ? `/uploads/articles/${req.file.filename}`
           : normalizeUploadPath(
-              oldImage
-            );
+            oldImage
+          );
 
       const result =
         await pool.query(
@@ -3049,7 +3391,7 @@ app.put(
             category || "Article",
             imageUrl,
             published_date ||
-              null,
+            null,
             link || "",
             req.params.id,
           ]
@@ -3191,8 +3533,8 @@ app.get(
             display_order ASC,
             id ASC
         `);
-          console.log("////////////////")
-        console.log(result.rows[0].image_url)
+      console.log("////////////////")
+      console.log(result.rows[0].image_url)
 
       const data =
         result.rows.map(
@@ -3323,7 +3665,7 @@ app.post(
 
       if (
         display_order !==
-          undefined &&
+        undefined &&
         display_order !== ""
       ) {
         const parsed =
@@ -3382,7 +3724,7 @@ app.post(
             category || "News",
             imageUrl,
             published_date ||
-              null,
+            null,
             orderValue,
             link || "",
           ]
@@ -3505,7 +3847,7 @@ app.put(
 
       if (
         display_order !==
-          undefined &&
+        undefined &&
         display_order !== ""
       ) {
         const parsed =
@@ -3528,7 +3870,7 @@ app.put(
         link !== undefined
           ? link || ""
           : existing.rows[0]
-              .link || "";
+            .link || "";
 
       const result =
         await pool.query(
@@ -3554,7 +3896,7 @@ app.put(
             category || "News",
             imageUrl,
             published_date ||
-              null,
+            null,
             orderValue,
             linkValue,
             id,
@@ -4069,9 +4411,9 @@ app.get(
       databaseConfigured:
         Boolean(
           process.env.DB_HOST &&
-            process.env.DB_NAME &&
-            process.env.DB_USER &&
-            process.env.DB_PASSWORD
+          process.env.DB_NAME &&
+          process.env.DB_USER &&
+          process.env.DB_PASSWORD
         ),
 
       serverPort:

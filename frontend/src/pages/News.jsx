@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { API_BASE_URL } from "../config";
 import { useTranslation } from "react-i18next";
+
 import {
   CalendarDays,
   Search,
@@ -8,6 +9,10 @@ import {
 } from "lucide-react";
 
 const API_URL = `${API_BASE_URL}/api/news`;
+
+/* =========================================================
+   FALLBACK CATEGORIES
+========================================================= */
 
 const fallbackCategories = [
   "All",
@@ -18,8 +23,53 @@ const fallbackCategories = [
   "Agriculture",
 ];
 
+/* =========================================================
+   IMAGE URL HELPER
+========================================================= */
+
+const getImageUrl = (imageUrl) => {
+  if (!imageUrl) return null;
+
+  const value = String(imageUrl).trim();
+
+  if (!value) return null;
+
+  // Already a complete URL
+  if (
+    value.startsWith("http://") ||
+    value.startsWith("https://")
+  ) {
+    return value;
+  }
+
+  // Remove leading /
+  const cleanPath = value.replace(/^\/+/, "");
+
+  // uploads/news/news1.jpeg
+  if (cleanPath.startsWith("uploads/")) {
+    return `${API_BASE_URL}/${cleanPath}`;
+  }
+
+  // news/news1.jpeg
+  if (cleanPath.startsWith("news/")) {
+    return `${API_BASE_URL}/uploads/${cleanPath}`;
+  }
+
+  // news1.jpeg
+  return `${API_BASE_URL}/uploads/news/${cleanPath}`;
+};
+
+/* =========================================================
+   NEWS PAGE
+========================================================= */
+
 export default function News() {
   const { i18n, t } = useTranslation();
+
+  /* =======================================================
+     CATEGORY TRANSLATION
+  ======================================================= */
+
   const categoryKeys = {
     All: "all",
     Government: "government",
@@ -28,13 +78,20 @@ export default function News() {
     Education: "education",
     Agriculture: "agriculture",
   };
+
   const translateCategory = (category) =>
     categoryKeys[category]
       ? t(`news.${categoryKeys[category]}`)
       : i18n.language?.startsWith("te")
         ? t("news.defaultCategory")
         : category;
+
   const isTelugu = i18n.language?.startsWith("te");
+
+  /* =======================================================
+     STATES
+  ======================================================= */
+
   const [newsData, setNewsData] = useState([]);
   const [category, setCategory] = useState("All");
   const [search, setSearch] = useState("");
@@ -42,17 +99,19 @@ export default function News() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // =====================================================
-  // LOAD NEWS FROM BACKEND
-  // =====================================================
+  /* =======================================================
+     LOAD NEWS
+  ======================================================= */
 
   const loadNews = async () => {
     try {
       setLoading(true);
       setError("");
 
+      const language = isTelugu ? "te" : "en";
+
       const response = await fetch(
-        `${API_URL}?lang=${i18n.language?.startsWith("te") ? "te" : "en"}&t=${Date.now()}`
+        `${API_URL}?lang=${language}&t=${Date.now()}`
       );
 
       if (!response.ok) {
@@ -69,46 +128,58 @@ export default function News() {
         );
       }
 
-      setNewsData(
-        Array.isArray(result.data)
-          ? result.data
-          : []
-      );
+      const data = Array.isArray(result.data)
+        ? result.data
+        : [];
 
-    } catch (error) {
+      console.log("=================================");
+      console.log("NEWS DATA FROM DATABASE");
+      console.log("=================================");
+
+      data.forEach((item) => {
+        console.log("Title:", item.title);
+        console.log(
+          "Database image:",
+          item.image_url
+        );
+        console.log(
+          "Final image URL:",
+          getImageUrl(item.image_url)
+        );
+      });
+
+      setNewsData(data);
+    } catch (err) {
       console.error(
         "LOAD PUBLIC NEWS ERROR:",
-        error
+        err
       );
 
       setError(
-        error.message ||
+        err.message ||
           "Unable to load news."
       );
 
       setNewsData([]);
-
     } finally {
       setLoading(false);
     }
   };
 
-  // =====================================================
-  // LOAD WHEN PAGE OPENS
-  // =====================================================
+  /* =======================================================
+     LOAD ON PAGE OPEN / LANGUAGE CHANGE
+  ======================================================= */
 
   useEffect(() => {
     loadNews();
   }, [i18n.language]);
 
-  // =====================================================
-  // FORMAT DATE
-  // =====================================================
+  /* =======================================================
+     FORMAT DATE
+  ======================================================= */
 
   const formatDate = (date) => {
-    if (!date) {
-      return "";
-    }
+    if (!date) return "";
 
     const parsedDate = new Date(date);
 
@@ -126,9 +197,9 @@ export default function News() {
     );
   };
 
-  // =====================================================
-  // CATEGORIES FROM DATABASE
-  // =====================================================
+  /* =======================================================
+     CATEGORIES
+  ======================================================= */
 
   const categories = useMemo(() => {
     const databaseCategories = newsData
@@ -145,9 +216,9 @@ export default function News() {
     ];
   }, [newsData]);
 
-  // =====================================================
-  // FILTER NEWS
-  // =====================================================
+  /* =======================================================
+     FILTER NEWS
+  ======================================================= */
 
   const filteredNews = useMemo(() => {
     const query =
@@ -181,9 +252,9 @@ export default function News() {
     search,
   ]);
 
-  // =====================================================
-  // LOADING
-  // =====================================================
+  /* =======================================================
+     LOADING
+  ======================================================= */
 
   if (loading) {
     return (
@@ -191,7 +262,10 @@ export default function News() {
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="py-20 text-center">
             <p className="text-gray-500">
-              {t("news.loading", "Loading news...")}
+              {t(
+                "news.loading",
+                "Loading news..."
+              )}
             </p>
           </div>
         </div>
@@ -199,201 +273,299 @@ export default function News() {
     );
   }
 
-  // =====================================================
-  // ERROR
-  // =====================================================
+  /* =======================================================
+     ERROR
+  ======================================================= */
 
   if (error) {
     return (
       <section className="bg-slate-50 py-20">
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
-          <div className="rounded-2xl border border-red-200 bg-red-50 p-8 text-center">
-            <h2 className="text-xl font-semibold text-red-700">
-              {t("news.noNewsFound")}
+
+          <div className="
+            rounded-2xl
+            border
+            border-red-200
+            bg-red-50
+            p-8
+            text-center
+          ">
+
+            <h2 className="
+              text-xl
+              font-semibold
+              text-red-700
+            ">
+              {t(
+                "news.noNewsFound",
+                "Unable to load news"
+              )}
             </h2>
 
-            <p className="mt-2 text-red-600">
+            <p className="
+              mt-2
+              text-red-600
+            ">
               {error}
             </p>
 
             <button
               onClick={loadNews}
-              className="mt-5 rounded-lg bg-orange-600 px-5 py-3 font-semibold text-white hover:bg-orange-700"
+              className="
+                mt-5
+                rounded-lg
+                bg-orange-600
+                px-5
+                py-3
+                font-semibold
+                text-white
+                hover:bg-orange-700
+              "
             >
-              {t("common.tryAgain")}
+              {t(
+                "common.tryAgain",
+                "Try Again"
+              )}
             </button>
+
           </div>
+
         </div>
       </section>
     );
   }
 
-  // =====================================================
-  // PAGE
-  // =====================================================
+  /* =======================================================
+     PAGE
+  ======================================================= */
 
   return (
-    <>
-      <section className="bg-slate-50 py-16 lg:py-20">
+    <section className="
+      min-h-screen
+      bg-slate-50
+      py-10
+      sm:py-14
+      lg:py-16
+    ">
 
-        <div className="mx-auto max-w-7xl px-6 lg:px-8">
+      <div className="
+        mx-auto
+        max-w-7xl
+        px-4
+        sm:px-6
+        lg:px-8
+      ">
 
-          {/* =================================================
-              HEADER
-          ================================================= */}
+        {/* =================================================
+            HEADER
+        ================================================= */}
 
-          <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
+        <div className="
+          flex
+          flex-col
+          gap-6
+          lg:flex-row
+          lg:items-end
+          lg:justify-between
+        ">
 
-            <div className="max-w-2xl">
+          <div className="max-w-2xl">
 
-              <span className="text-sm font-semibold uppercase tracking-[0.25em] text-orange-600">
-                {t("news.pageLabel")}
-              </span>
+            <span className="
+              text-xs
+              font-semibold
+              uppercase
+              tracking-[0.25em]
+              text-orange-600
+              sm:text-sm
+            ">
+              {t("news.pageLabel")}
+            </span>
 
-              <h1 className="mt-3 text-3xl font-bold text-slate-900 md:text-4xl lg:text-5xl">
-                {t("news.pageTitle")}
-              </h1>
+            <h1 className="
+              mt-2
+              text-3xl
+              font-bold
+              text-slate-900
+              sm:text-4xl
+              lg:text-5xl
+            ">
+              {t("news.pageTitle")}
+            </h1>
 
-              <p className="mt-4 leading-8 text-gray-600">
-                {t("news.pageDescription")}
-              </p>
-
-            </div>
-
-            {/* SEARCH */}
-
-            <div className="relative w-full lg:w-80">
-
-              <Search
-                size={18}
-                className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
-              />
-
-              <input
-                type="text"
-                value={search}
-                onChange={(e) =>
-                  setSearch(e.target.value)
-                }
-                placeholder={t("news.search")}
-                className="
-                  w-full
-                  rounded-2xl
-                  border
-                  border-slate-200
-                  bg-white
-                  py-3.5
-                  pl-11
-                  pr-4
-                  text-sm
-                  outline-none
-                  transition
-                  focus:border-orange-500
-                  focus:ring-2
-                  focus:ring-orange-100
-                "
-              />
-
-            </div>
-
-          </div>
-
-          {/* =================================================
-              CATEGORIES
-          ================================================= */}
-
-          <div className="mt-10 flex flex-wrap gap-3">
-
-            {categories.length > 0
-              ? categories.map((item) => (
-                  <button
-                    key={item}
-                    onClick={() =>
-                      setCategory(item)
-                    }
-                    className={`
-                      rounded-full
-                      border
-                      px-5
-                      py-2
-                      text-sm
-                      font-medium
-                      transition
-
-                      ${
-                        category === item
-                          ? "border-orange-600 bg-orange-600 text-white"
-                          : "border-slate-200 bg-white text-slate-600 hover:border-orange-500 hover:text-orange-600"
-                      }
-                    `}
-                  >
-                    {translateCategory(item)}
-                  </button>
-                ))
-              : fallbackCategories.map(
-                  (item) => (
-                    <button
-                      key={item}
-                      onClick={() =>
-                        setCategory(item)
-                      }
-                      className={`
-                        rounded-full
-                        border
-                        px-5
-                        py-2
-                        text-sm
-                        font-medium
-
-                        ${
-                          category === item
-                            ? "border-orange-600 bg-orange-600 text-white"
-                            : "border-slate-200 bg-white text-slate-600"
-                        }
-                      `}
-                    >
-                      {translateCategory(item)}
-                    </button>
-                  )
-                )}
-
-          </div>
-
-          {/* =================================================
-              RESULT COUNT
-          ================================================= */}
-
-          <div className="mt-10 flex items-center justify-between">
-
-            <p className="text-sm text-gray-500">
-
-              {t("news.showing")} {" "}
-
-              <span className="font-semibold text-slate-900">
-                {filteredNews.length}
-              </span>{" "}
-
-              {filteredNews.length === 1
-                ? t("news.update")
-                : t("news.updates")}
-
+            <p className="
+              mt-3
+              leading-7
+              text-gray-600
+            ">
+              {t("news.pageDescription")}
             </p>
 
           </div>
 
-          {/* =================================================
-              NEWS GRID
-          ================================================= */}
+          {/* SEARCH */}
 
-          {filteredNews.length > 0 ? (
+          <div className="
+            relative
+            w-full
+            lg:w-80
+          ">
 
-            <div className="mt-6 grid gap-7 md:grid-cols-2 xl:grid-cols-3">
+            <Search
+              size={18}
+              className="
+                absolute
+                left-4
+                top-1/2
+                -translate-y-1/2
+                text-gray-400
+              "
+            />
 
-              {filteredNews.map(
-                (item, index) => (
+            <input
+              type="text"
+              value={search}
+              onChange={(e) =>
+                setSearch(e.target.value)
+              }
+              placeholder={t(
+                "news.search",
+                "Search news..."
+              )}
+              className="
+                w-full
+                rounded-2xl
+                border
+                border-slate-200
+                bg-white
+                py-3.5
+                pl-11
+                pr-4
+                text-sm
+                outline-none
+                transition
+                focus:border-orange-500
+                focus:ring-2
+                focus:ring-orange-100
+              "
+            />
+
+          </div>
+
+        </div>
+
+        {/* =================================================
+            CATEGORIES
+        ================================================= */}
+
+        <div className="
+          mt-8
+          flex
+          flex-wrap
+          gap-3
+        ">
+
+          {(categories.length > 0
+            ? categories
+            : fallbackCategories
+          ).map((item) => (
+
+            <button
+              key={item}
+              onClick={() =>
+                setCategory(item)
+              }
+              className={`
+                rounded-full
+                border
+                px-5
+                py-2
+                text-sm
+                font-medium
+                transition
+
+                ${
+                  category === item
+                    ? "border-orange-600 bg-orange-600 text-white"
+                    : "border-slate-200 bg-white text-slate-600 hover:border-orange-500 hover:text-orange-600"
+                }
+              `}
+            >
+              {translateCategory(item)}
+            </button>
+
+          ))}
+
+        </div>
+
+        {/* =================================================
+            RESULT COUNT
+        ================================================= */}
+
+        <div className="
+          mt-8
+          flex
+          items-center
+          justify-between
+        ">
+
+          <p className="
+            text-sm
+            text-gray-500
+          ">
+
+            {t("news.showing", "Showing")}{" "}
+
+            <span className="
+              font-semibold
+              text-slate-900
+            ">
+              {filteredNews.length}
+            </span>{" "}
+
+            {filteredNews.length === 1
+              ? t(
+                  "news.update",
+                  "update"
+                )
+              : t(
+                  "news.updates",
+                  "updates"
+                )}
+
+          </p>
+
+        </div>
+
+        {/* =================================================
+            NEWS GRID
+        ================================================= */}
+
+        {filteredNews.length > 0 ? (
+
+          <div className="
+            mt-6
+            grid
+            gap-7
+            md:grid-cols-2
+            xl:grid-cols-3
+          ">
+
+            {filteredNews.map(
+              (item, index) => {
+
+                const imageUrl =
+                  getImageUrl(
+                    item.image_url
+                  );
+
+                return (
 
                   <article
-                    key={item.id}
+                    key={
+                      item.id ||
+                      `${item.title}-${index}`
+                    }
                     className="
                       group
                       overflow-hidden
@@ -409,71 +581,130 @@ export default function News() {
                     "
                   >
 
-                    {/* IMAGE */}
+                    {/* =================================================
+                        IMAGE
+                    ================================================= */}
 
-                    <div className="overflow-hidden">
+                    <div className="
+                      relative
+                      h-56
+                      w-full
+                      overflow-hidden
+                      bg-gray-100
+                    ">
 
-                      {item.image_url ? (
+                      {imageUrl ? (
 
                         <img
-                          src={item.image_url}
-                          alt={item.title}
+                          src={imageUrl}
+                          alt={
+                            item.title ||
+                            "News"
+                          }
                           className="
-                            h-56
+                            h-full
                             w-full
                             object-cover
                             transition
                             duration-700
                             group-hover:scale-105
                           "
+                          onLoad={() => {
+                            console.log(
+                              "IMAGE LOADED:",
+                              imageUrl
+                            );
+                          }}
                           onError={(e) => {
+                            console.error(
+                              "IMAGE FAILED:",
+                              imageUrl
+                            );
+
                             e.currentTarget.style.display =
                               "none";
+
+                            const parent =
+                              e.currentTarget.parentElement;
+
+                            if (parent) {
+                              const fallback =
+                                document.createElement(
+                                  "div"
+                                );
+
+                              fallback.className =
+                                "flex h-full w-full items-center justify-center bg-gray-100 text-sm text-gray-400";
+
+                              fallback.innerText =
+                                "Image unavailable";
+
+                              parent.appendChild(
+                                fallback
+                              );
+                            }
                           }}
                         />
 
                       ) : (
 
-                        <div
-                          className="
-                            flex
-                            h-56
-                            w-full
-                            items-center
-                            justify-center
-                            bg-gray-100
-                            text-gray-400
-                          "
-                        >
-                          {t("common.noImage", "No Image")}
+                        <div className="
+                          flex
+                          h-full
+                          w-full
+                          items-center
+                          justify-center
+                          bg-gray-100
+                          text-sm
+                          text-gray-400
+                        ">
+                          {t(
+                            "common.noImage",
+                            "No Image"
+                          )}
                         </div>
 
                       )}
 
                     </div>
 
-                    {/* CONTENT */}
+                    {/* =================================================
+                        CONTENT
+                    ================================================= */}
 
                     <div className="p-6">
 
                       {/* DATE */}
 
-                      <div className="flex items-center gap-2 text-sm text-orange-600">
+                      {item.published_date && (
 
-                        <CalendarDays size={16} />
+                        <div className="
+                          flex
+                          items-center
+                          gap-2
+                          text-sm
+                          text-orange-600
+                        ">
 
-                        <span>
-                          {formatDate(
-                            item.published_date
-                          )}
-                        </span>
+                          <CalendarDays
+                            size={16}
+                          />
 
-                      </div>
+                          <span>
+                            {formatDate(
+                              item.published_date
+                            )}
+                          </span>
+
+                        </div>
+
+                      )}
 
                       {/* CATEGORY */}
 
-                      <span
-                        className="
+                      {item.category && (
+
+                        <span className="
                           mt-4
                           inline-block
                           rounded-full
@@ -483,36 +714,45 @@ export default function News() {
                           text-xs
                           font-semibold
                           text-orange-600
-                        "
-                      >
-                        {translateCategory(item.category || "News")}
-                      </span>
+                        ">
+                          {translateCategory(
+                            item.category
+                          )}
+                        </span>
+
+                      )}
 
                       {/* TITLE */}
 
-                      <h2 className="mt-4 text-xl font-bold leading-8 text-slate-900">
-                        {isTelugu
-                          ? t(`news.items.news${index + 1}.title`, {
-                              defaultValue: t("news.defaultTitle"),
-                            })
-                          : item.title}
+                      <h2 className="
+                        mt-4
+                        text-xl
+                        font-bold
+                        leading-8
+                        text-slate-900
+                      ">
+                        {item.title}
                       </h2>
 
                       {/* DESCRIPTION */}
 
                       {item.description && (
-                        <p className="mt-3 text-sm leading-7 text-gray-600">
-                          {isTelugu
-                            ? t(`news.items.news${index + 1}.description`, {
-                                defaultValue: t("news.defaultDescription"),
-                              })
-                            : item.description}
+
+                        <p className="
+                          mt-3
+                          text-sm
+                          leading-7
+                          text-gray-600
+                        ">
+                          {item.description}
                         </p>
+
                       )}
 
                       {/* READ MORE */}
 
                       {item.link && (
+
                         <a
                           href={item.link}
                           target="_blank"
@@ -526,7 +766,11 @@ export default function News() {
                             text-orange-600
                           "
                         >
-                              {t("news.readMore")}
+
+                          {t(
+                            "news.readMore",
+                            "Read More"
+                          )}
 
                           <ArrowRight
                             size={17}
@@ -537,62 +781,95 @@ export default function News() {
                           />
 
                         </a>
+
                       )}
 
                     </div>
 
                   </article>
 
-                )
+                );
+              }
+            )}
+
+          </div>
+
+        ) : (
+
+          /* =================================================
+             NO NEWS
+          ================================================= */
+
+          <div className="
+            mt-8
+            rounded-3xl
+            border
+            border-slate-200
+            bg-white
+            py-20
+            text-center
+          ">
+
+            <Search
+              size={30}
+              className="
+                mx-auto
+                text-gray-300
+              "
+            />
+
+            <h3 className="
+              mt-4
+              text-xl
+              font-semibold
+              text-slate-900
+            ">
+              {t(
+                "news.noNewsFound",
+                "No news found"
               )}
+            </h3>
 
-            </div>
+            <p className="
+              mt-2
+              text-gray-500
+            ">
+              {t(
+                "news.noNewsDescription",
+                "Try another search term or category."
+              )}
+            </p>
 
-          ) : (
+            <button
+              onClick={() => {
+                setSearch("");
+                setCategory("All");
+              }}
+              className="
+                mt-6
+                rounded-full
+                bg-orange-600
+                px-6
+                py-3
+                text-sm
+                font-semibold
+                text-white
+                transition
+                hover:bg-orange-700
+              "
+            >
+              {t(
+                "news.clearFilters",
+                "Clear Filters"
+              )}
+            </button>
 
-            <div className="mt-8 rounded-3xl border border-slate-200 bg-white py-20 text-center">
+          </div>
 
-              <Search
-                size={30}
-                className="mx-auto text-gray-300"
-              />
+        )}
 
-              <h3 className="mt-4 text-xl font-semibold text-slate-900">
-                No news found
-              </h3>
+      </div>
 
-              <p className="mt-2 text-gray-500">
-                Try another search term or category.
-              </p>
-
-              <button
-                onClick={() => {
-                  setSearch("");
-                  setCategory("All");
-                }}
-                className="
-                  mt-6
-                  rounded-full
-                  bg-orange-600
-                  px-6
-                  py-3
-                  text-sm
-                  font-semibold
-                  text-white
-                  transition
-                  hover:bg-orange-700
-                "
-              >
-                Clear Filters
-              </button>
-
-            </div>
-
-          )}
-
-        </div>
-
-      </section>
-    </>
+    </section>
   );
 }
