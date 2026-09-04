@@ -4,6 +4,7 @@ import {
 } from "react";
 import { useTranslation } from "react-i18next";
 import { API_BASE_URL } from "../config";
+import { fetchContentWithCache, getCache } from "../services/cacheService";
 
 import Hero from "../components/home/Hero";
 import AboutPreview from "../components/home/AboutPreview";
@@ -31,6 +32,11 @@ const Home = () => {
     setError,
   ] = useState("");
 
+  const [
+    usingCache,
+    setUsingCache,
+  ] = useState(false);
+
   // =====================================
   // LOAD WEBSITE CONTENT
   // =====================================
@@ -46,37 +52,16 @@ const Home = () => {
 
           setError("");
 
-          const response =
-            await fetch(
-              `${API_BASE_URL}/api/content?lang=${
-                i18n.language?.startsWith("te") ? "te" : "en"
-              }`,
-              {
-                method:
-                  "GET",
+          setUsingCache(false);
 
-                headers: {
-                  "Cache-Control":
-                    "no-cache",
-                },
+          const language = 
+            i18n.language?.startsWith("te") ? "te" : "en";
 
-                cache:
-                  "no-store",
-              }
+          const data = 
+            await fetchContentWithCache(
+              language,
+              API_BASE_URL
             );
-
-          if (
-            !response.ok
-          ) {
-
-            throw new Error(
-              `Failed to load website content. Status: ${response.status}`
-            );
-
-          }
-
-          const data =
-            await response.json();
 
           console.log(
             "LATEST WEBSITE CONTENT:",
@@ -96,9 +81,34 @@ const Home = () => {
             error
           );
 
-          setError(
-            error.message
-          );
+          // Try to get cached data
+          const language = 
+            i18n.language?.startsWith("te") ? "te" : "en";
+
+          const cacheKey = `content_${language}_/api/content`;
+
+          const cachedData = 
+            getCache(cacheKey);
+
+          if (cachedData) {
+
+            console.log(
+              "Using cached content"
+            );
+
+            setContent(cachedData);
+
+            setUsingCache(true);
+
+            setError("");
+
+          } else {
+
+            setError(
+              "Unable to load website content. No cached data available."
+            );
+
+          }
 
         } finally {
 

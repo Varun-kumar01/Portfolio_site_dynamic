@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { API_BASE_URL } from "../config";
+import { fetchContentWithCache, getCache } from "../services/cacheService";
 
 import BiographyHero from "../components/biography/BiographyHero";
 import ProfileSection from "../components/biography/ProfileSection";
@@ -14,6 +15,7 @@ export default function Biography() {
   const { i18n, t } = useTranslation();
   const [biographyContent, setBiographyContent] = useState("");
   const [loading, setLoading] = useState(true);
+  const [usingCache, setUsingCache] = useState(false);
 
   // ==========================================
   // LOAD BIOGRAPHY FROM BACKEND
@@ -22,19 +24,11 @@ export default function Biography() {
   useEffect(() => {
     const loadBiography = async () => {
       try {
-        const response = await fetch(
-          `${API_BASE_URL}/api/content?lang=${
-            i18n.language?.startsWith("te") ? "te" : "en"
-          }`
-        );
+        setLoading(true);
+        setUsingCache(false);
 
-        const data = await response.json();
-
-        if (!response.ok) {
-          throw new Error(
-            data.message || "Failed to load biography"
-          );
-        }
+        const language = i18n.language?.startsWith("te") ? "te" : "en";
+        const data = await fetchContentWithCache(language, API_BASE_URL);
 
         console.log("Biography data:", data);
 
@@ -46,6 +40,19 @@ export default function Biography() {
           "Error loading biography:",
           error
         );
+
+        // Try to get cached data
+        const language = i18n.language?.startsWith("te") ? "te" : "en";
+        const cacheKey = `content_${language}_/api/content`;
+        const cachedData = getCache(cacheKey);
+
+        if (cachedData) {
+          console.log("Using cached biography data");
+          setBiographyContent(
+            cachedData.biography?.biographyContent || ""
+          );
+          setUsingCache(true);
+        }
       } finally {
         setLoading(false);
       }

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { API_BASE_URL } from "../config";
+import { fetchContentWithCache, getCache } from "../services/cacheService";
 
 import SectionTitle from "../components/common/SectionTitle";
 import ProfileTabs from "../components/profile/ProfileTabs";
@@ -17,6 +18,7 @@ const About = () => {
   });
 
   const [loading, setLoading] = useState(true);
+  const [usingCache, setUsingCache] = useState(false);
 
   // =========================
   // LOAD ABOUT CONTENT
@@ -25,17 +27,11 @@ const About = () => {
   useEffect(() => {
     const loadAboutContent = async () => {
       try {
-        const response = await fetch(
-          `${API_BASE_URL}/api/content?lang=${
-            i18n.language?.startsWith("te") ? "te" : "en"
-          }`
-        );
+        setLoading(true);
+        setUsingCache(false);
 
-        if (!response.ok) {
-          throw new Error("Failed to load About content");
-        }
-
-        const data = await response.json();
+        const language = i18n.language?.startsWith("te") ? "te" : "en";
+        const data = await fetchContentWithCache(language, API_BASE_URL);
 
         setAboutData({
           aboutName:
@@ -55,6 +51,29 @@ const About = () => {
           "Error loading About content:",
           error
         );
+
+        // Try to get cached data
+        const language = i18n.language?.startsWith("te") ? "te" : "en";
+        const cacheKey = `content_${language}_/api/content`;
+        const cachedData = getCache(cacheKey);
+
+        if (cachedData) {
+          console.log("Using cached About content");
+          setAboutData({
+            aboutName:
+              cachedData.about?.aboutName ||
+              "Adluri Laxman Kumar",
+
+            aboutPosition:
+              cachedData.about?.aboutPosition ||
+              "Minister for SC, ST, Minority, Disabled, Senior Citizens Welfare & Transgender Empowerment",
+
+            aboutDescription:
+              cachedData.about?.aboutDescription ||
+              "",
+          });
+          setUsingCache(true);
+        }
       } finally {
         setLoading(false);
       }

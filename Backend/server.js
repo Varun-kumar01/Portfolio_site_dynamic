@@ -117,6 +117,26 @@ const homeFolder = path.join(
 // CREATE REQUIRED FOLDERS
 // ============================================================
 
+// [
+//   dataFolder,
+//   uploadFolder,
+//   politicalCareerFolder,
+//   newsFolder,
+//   galleryFolder,
+//   videoFolder,
+//   articleFolder,
+//   homeFolder,
+// ].forEach((folder) => {
+//   if (!fs.existsSync(folder)) {
+//     fs.mkdirSync(uploadFolder, {
+//       recursive: true,
+//     });
+//   }
+//     fs.mkdirSync(videoFolder,{
+//       recursive: true
+//     });
+// });
+
 [
   dataFolder,
   uploadFolder,
@@ -128,13 +148,8 @@ const homeFolder = path.join(
   homeFolder,
 ].forEach((folder) => {
   if (!fs.existsSync(folder)) {
-    fs.mkdirSync(uploadfolder, {
-      recursive: true,
-    });
+    fs.mkdirSync(folder, { recursive: true });
   }
-    fs.mkdirSync(videoFolder,{
-      recursive: true
-    });
 });
 
 // ============================================================
@@ -496,6 +511,33 @@ const saveContent = (content) => {
 // ============================================================
 // NORMALIZE UPLOAD PATH
 // ============================================================
+// const normalizeUploadPath = (imageUrl) => {
+//   if (!imageUrl) {
+//     return "";
+//   }
+
+//   let value = String(imageUrl).trim();
+
+//   if (!value) {
+//     return "";
+//   }
+
+//   // Remove localhost / any complete HTTP or HTTPS URL
+//   value = value.replace(/^https?:\/\/[^/]+/i, "");
+
+//   // Remove leading slashes
+//   value = value.replace(/^\/+/, "");
+
+//   // If it already starts with uploads/, keep it
+//   // Otherwise add uploads/
+//   if (!value.startsWith("uploads/")) {
+//     value = `uploads/${value}`;
+//   }
+
+//   // Return as /uploads/...
+//   return `/${value}`;
+// };
+
 const normalizeUploadPath = (imageUrl) => {
   if (!imageUrl) {
     return "";
@@ -507,14 +549,16 @@ const normalizeUploadPath = (imageUrl) => {
     return "";
   }
 
-  // Remove localhost / any complete HTTP or HTTPS URL
+  // Convert Windows backslashes to normal URL slashes
+  value = value.replace(/\\/g, "/");
+
+  // Remove any complete HTTP/HTTPS URL
   value = value.replace(/^https?:\/\/[^/]+/i, "");
 
   // Remove leading slashes
   value = value.replace(/^\/+/, "");
 
-  // If it already starts with uploads/, keep it
-  // Otherwise add uploads/
+  // Make sure the path starts with uploads/
   if (!value.startsWith("uploads/")) {
     value = `uploads/${value}`;
   }

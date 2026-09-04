@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { API_BASE_URL } from "../config";
 import { useTranslation } from "react-i18next";
+import { fetchWithCache, getCache, cacheImageAsBase64, getCachedImageBase64 } from "../services/cacheService";
 
 import {
   CalendarDays,
@@ -9,6 +10,7 @@ import {
 } from "lucide-react";
 
 const API_URL = `${API_BASE_URL}/api/news`;
+const NEWS_CACHE_KEY = "news_cache";
 
 /* =========================================================
    FALLBACK CATEGORIES
@@ -98,6 +100,7 @@ export default function News() {
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [usingCache, setUsingCache] = useState(false);
 
   /* =======================================================
      LOAD NEWS
@@ -106,9 +109,10 @@ export default function News() {
   const loadNews = async () => {
     try {
       setLoading(true);
-      setError("");
+      setUsingCache(false);
 
       const language = isTelugu ? "te" : "en";
+      const cacheKey = `${NEWS_CACHE_KEY}_${language}`;
 
       const response = await fetch(
         `${API_URL}?lang=${language}&t=${Date.now()}`
@@ -149,18 +153,83 @@ export default function News() {
       });
 
       setNewsData(data);
+      
+      // Cache the data and embed base64 images
+      if (data.length > 0) {
+        // Proactively fetch all images and embed base64 directly in data
+        console.log("Starting to cache news images...");
+        
+        Promise.all(
+          data.map(async (item, index) => {
+            const imageUrl = getImageUrl(item.image_url);
+            if (!imageUrl) {
+              return item;
+            }
+
+            try {
+              const response = await fetch(imageUrl, {
+                method: "GET",
+                cache: "no-store",
+              });
+
+              if (!response.ok) {
+                console.warn(`Failed to fetch image for news ${item.id || index}`);
+                return item;
+              }
+
+              const blob = await response.blob();
+              return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                  // Embed base64 directly in the item
+                  resolve({
+                    ...item,
+                    _cachedImageBase64: reader.result,
+                  });
+                };
+                reader.readAsDataURL(blob);
+              });
+            } catch (err) {
+              console.warn(`Failed to cache image for news ${item.id || index}:`, err);
+              return item;
+            }
+          })
+        )
+          .then((dataWithImages) => {
+            try {
+              localStorage.setItem(cacheKey, JSON.stringify(dataWithImages));
+              console.log("Cached all news with embedded images");
+            } catch (e) {
+              console.warn("Failed to cache news with images:", e);
+            }
+          })
+          .catch((err) => {
+            console.warn("Error caching news images:", err);
+          });
+      }
     } catch (err) {
       console.error(
         "LOAD PUBLIC NEWS ERROR:",
         err
       );
 
-      setError(
-        err.message ||
-          "Unable to load news."
-      );
+      // Try to get cached data
+      const language = isTelugu ? "te" : "en";
+      const cacheKey = `${NEWS_CACHE_KEY}_${language}`;
+      const cachedData = getCache(cacheKey, []);
 
-      setNewsData([]);
+      if (cachedData.length > 0) {
+        console.log("Using cached news data");
+        setNewsData(cachedData);
+        setUsingCache(true);
+        setError(""); // Clear error when using cache
+      } else {
+        setError(
+          err.message ||
+            "Unable to load news."
+        );
+        setNewsData([]);
+      }
     } finally {
       setLoading(false);
     }
@@ -340,13 +409,14 @@ export default function News() {
   ======================================================= */
 
   return (
-    <section className="
-      min-h-screen
-      bg-slate-50
-      py-10
-      sm:py-14
-      lg:py-16
-    ">
+    <>
+      <section className="
+        min-h-screen
+        bg-slate-50
+        py-10
+        sm:py-14
+        lg:py-16
+      ">
 
       <div className="
         mx-auto
@@ -621,28 +691,43 @@ export default function News() {
                               imageUrl
                             );
 
-                            e.currentTarget.style.display =
-                              "none";
-
-                            const parent =
-                              e.currentTarget.parentElement;
-
-                            if (parent) {
-                              const fallback =
-                                document.createElement(
-                                  "div"
-                                );
-
-                              fallback.className =
-                                "flex h-full w-full items-center justify-center bg-gray-100 text-sm text-gray-400";
-
-                              fallback.innerText =
-                                "Image unavailable";
-
-                              parent.appendChild(
-                                fallback
+                            /*
+                              Try to use cached base64 image first,
+                              then fall back to static news images
+                            */
+                            
+                            // Try embedded cached base64
+                            if (item._cachedImageBase64) {
+                              console.log(
+                                "Using cached news image for:",
+                                item.id
                               );
+                              e.currentTarget.src =
+                                item._cachedImageBase64;
+                              return;
                             }
+
+                            // Fall back to static news images
+                            const staticNewsImages = [
+                              "/news/news1.png",
+                              "/news/news2.png",
+                              "/news/news3.png",
+                              "/news/news4.png",
+                              "/news/news5.png",
+                              "/news/news6.png",
+                            ];
+
+                            const fallbackImage =
+                              staticNewsImages[
+                                index %
+                                  staticNewsImages.length
+                              ];
+
+                            e.currentTarget.src =
+                              fallbackImage;
+
+                            e.currentTarget.style.display =
+                              "block";
                           }}
                         />
 
@@ -871,5 +956,6 @@ export default function News() {
       </div>
 
     </section>
+    </>
   );
 }
