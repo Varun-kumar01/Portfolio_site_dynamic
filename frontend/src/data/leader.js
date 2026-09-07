@@ -46,7 +46,7 @@ const leader = {
 
   contact: {
     email: "office@email.com", // Replace with actual office email
-    phone: "+91 9876543210",   // Replace with actual office phone
+    phone: "+91 9959511127",   // Replace with actual office phone
     address: "Dharmapuri, Jagtial, Telangana",
   },
 
