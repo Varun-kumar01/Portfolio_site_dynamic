@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-
+import { API_BASE_URL } from "../../config";
 import { getWebsiteContent } from "../services/contentApi";
 import { fetchContentWithCache, getCache } from "../services/cacheService";
 
@@ -17,7 +17,7 @@ const Contact = () => {
       try {
         setUsingCache(false);
         const language = i18n.language?.startsWith("te") ? "te" : "en";
-        const data = await fetchContentWithCache(language, "http://localhost:5173");
+        const data = await fetchContentWithCache(language, API_BASE_URL);
 
         console.log("CONTACT CONTENT:", data);
 
