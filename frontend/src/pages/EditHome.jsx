@@ -736,21 +736,21 @@ const EditHome = () => {
 
       if (selectedFeaturedNewsImage) {
         uploadData.append(
-          "featuredNewsImage",
+          "newsFeaturedImage",
           selectedFeaturedNewsImage
         );
       }
 
       if (selectedNews1Image) {
         uploadData.append(
-          "news1Image",
+          "newsImage1",
           selectedNews1Image
         );
       }
 
       if (selectedNews2Image) {
         uploadData.append(
-          "news2Image",
+          "newsImage2",
           selectedNews2Image
         );
       }

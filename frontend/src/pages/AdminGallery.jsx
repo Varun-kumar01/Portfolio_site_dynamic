@@ -1531,7 +1531,7 @@ import { API_BASE_URL } from "../config";
 const API_URL = `${API_BASE_URL}/api/gallery`;
 
 // IMPORTANT:
-// This must match the cache key used by public Gallery.jsx
+// Must match the cache key used by public Gallery.jsx
 const PHOTO_CACHE_KEY = "gallery_photos_cache_v2";
 
 export default function AdminGallery() {
@@ -1600,11 +1600,11 @@ export default function AdminGallery() {
   // =========================================
   const invalidateGalleryCache = () => {
     try {
-      // Remove ONLY the current dynamic gallery cache.
       localStorage.removeItem(PHOTO_CACHE_KEY);
 
-      // Tell the public Gallery page that admin data changed.
-      window.dispatchEvent(new Event("gallery-updated"));
+      window.dispatchEvent(
+        new Event("gallery-updated")
+      );
     } catch (error) {
       console.error(
         "GALLERY CACHE INVALIDATION ERROR:",
@@ -1635,44 +1635,35 @@ export default function AdminGallery() {
       return "";
     }
 
-    // -----------------------------------------
-    // Remove localhost backend origin
-    // -----------------------------------------
+    // Remove localhost backend URL
     imagePath = imagePath.replace(
       /^https?:\/\/localhost:\d+/i,
       ""
     );
 
-    // -----------------------------------------
-    // Remove 127.0.0.1 backend origin
-    // -----------------------------------------
+    // Remove 127.0.0.1 backend URL
     imagePath = imagePath.replace(
       /^https?:\/\/127\.0\.0\.1:\d+/i,
       ""
     );
 
-    // -----------------------------------------
     // Normalize Windows slashes
-    // -----------------------------------------
-    imagePath = imagePath.replace(/\\/g, "/");
+    imagePath = imagePath.replace(
+      /\\/g,
+      "/"
+    );
 
-    // -----------------------------------------
-    // Remove accidental duplicate leading slash
-    // -----------------------------------------
-    imagePath = imagePath.replace(/^\/+/, "/");
+    // Remove duplicate leading slashes
+    imagePath = imagePath.replace(
+      /^\/+/,
+      "/"
+    );
 
-    // -----------------------------------------
     // Make sure path starts with /
-    // -----------------------------------------
     if (!imagePath.startsWith("/")) {
       imagePath = `/${imagePath}`;
     }
 
-    // -----------------------------------------
-    // If DB accidentally contains uploads path
-    // it remains:
-    // /uploads/gallery/file.jpeg
-    // -----------------------------------------
     return `${API_BASE_URL}${imagePath}`;
   };
 
@@ -1713,7 +1704,8 @@ export default function AdminGallery() {
         }
       );
 
-      const data = await parseApiResponse(response);
+      const data =
+        await parseApiResponse(response);
 
       if (!response.ok) {
         throw new Error(
@@ -1724,8 +1716,8 @@ export default function AdminGallery() {
 
       // Backend is the source of truth.
       //
-      // DO NOT merge this with old cache.
-      // DO NOT add static images.
+      // Do NOT merge with cache.
+      // Do NOT add static images.
       const items = Array.isArray(data)
         ? data
         : Array.isArray(data.gallery)
@@ -1909,9 +1901,31 @@ export default function AdminGallery() {
         category
       );
 
-      // -----------------------------------------
+      // =========================================
+      // DISPLAY ORDER
+      // =========================================
+      //
+      // New image goes to the end.
+      //
+      const displayOrder =
+        editingId
+          ? (
+              galleryItems.findIndex(
+                (item) =>
+                  String(item.id) ===
+                  String(editingId)
+              ) + 1
+            )
+          : galleryItems.length + 1;
+
+      formData.append(
+        "display_order",
+        String(displayOrder)
+      );
+
+      // =========================================
       // IMAGE
-      // -----------------------------------------
+      // =========================================
       if (selectedFile) {
         formData.append(
           "image",
@@ -1923,7 +1937,9 @@ export default function AdminGallery() {
       // URL + METHOD
       // =========================================
       const url = editingId
-        ? `${API_URL}/${editingId}`
+        ? `${API_URL}/${encodeURIComponent(
+            String(editingId)
+          )}`
         : API_URL;
 
       const method = editingId
@@ -1931,11 +1947,12 @@ export default function AdminGallery() {
         : "POST";
 
       console.log(
-        "GALLERY SAVE:",
+        "GALLERY SAVE REQUEST:",
         {
           method,
           url,
           editingId,
+          displayOrder,
         }
       );
 
@@ -1947,17 +1964,28 @@ export default function AdminGallery() {
         {
           method,
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization:
+              `Bearer ${token}`,
           },
 
           // IMPORTANT:
-          // Do NOT set Content-Type manually.
+          // Do NOT manually set Content-Type.
           body: formData,
         }
       );
 
       const data =
-        await parseApiResponse(response);
+        await parseApiResponse(
+          response
+        );
+
+      console.log(
+        "GALLERY SAVE RESPONSE:",
+        {
+          status: response.status,
+          data,
+        }
+      );
 
       if (!response.ok) {
         throw new Error(
@@ -1985,7 +2013,7 @@ export default function AdminGallery() {
       );
 
       // =========================================
-      // GET EXACT DATABASE DATA
+      // FETCH EXACT DATABASE DATA
       // =========================================
       await fetchGallery();
 
@@ -2030,10 +2058,8 @@ export default function AdminGallery() {
         "Public Events"
     );
 
-    // No new file initially.
     setSelectedFile(null);
 
-    // Existing backend image.
     setPreview(
       getImageUrl(item)
     );
@@ -2087,10 +2113,13 @@ export default function AdminGallery() {
       return;
     }
 
-    const deleteId = String(id).trim();
-    const deleteUrl = `${API_URL}/${encodeURIComponent(
-      deleteId
-    )}`;
+    const deleteId =
+      String(id).trim();
+
+    const deleteUrl =
+      `${API_URL}/${encodeURIComponent(
+        deleteId
+      )}`;
 
     try {
       setDeletingId(deleteId);
@@ -2112,16 +2141,23 @@ export default function AdminGallery() {
         deleteUrl,
         {
           method: "DELETE",
+
           headers: {
-            Authorization: `Bearer ${token}`,
-            Accept: "application/json",
+            Authorization:
+              `Bearer ${token}`,
+
+            Accept:
+              "application/json",
           },
+
           cache: "no-store",
         }
       );
 
       const data =
-        await parseApiResponse(response);
+        await parseApiResponse(
+          response
+        );
 
       console.log(
         "GALLERY DELETE RESPONSE:",
@@ -2139,14 +2175,15 @@ export default function AdminGallery() {
       }
 
       // =========================================
-      // REMOVE FROM CURRENT ADMIN UI IMMEDIATELY
+      // REMOVE FROM CURRENT ADMIN UI
       // =========================================
-      setGalleryItems((currentItems) =>
-        currentItems.filter(
-          (item) =>
-            String(item.id) !==
-            deleteId
-        )
+      setGalleryItems(
+        (currentItems) =>
+          currentItems.filter(
+            (item) =>
+              String(item.id) !==
+              deleteId
+          )
       );
 
       // =========================================
@@ -2159,7 +2196,7 @@ export default function AdminGallery() {
       );
 
       // =========================================
-      // FETCH EXACT CURRENT DB DATA
+      // FETCH EXACT DATABASE DATA
       // =========================================
       await fetchGallery();
     } catch (error) {
@@ -2193,7 +2230,10 @@ export default function AdminGallery() {
   // =========================================
   // DRAG START
   // =========================================
-  const handleDragStart = (e, id) => {
+  const handleDragStart = (
+    e,
+    id
+  ) => {
     setDraggedItemId(id);
 
     e.dataTransfer.effectAllowed =
@@ -2208,7 +2248,10 @@ export default function AdminGallery() {
   // =========================================
   // DRAG OVER
   // =========================================
-  const handleDragOver = (e, id) => {
+  const handleDragOver = (
+    e,
+    id
+  ) => {
     e.preventDefault();
 
     e.dataTransfer.dropEffect =
@@ -2301,8 +2344,10 @@ export default function AdminGallery() {
       movedItem
     );
 
-    // Update UI immediately.
-    setGalleryItems(newItems);
+    // Update UI immediately
+    setGalleryItems(
+      newItems
+    );
 
     await saveGalleryOrder(
       newItems,
@@ -2313,104 +2358,132 @@ export default function AdminGallery() {
   // =========================================
   // SAVE ORDER
   // =========================================
-  const saveGalleryOrder = async (
-    items,
-    oldItems
-  ) => {
-    const token = getToken();
+  const saveGalleryOrder =
+    async (
+      items,
+      oldItems
+    ) => {
+      const token = getToken();
 
-    if (!token) {
-      setError(
-        "Admin authentication token is missing. Please login again."
-      );
+      if (!token) {
+        setError(
+          "Admin authentication token is missing. Please login again."
+        );
 
-      if (oldItems) {
-        setGalleryItems(oldItems);
+        if (oldItems) {
+          setGalleryItems(
+            oldItems
+          );
+        }
+
+        return;
       }
 
-      return;
-    }
+      try {
+        setSavingOrder(true);
+        setMessage("");
+        setError("");
 
-    try {
-      setSavingOrder(true);
-      setMessage("");
-      setError("");
+        // =====================================
+        // BACKEND ORDER FORMAT
+        // =====================================
+        const itemsForBackend =
+          items.map(
+            (item, index) => ({
+              id: item.id,
 
-      const order = items.map(
-        (item, index) => ({
-          id: item.id,
-          display_order:
-            index + 1,
-        })
-      );
+              display_order:
+                index + 1,
+            })
+          );
 
-      console.log(
-        "GALLERY REORDER REQUEST:",
-        order
-      );
+        console.log(
+          "GALLERY REORDER REQUEST:",
+          itemsForBackend
+        );
 
-      const response =
-        await fetch(
-          `${API_URL}/reorder`,
+        // =====================================
+        // SEND ORDER TO BACKEND
+        // =====================================
+        const response =
+          await fetch(
+            `${API_URL}/reorder`,
+            {
+              method: "PUT",
+
+              headers: {
+                "Content-Type":
+                  "application/json",
+
+                Authorization:
+                  `Bearer ${token}`,
+
+                Accept:
+                  "application/json",
+              },
+
+              body: JSON.stringify({
+                order:
+                  itemsForBackend,
+              }),
+            }
+          );
+
+        const data =
+          await parseApiResponse(
+            response
+          );
+
+        console.log(
+          "GALLERY REORDER RESPONSE:",
           {
-            method: "PUT",
-            headers: {
-              "Content-Type":
-                "application/json",
-
-              Authorization:
-                `Bearer ${token}`,
-
-              Accept:
-                "application/json",
-            },
-
-            body: JSON.stringify({
-              order,
-            }),
+            status:
+              response.status,
+            data,
           }
         );
 
-      const data =
-        await parseApiResponse(
-          response
+        if (!response.ok) {
+          throw new Error(
+            data?.message ||
+              "Failed to save gallery order."
+          );
+        }
+
+        // =====================================
+        // CLEAR PUBLIC CACHE
+        // =====================================
+        invalidateGalleryCache();
+
+        setMessage(
+          "Gallery order updated successfully."
         );
 
-      if (!response.ok) {
-        throw new Error(
-          data?.message ||
-            "Failed to save gallery order."
+        // =====================================
+        // FETCH EXACT DATABASE ORDER
+        // =====================================
+        await fetchGallery();
+      } catch (error) {
+        console.error(
+          "GALLERY REORDER ERROR:",
+          error
         );
+
+        setError(
+          error?.message ||
+            "The new order could not be saved."
+        );
+
+        // Restore previous order
+        if (oldItems) {
+          setGalleryItems(
+            oldItems
+          );
+        }
+      } finally {
+        setSavingOrder(false);
       }
-
-      // Clear public cache because order changed.
-      invalidateGalleryCache();
-
-      setMessage(
-        "Gallery order updated successfully."
-      );
-
-      // Fetch exact DB order.
-      await fetchGallery();
-    } catch (error) {
-      console.error(
-        "GALLERY REORDER ERROR:",
-        error
-      );
-
-      setError(
-        error?.message ||
-          "The new order could not be saved."
-      );
-
-      // Restore previous order if backend failed.
-      if (oldItems) {
-        setGalleryItems(oldItems);
-      }
-    } finally {
-      setSavingOrder(false);
-    }
-  };
+    };
 
   // =========================================
   // RENDER

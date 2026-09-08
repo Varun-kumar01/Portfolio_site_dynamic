@@ -4080,6 +4080,9 @@ const PoliticalJourney = () => {
       i18n.language
     );
 
+  const isTelugu =
+    initialLanguage === "te";
+
   // ===================================================
   // STATE
   // ===================================================
@@ -4732,9 +4735,7 @@ const PoliticalJourney = () => {
               text-yellow-700
             "
           >
-            Backend is currently unavailable.
-            Showing the last saved Political
-            Career information.
+            
           </div>
         </div>
       )}
@@ -4789,6 +4790,47 @@ const PoliticalJourney = () => {
               ) => {
                 const leftSide =
                   index % 2 === 0;
+                const careerTranslations = isTelugu
+                  ? t("journey.careerJourney", {
+                      returnObjects: true,
+                      defaultValue: [],
+                    })
+                  : [];
+                const translationIndex = isTelugu
+                  ? (() => {
+                      const itemId = Number(item.id);
+                      const knownIndex =
+                        itemId >= 7 && itemId <= 20
+                          ? itemId - 7
+                          : -1;
+
+                      if (knownIndex >= 0) {
+                        return knownIndex;
+                      }
+
+                      return careerTranslations.findIndex((entry) =>
+                        entry?.title === item.position ||
+                        entry?.title?.includes(item.position) ||
+                        entry?.title?.includes(item.organization)
+                      );
+                    })()
+                  : -1;
+                const translatedCareer =
+                  translationIndex >= 0
+                    ? careerTranslations[translationIndex]
+                    : {};
+                const useCareerTranslation =
+                  isTelugu && translationIndex >= 0;
+                const displayItem = useCareerTranslation
+                  ? {
+                      ...item,
+                      year: translatedCareer.year || item.year,
+                      position: translatedCareer.title || item.position,
+                      category: translatedCareer.label || item.category,
+                      description:
+                        translatedCareer.description || item.description,
+                    }
+                  : item;
 
                 return (
                   <div
@@ -4859,7 +4901,7 @@ const PoliticalJourney = () => {
                       >
                         {leftSide ? (
                           <CareerContent
-                            item={item}
+                            item={displayItem}
                           />
                         ) : (
                           <CareerImage
@@ -4883,7 +4925,7 @@ const PoliticalJourney = () => {
                           />
                         ) : (
                           <CareerContent
-                            item={item}
+                            item={displayItem}
                           />
                         )}
                       </div>

@@ -1680,52 +1680,51 @@
 //     </>
 //   );
 // }
-
-
-
-
 import { useEffect, useMemo, useState } from "react";
 import { Play, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { API_BASE_URL } from "../config";
-import {
-  cacheImageAsBase64,
-  getCachedImageBase64,
-} from "../services/cacheService";
 
 /* =========================================================
    API CONFIGURATION
 ========================================================= */
 
-const PHOTO_API_URL = `${API_BASE_URL}/api/gallery`;
-const VIDEO_API_URL = `${API_BASE_URL}/api/videos`;
+const BASE_URL = String(API_BASE_URL || "").replace(/\/+$/, "");
+
+const PHOTO_API_URL = `${BASE_URL}/api/gallery`;
+const VIDEO_API_URL = `${BASE_URL}/api/videos`;
+
+/* =========================================================
+   CACHE CONFIGURATION
+========================================================= */
 
 /*
- * IMPORTANT
+ * IMPORTANT:
  *
- * PHOTO CACHE contains ONLY photos returned by the backend.
+ * Backend/PostgreSQL is the source of truth when online.
  *
- * There is intentionally NO static gallery photo fallback.
+ * Photos:
+ *   - Metadata -> localStorage
+ *   - Actual image files -> Cache Storage
  *
- * Flow:
+ * Videos:
+ *   - Metadata -> localStorage
+ *   - Actual LOCAL video files -> Cache Storage
  *
- * Backend available
- *      ↓
- * DB photos
- *      ↓
- * Display DB photos
- *      ↓
- * Cache DB photos
+ * YouTube videos cannot be played fully offline because
+ * YouTube itself must be reachable. Their metadata can still
+ * be remembered, but local uploaded videos are cached and
+ * played offline.
  *
- * Backend unavailable
- *      ↓
- * Cached DB photos
- *      ↓
- * Display cached photos
+ * v4/v2 are intentionally versioned so old cache data is not
+ * mixed with the new offline implementation.
  */
-const PHOTO_CACHE_KEY = "gallery_photos_cache_v2";
 
-const VIDEO_CACHE_KEY = "gallery_videos_cache";
+const PHOTO_CACHE_KEY = "gallery_photos_cache_v4";
+const PHOTO_IMAGE_CACHE_NAME = "gallery-photo-images-v4";
+
+const VIDEO_CACHE_KEY = "gallery_videos_cache_v2";
+const VIDEO_FILE_CACHE_NAME = "gallery-video-files-v2";
 
 /* =========================================================
    CATEGORIES
@@ -1740,49 +1739,17 @@ const categories = [
 ];
 
 /* =========================================================
-   FALLBACK VIDEOS
-========================================================= */
-
-/*
- * Video fallback is kept because this change is ONLY for
- * gallery photos.
- *
- * Your existing video functionality is not changed.
- */
-const fallbackVideos = [
-  {
-    id: "old-video-1",
-    type: "video",
-    category: "Public Events",
-    title: "Public Programme",
-    description: "",
-    videoUrl: "https://www.youtube.com/watch?v=qFusARwKYPk",
-    thumbnailUrl: "",
-  },
-
-  {
-    id: "old-video-2",
-    type: "video",
-    category: "Meetings",
-    title: "Public Interaction",
-    description: "",
-    videoUrl: "https://www.youtube.com/watch?v=XTZMEkK0F7s",
-    thumbnailUrl: "",
-  },
-];
-
-/* =========================================================
    YOUTUBE CHECK
 ========================================================= */
 
 function isYoutube(url) {
-  if (!url) {
-    return false;
-  }
+  if (!url) return false;
+
+  const value = String(url).toLowerCase();
 
   return (
-    url.includes("youtube.com") ||
-    url.includes("youtu.be")
+    value.includes("youtube.com") ||
+    value.includes("youtu.be")
   );
 }
 
@@ -1791,17 +1758,13 @@ function isYoutube(url) {
 ========================================================= */
 
 function youtubeThumbnail(url) {
-  if (!url) {
-    return "";
-  }
+  if (!url) return "";
 
-  const match = url.match(
+  const match = String(url).match(
     /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&?/]+)/
   );
 
-  if (!match) {
-    return "";
-  }
+  if (!match) return "";
 
   return `https://img.youtube.com/vi/${match[1]}/hqdefault.jpg`;
 }
@@ -1811,36 +1774,41 @@ function youtubeThumbnail(url) {
 ========================================================= */
 
 function getImageUrl(imagePath) {
-  if (!imagePath) {
-    return "";
-  }
+  if (!imagePath) return "";
 
-  const cleanPath = String(imagePath).trim();
+  let cleanPath = String(imagePath).trim();
 
-  if (!cleanPath) {
-    return "";
-  }
+  if (!cleanPath) return "";
 
-  /*
-   * Already a complete URL
-   */
   if (
-    cleanPath.startsWith("http://") ||
-    cleanPath.startsWith("https://") ||
-    cleanPath.startsWith("data:")
+    cleanPath.startsWith("data:") ||
+    cleanPath.startsWith("blob:")
   ) {
     return cleanPath;
   }
 
-  /*
-   * Frontend public images.
-   *
-   * These are kept only for compatibility with any existing
-   * public assets such as video thumbnails.
-   *
-   * IMPORTANT:
-   * No static gallery photo is added to the photos array.
-   */
+  if (
+    cleanPath.startsWith("http://") ||
+    cleanPath.startsWith("https://")
+  ) {
+    try {
+      const url = new URL(cleanPath);
+
+      if (
+        url.hostname === "localhost" ||
+        url.hostname === "127.0.0.1"
+      ) {
+        cleanPath = url.pathname;
+      } else {
+        return cleanPath;
+      }
+    } catch {
+      return cleanPath;
+    }
+  }
+
+  cleanPath = cleanPath.replace(/\\/g, "/");
+
   if (
     cleanPath.startsWith("/gallery/") ||
     cleanPath.startsWith("/gallery12/") ||
@@ -1849,17 +1817,11 @@ function getImageUrl(imagePath) {
     return cleanPath;
   }
 
-  /*
-   * Backend upload path.
-   *
-   * Examples:
-   *
-   * uploads/gallery/photo.jpg
-   * uploads/gallery/abc/photo.jpg
-   */
-  return `${API_BASE_URL}${
-    cleanPath.startsWith("/") ? "" : "/"
-  }${cleanPath}`;
+  if (!cleanPath.startsWith("/")) {
+    cleanPath = `/${cleanPath}`;
+  }
+
+  return `${BASE_URL}${cleanPath}`;
 }
 
 /* =========================================================
@@ -1867,19 +1829,25 @@ function getImageUrl(imagePath) {
 ========================================================= */
 
 function getVideoUrl(videoPath) {
-  if (!videoPath) {
-    return "";
-  }
+  if (!videoPath) return "";
 
   const cleanPath = String(videoPath).trim();
 
-  if (!cleanPath) {
-    return "";
-  }
+  if (!cleanPath) return "";
 
   /*
-   * Already a complete URL
+   * IMPORTANT:
+   * Do not convert Blob URLs into backend URLs.
+   * Blob URLs are used for offline playback.
    */
+
+  if (
+    cleanPath.startsWith("blob:") ||
+    cleanPath.startsWith("data:")
+  ) {
+    return cleanPath;
+  }
+
   if (
     cleanPath.startsWith("http://") ||
     cleanPath.startsWith("https://")
@@ -1887,12 +1855,31 @@ function getVideoUrl(videoPath) {
     return cleanPath;
   }
 
-  /*
-   * Backend video upload
-   */
-  return `${API_BASE_URL}${
+  return `${BASE_URL}${
     cleanPath.startsWith("/") ? "" : "/"
   }${cleanPath}`;
+}
+
+/* =========================================================
+   REMOVE QUERY FROM CACHE URL
+========================================================= */
+
+function getCacheUrl(url) {
+  if (!url) return "";
+
+  try {
+    const parsed = new URL(
+      url,
+      window.location.origin
+    );
+
+    parsed.search = "";
+    parsed.hash = "";
+
+    return parsed.toString();
+  } catch {
+    return url;
+  }
 }
 
 /* =========================================================
@@ -1900,22 +1887,15 @@ function getVideoUrl(videoPath) {
 ========================================================= */
 
 function getFreshImageUrl(imageUrl, updatedAt = "") {
-  if (!imageUrl) {
-    return "";
-  }
+  if (!imageUrl) return "";
 
-  /*
-   * Do not cache-bust data URLs.
-   */
-  if (imageUrl.startsWith("data:")) {
+  if (
+    imageUrl.startsWith("data:") ||
+    imageUrl.startsWith("blob:")
+  ) {
     return imageUrl;
   }
 
-  /*
-   * Static public images do not need cache busting.
-   *
-   * These are not used as gallery fallback photos.
-   */
   if (
     imageUrl.startsWith("/gallery/") ||
     imageUrl.startsWith("/gallery12/") ||
@@ -1934,50 +1914,21 @@ function getFreshImageUrl(imageUrl, updatedAt = "") {
 }
 
 /* =========================================================
-   GET CACHED PHOTOS
+   GET CACHED PHOTO METADATA
 ========================================================= */
 
-/*
- * IMPORTANT:
- *
- * This function reads ONLY the new v2 cache.
- *
- * We intentionally DO NOT read the old
- * "gallery_photos_cache" key.
- *
- * Reason:
- *
- * The old cache may contain:
- *
- * 20 backend photos
- * +
- * 12 gallery12 photos
- * =
- * 32 photos
- *
- * Reading that old cache would bring the problem back.
- */
 function getCachedPhotos() {
   try {
     const saved = localStorage.getItem(
       PHOTO_CACHE_KEY
     );
 
-    if (!saved) {
-      return [];
-    }
+    if (!saved) return [];
 
     const parsed = JSON.parse(saved);
 
-    if (!Array.isArray(parsed)) {
-      return [];
-    }
+    if (!Array.isArray(parsed)) return [];
 
-    /*
-     * Only return backend/cache photos.
-     *
-     * Old static entries are explicitly ignored.
-     */
     return parsed.filter(
       (photo) =>
         photo &&
@@ -1985,8 +1936,8 @@ function getCachedPhotos() {
         photo.image
     );
   } catch (error) {
-    console.error(
-      "PHOTO CACHE ERROR:",
+    console.warn(
+      "PHOTO CACHE METADATA ERROR:",
       error
     );
 
@@ -1995,43 +1946,11 @@ function getCachedPhotos() {
 }
 
 /* =========================================================
-   GET CACHED VIDEOS
-========================================================= */
-
-function getCachedVideos() {
-  try {
-    const saved = localStorage.getItem(
-      VIDEO_CACHE_KEY
-    );
-
-    if (!saved) {
-      return [];
-    }
-
-    const parsed = JSON.parse(saved);
-
-    return Array.isArray(parsed)
-      ? parsed
-      : [];
-  } catch (error) {
-    console.error(
-      "VIDEO CACHE ERROR:",
-      error
-    );
-
-    return [];
-  }
-}
-
-/* =========================================================
-   SAVE PHOTO CACHE
+   SAVE PHOTO METADATA
 ========================================================= */
 
 function savePhotoCache(photos) {
   try {
-    /*
-     * Never cache static photos.
-     */
     const backendPhotos = Array.isArray(photos)
       ? photos.filter(
           (photo) =>
@@ -2046,163 +1965,497 @@ function savePhotoCache(photos) {
     );
 
     console.log(
-      "PHOTO CACHE SAVED:",
+      "PHOTO METADATA CACHE SAVED:",
       backendPhotos.length
     );
   } catch (error) {
     console.warn(
-      "PHOTO CACHE SAVE ERROR:",
+      "PHOTO METADATA CACHE SAVE ERROR:",
       error
     );
   }
 }
 
 /* =========================================================
-   CACHE BACKEND PHOTO IMAGES
+   CACHE ACTUAL PHOTO IMAGE
 ========================================================= */
 
-/*
- * Downloads each backend image and embeds it as base64.
- *
- * This allows cached gallery images to continue displaying
- * even when the backend is unavailable.
- */
-async function createPhotoCacheWithImages(
-  photos
-) {
+async function cachePhotoImage(photo) {
+  if (!photo?.image) return;
+
+  if (
+    typeof window === "undefined" ||
+    !("caches" in window)
+  ) {
+    return;
+  }
+
+  try {
+    const imageUrl = getImageUrl(
+      photo.image_path || photo.image
+    );
+
+    if (!imageUrl) return;
+
+    const cacheUrl = getCacheUrl(imageUrl);
+
+    const cache = await caches.open(
+      PHOTO_IMAGE_CACHE_NAME
+    );
+
+    /*
+     * Always fetch the latest version.
+     * This is important when admin replaces an image
+     * using the same filename/path.
+     */
+
+    const response = await fetch(imageUrl, {
+      method: "GET",
+      cache: "no-store",
+    });
+
+    if (!response.ok) {
+      console.warn(
+        "IMAGE CACHE FETCH FAILED:",
+        response.status,
+        imageUrl
+      );
+      return;
+    }
+
+    await cache.put(
+      cacheUrl,
+      response.clone()
+    );
+
+    console.log(
+      "IMAGE CACHED:",
+      cacheUrl
+    );
+  } catch (error) {
+    console.warn(
+      "IMAGE CACHE ERROR:",
+      photo.id,
+      error
+    );
+  }
+}
+
+/* =========================================================
+   CACHE ALL PHOTO IMAGES
+========================================================= */
+
+async function cacheAllPhotoImages(photos) {
   if (
     !Array.isArray(photos) ||
     photos.length === 0
   ) {
-    /*
-     * IMPORTANT:
-     *
-     * If backend successfully returns zero photos,
-     * cache zero photos.
-     *
-     * This prevents old photos from coming back.
-     */
-    savePhotoCache([]);
-
-    return [];
+    return;
   }
 
-  const photosWithImages = await Promise.all(
+  let cachedCount = 0;
+
+  await Promise.all(
     photos.map(async (photo) => {
-      if (!photo || !photo.image) {
-        return photo;
-      }
-
-      /*
-       * If the image already contains a base64 value,
-       * keep it.
-       */
-      if (photo._cachedImageBase64) {
-        return photo;
-      }
-
-      try {
-        const imageUrl = getImageUrl(
-          photo.image
-        );
-
-        const response = await fetch(
-          imageUrl,
-          {
-            method: "GET",
-            cache: "no-store",
-          }
-        );
-
-        if (!response.ok) {
-          console.warn(
-            `Unable to cache image for photo ${photo.id}`
-          );
-
-          return photo;
-        }
-
-        const blob =
-          await response.blob();
-
-        /*
-         * Use existing cacheService helper when
-         * available.
-         *
-         * This also keeps compatibility with the
-         * cacheService already present in the project.
-         */
-        try {
-          if (
-            typeof cacheImageAsBase64 ===
-            "function"
-          ) {
-            const cacheKey =
-              photo.cacheImageKey ||
-              `gallery-photo-${photo.id}`;
-
-            await cacheImageAsBase64(
-              cacheKey,
-              blob
-            );
-          }
-        } catch (cacheError) {
-          console.warn(
-            "cacheService image cache failed:",
-            cacheError
-          );
-        }
-
-        /*
-         * Also embed base64 directly inside the
-         * localStorage object.
-         *
-         * This makes the photo cache self-contained.
-         */
-        const base64 =
-          await new Promise(
-            (resolve) => {
-              const reader =
-                new FileReader();
-
-              reader.onloadend =
-                () => {
-                  resolve(
-                    reader.result
-                  );
-                };
-
-              reader.onerror = () => {
-                resolve("");
-              };
-
-              reader.readAsDataURL(
-                blob
-              );
-            }
-          );
-
-        if (!base64) {
-          return photo;
-        }
-
-        return {
-          ...photo,
-          _cachedImageBase64:
-            base64,
-        };
-      } catch (error) {
-        console.warn(
-          `Failed to cache image for ${photo.id}:`,
-          error
-        );
-
-        return photo;
-      }
+      await cachePhotoImage(photo);
+      cachedCount += 1;
     })
   );
 
-  return photosWithImages;
+  console.log(
+    `PHOTO IMAGE CACHE COMPLETE: ${cachedCount}/${photos.length}`
+  );
+}
+
+/* =========================================================
+   GET ONE PHOTO FROM CACHE
+========================================================= */
+
+async function getCachedPhotoImage(imageUrl) {
+  if (
+    !imageUrl ||
+    typeof window === "undefined" ||
+    !("caches" in window)
+  ) {
+    return "";
+  }
+
+  try {
+    const cache = await caches.open(
+      PHOTO_IMAGE_CACHE_NAME
+    );
+
+    const cacheUrl = getCacheUrl(imageUrl);
+
+    const cachedResponse =
+      await cache.match(cacheUrl);
+
+    if (!cachedResponse) {
+      return "";
+    }
+
+    const blob =
+      await cachedResponse.blob();
+
+    return URL.createObjectURL(blob);
+  } catch (error) {
+    console.warn(
+      "GET CACHED IMAGE ERROR:",
+      error
+    );
+
+    return "";
+  }
+}
+
+/* =========================================================
+   HYDRATE CACHED PHOTOS
+========================================================= */
+
+async function hydrateCachedPhotos(cachedPhotos) {
+  if (
+    !Array.isArray(cachedPhotos) ||
+    cachedPhotos.length === 0
+  ) {
+    return [];
+  }
+
+  const hydrated = await Promise.all(
+    cachedPhotos.map(async (photo) => {
+      if (!photo?.image) return null;
+
+      const originalUrl = getImageUrl(
+        photo.image_path || photo.image
+      );
+
+      const cachedImage =
+        await getCachedPhotoImage(
+          originalUrl
+        );
+
+      if (!cachedImage) {
+        return null;
+      }
+
+      return {
+        ...photo,
+        image: cachedImage,
+        _offlineCached: true,
+      };
+    })
+  );
+
+  return hydrated.filter(Boolean);
+}
+
+/* =========================================================
+   GET CACHED VIDEO METADATA
+========================================================= */
+
+function getCachedVideos() {
+  try {
+    const saved = localStorage.getItem(
+      VIDEO_CACHE_KEY
+    );
+
+    if (!saved) return [];
+
+    const parsed = JSON.parse(saved);
+
+    if (!Array.isArray(parsed)) return [];
+
+    return parsed;
+  } catch (error) {
+    console.warn(
+      "VIDEO CACHE METADATA ERROR:",
+      error
+    );
+
+    return [];
+  }
+}
+
+/* =========================================================
+   SAVE VIDEO METADATA
+========================================================= */
+
+function saveVideoCache(videos) {
+  try {
+    const backendVideos = Array.isArray(videos)
+      ? videos
+      : [];
+
+    localStorage.setItem(
+      VIDEO_CACHE_KEY,
+      JSON.stringify(backendVideos)
+    );
+
+    console.log(
+      "VIDEO METADATA CACHE SAVED:",
+      backendVideos.length
+    );
+  } catch (error) {
+    console.warn(
+      "VIDEO METADATA CACHE SAVE ERROR:",
+      error
+    );
+  }
+}
+
+/* =========================================================
+   CACHE ONE LOCAL VIDEO FILE
+========================================================= */
+
+async function cacheVideoFile(video) {
+  if (!video?.videoUrl) {
+    return false;
+  }
+
+  /*
+   * YouTube videos cannot be downloaded/cached here
+   * for offline YouTube playback.
+   */
+
+  if (isYoutube(video.videoUrl)) {
+    console.log(
+      "YOUTUBE VIDEO - FILE CACHE SKIPPED:",
+      video.videoUrl
+    );
+
+    return false;
+  }
+
+  if (
+    typeof window === "undefined" ||
+    !("caches" in window)
+  ) {
+    console.warn(
+      "Browser Cache Storage is not available."
+    );
+
+    return false;
+  }
+
+  try {
+    const videoUrl = getVideoUrl(
+      video.videoUrl
+    );
+
+    if (!videoUrl) return false;
+
+    const cacheUrl =
+      getCacheUrl(videoUrl);
+
+    const cache = await caches.open(
+      VIDEO_FILE_CACHE_NAME
+    );
+
+    /*
+     * Always fetch the latest backend video.
+     * Do not rely on an old cached file.
+     */
+
+    const response = await fetch(videoUrl, {
+      method: "GET",
+      cache: "no-store",
+    });
+
+    if (!response.ok) {
+      console.warn(
+        "VIDEO CACHE FETCH FAILED:",
+        response.status,
+        videoUrl
+      );
+
+      return false;
+    }
+
+    await cache.put(
+      cacheUrl,
+      response.clone()
+    );
+
+    console.log(
+      "VIDEO FILE CACHED:",
+      cacheUrl
+    );
+
+    return true;
+  } catch (error) {
+    console.warn(
+      "VIDEO FILE CACHE ERROR:",
+      video.id,
+      error
+    );
+
+    return false;
+  }
+}
+
+/* =========================================================
+   CACHE ALL LOCAL VIDEOS
+========================================================= */
+
+async function cacheAllVideoFiles(videos) {
+  if (
+    !Array.isArray(videos) ||
+    videos.length === 0
+  ) {
+    return {
+      totalLocal: 0,
+      cached: 0,
+    };
+  }
+
+  const localVideos = videos.filter(
+    (video) =>
+      video?.videoUrl &&
+      !isYoutube(video.videoUrl)
+  );
+
+  console.log(
+    "LOCAL VIDEOS TO CACHE:",
+    localVideos.length
+  );
+
+  const results = await Promise.all(
+    localVideos.map((video) =>
+      cacheVideoFile(video)
+    )
+  );
+
+  const cached = results.filter(Boolean).length;
+
+  console.log(
+    `VIDEO FILE CACHE COMPLETE: ${cached}/${localVideos.length}`
+  );
+
+  return {
+    totalLocal: localVideos.length,
+    cached,
+  };
+}
+
+/* =========================================================
+   GET ONE LOCAL VIDEO FROM CACHE
+========================================================= */
+
+async function getCachedVideoFile(videoUrl) {
+  if (
+    !videoUrl ||
+    typeof window === "undefined" ||
+    !("caches" in window)
+  ) {
+    return "";
+  }
+
+  try {
+    const cache = await caches.open(
+      VIDEO_FILE_CACHE_NAME
+    );
+
+    const cacheUrl =
+      getCacheUrl(
+        getVideoUrl(videoUrl)
+      );
+
+    const cachedResponse =
+      await cache.match(cacheUrl);
+
+    if (!cachedResponse) {
+      console.warn(
+        "NO CACHED VIDEO FILE FOUND:",
+        cacheUrl
+      );
+
+      return "";
+    }
+
+    const blob =
+      await cachedResponse.blob();
+
+    const blobUrl =
+      URL.createObjectURL(blob);
+
+    console.log(
+      "OFFLINE VIDEO FILE LOADED:",
+      cacheUrl
+    );
+
+    return blobUrl;
+  } catch (error) {
+    console.warn(
+      "GET CACHED VIDEO ERROR:",
+      error
+    );
+
+    return "";
+  }
+}
+
+/* =========================================================
+   HYDRATE CACHED VIDEOS
+========================================================= */
+
+async function hydrateCachedVideos(
+  cachedVideos
+) {
+  if (
+    !Array.isArray(cachedVideos) ||
+    cachedVideos.length === 0
+  ) {
+    return [];
+  }
+
+  const hydrated =
+    await Promise.all(
+      cachedVideos.map(
+        async (video) => {
+          if (!video?.videoUrl) {
+            return null;
+          }
+
+          /*
+           * YouTube metadata can remain visible,
+           * but YouTube playback itself requires internet.
+           */
+
+          if (
+            isYoutube(
+              video.videoUrl
+            )
+          ) {
+            return {
+              ...video,
+              _offlineYoutube: true,
+            };
+          }
+
+          const cachedVideo =
+            await getCachedVideoFile(
+              video.videoUrl
+            );
+
+          /*
+           * Do not display a local video if its actual
+           * file was not cached. This prevents the UI from
+           * showing a 0:00 broken player offline.
+           */
+
+          if (!cachedVideo) {
+            return null;
+          }
+
+          return {
+            ...video,
+            videoUrl: cachedVideo,
+            _offlineCached: true,
+          };
+        }
+      )
+    );
+
+  return hydrated.filter(Boolean);
 }
 
 /* =========================================================
@@ -2240,31 +2493,28 @@ export default function Gallery() {
      PHOTOS
   ======================================================= */
 
-  /*
-   * IMPORTANT:
-   *
-   * Initial photos come ONLY from cache.
-   *
-   * There is NO gallery12 fallback.
-   */
   const [photos, setPhotos] =
     useState(() => {
       const cached =
         getCachedPhotos();
 
       console.log(
-        "INITIAL CACHED PHOTO COUNT:",
+        "INITIAL CACHED PHOTO METADATA COUNT:",
         cached.length
       );
 
       return cached;
     });
 
-  const [loadingPhotos, setLoadingPhotos] =
-    useState(false);
+  const [
+    loadingPhotos,
+    setLoadingPhotos,
+  ] = useState(false);
 
-  const [photoError, setPhotoError] =
-    useState("");
+  const [
+    photoError,
+    setPhotoError,
+  ] = useState("");
 
   const [
     usingPhotoCache,
@@ -2277,18 +2527,20 @@ export default function Gallery() {
 
   const [videos, setVideos] =
     useState(() => {
-      const cached =
-        getCachedVideos();
+      /*
+       * Do NOT use hardcoded/static videos.
+       *
+       * Backend data is the source of truth.
+       * If backend is unavailable, cached DB data is used.
+       */
 
-      if (cached.length > 0) {
-        return cached;
-      }
-
-      return fallbackVideos;
+      return getCachedVideos();
     });
 
-  const [loadingVideos, setLoadingVideos] =
-    useState(false);
+  const [
+    loadingVideos,
+    setLoadingVideos,
+  ] = useState(false);
 
   const [
     usingVideoCache,
@@ -2307,30 +2559,7 @@ export default function Gallery() {
 
     try {
       setLoadingPhotos(true);
-
       setPhotoError("");
-
-      console.log(
-        "================================"
-      );
-
-      console.log(
-        "LOADING GALLERY PHOTOS"
-      );
-
-      console.log(
-        "API:",
-        PHOTO_API_URL
-      );
-
-      console.log(
-        "LANGUAGE:",
-        language
-      );
-
-      console.log(
-        "================================"
-      );
 
       const response =
         await fetch(
@@ -2347,15 +2576,11 @@ export default function Gallery() {
       let result;
 
       try {
-        result = JSON.parse(text);
-      } catch (error) {
-        console.error(
-          "INVALID GALLERY JSON:",
-          text
-        );
-
+        result =
+          JSON.parse(text);
+      } catch {
         throw new Error(
-          "Backend returned invalid gallery data."
+          "Invalid gallery response."
         );
       }
 
@@ -2366,38 +2591,17 @@ export default function Gallery() {
         );
       }
 
-      /* ---------------------------------------------------
-         SUPPORT:
-
-         [
-           {...}
-         ]
-
-         OR
-
-         {
-           success: true,
-           data: [...]
-         }
-      --------------------------------------------------- */
-
       const galleryData =
         Array.isArray(result)
           ? result
-          : Array.isArray(
-                result?.data
-              )
-            ? result.data
-            : [];
+          : Array.isArray(result?.data)
+          ? result.data
+          : [];
 
       console.log(
         "DATABASE PHOTO COUNT:",
         galleryData.length
       );
-
-      /* ---------------------------------------------------
-         FORMAT DATABASE PHOTOS
-      --------------------------------------------------- */
 
       const formattedPhotos =
         galleryData
@@ -2457,153 +2661,64 @@ export default function Gallery() {
                   item.updated_at ||
                   "",
 
-                /*
-                 * Used by cacheService.
-                 */
-                cacheImageKey:
-                  `gallery-photo-${
-                    item.id ?? index
-                  }-${language}`,
+                display_order:
+                  item.display_order ??
+                  index,
 
-                /*
-                 * IMPORTANT:
-                 *
-                 * These are database photos,
-                 * not static photos.
-                 */
                 isStatic: false,
               };
             }
           )
           .filter(
-            (item) =>
-              item.image
+            (item) => item.image
           );
 
-      console.log(
-        "FORMATTED DATABASE PHOTO COUNT:",
-        formattedPhotos.length
-      );
-
-      /* ---------------------------------------------------
-         IMPORTANT SOURCE-OF-TRUTH RULE
-      ---------------------------------------------------
-
-         DO NOT DO THIS:
-
-         mergePhotos(
-           formattedPhotos,
-           existingPhotos
-         )
-
-         DO NOT add gallery12.
-
-         Backend response is the complete list.
-      --------------------------------------------------- */
-
       /*
-       * Backend is available.
-       *
-       * Display EXACTLY what backend returned.
-       *
-       * If backend returns 20:
-       * display 20.
-       *
-       * If backend returns 5:
-       * display 5.
-       *
-       * If backend returns 0:
-       * display 0.
+       * Backend response completely replaces the old list.
+       * No merge with old photos.
+       * No gallery12.
+       * No static photos.
        */
+
       setPhotos(
         formattedPhotos
       );
 
-      setUsingPhotoCache(
-        false
-      );
-
+      setUsingPhotoCache(false);
       setPhotoError("");
 
-      console.log(
-        "================================"
-      );
+      /*
+       * Save metadata immediately.
+       */
 
-      console.log(
-        "FINAL DATABASE PHOTO COUNT:",
-        formattedPhotos.length
+      savePhotoCache(
+        formattedPhotos
       );
-
-      console.log(
-        "DISPLAYING EXACTLY DATABASE PHOTOS"
-      );
-
-      console.log(
-        "================================"
-      );
-
-      /* ---------------------------------------------------
-         CACHE THE EXACT DATABASE LIST
-      --------------------------------------------------- */
 
       /*
-       * We cache in the background.
-       *
-       * The UI does not wait for image caching.
+       * Cache the actual image files.
        */
-      createPhotoCacheWithImages(
-        formattedPhotos
-      )
-        .then(
-          (
-            photosWithImages
-          ) => {
-            /*
-             * IMPORTANT:
-             *
-             * Cache exactly the backend list.
-             *
-             * No static photos.
-             */
-            savePhotoCache(
-              photosWithImages
-            );
 
-            console.log(
-              "DATABASE PHOTOS CACHED:",
-              photosWithImages.length
-            );
-          }
-        )
-        .catch((error) => {
+      cacheAllPhotoImages(
+        formattedPhotos
+      ).catch(
+        (error) =>
           console.warn(
             "BACKGROUND PHOTO CACHE ERROR:",
             error
-          );
-
-          /*
-           * Even if image caching fails,
-           * save the database metadata.
-           */
-          savePhotoCache(
-            formattedPhotos
-          );
-        });
-    } catch (error) {
-      console.error(
-        "GALLERY PHOTO ERROR:",
-        error
+          )
       );
+    } catch (error) {
+      /*
+       * Backend is unavailable.
+       * Silently use the last successful cache.
+       *
+       * No visible "Failed to fetch" notification.
+       */
 
-      /* ---------------------------------------------------
-         BACKEND UNAVAILABLE
-      ---------------------------------------------------
-
-         Now use cache.
-
-         IMPORTANT:
-         No gallery12 fallback.
-      --------------------------------------------------- */
+      console.warn(
+        "PHOTO BACKEND UNAVAILABLE - USING CACHE"
+      );
 
       const cachedPhotos =
         getCachedPhotos();
@@ -2611,20 +2726,17 @@ export default function Gallery() {
       if (
         cachedPhotos.length > 0
       ) {
-        console.log(
-          "BACKEND UNAVAILABLE"
-        );
-
-        console.log(
-          "USING CACHED DATABASE PHOTOS:",
-          cachedPhotos.length
-        );
+        const hydratedPhotos =
+          await hydrateCachedPhotos(
+            cachedPhotos
+          );
 
         /*
-         * Display exactly cached photos.
+         * Only display actual cached files.
          */
+
         setPhotos(
-          cachedPhotos
+          hydratedPhotos
         );
 
         setUsingPhotoCache(
@@ -2632,32 +2744,17 @@ export default function Gallery() {
         );
 
         setPhotoError("");
-
-        console.log(
-          "DISPLAYING CACHED PHOTOS:",
-          cachedPhotos.length
-        );
       } else {
-        /*
-         * No backend
-         * +
-         * No cache
-         *
-         * Do NOT use gallery12.
-         */
-        console.log(
-          "BACKEND UNAVAILABLE AND NO PHOTO CACHE"
-        );
-
         setPhotos([]);
-
         setUsingPhotoCache(
           false
         );
 
-        setPhotoError(
-          "Gallery photos are currently unavailable."
-        );
+        /*
+         * Keep the error invisible.
+         */
+
+        setPhotoError("");
       }
     } finally {
       setLoadingPhotos(
@@ -2672,9 +2769,7 @@ export default function Gallery() {
 
   async function loadVideos() {
     try {
-      setLoadingVideos(
-        true
-      );
+      setLoadingVideos(true);
 
       const language =
         i18n.language?.startsWith("te")
@@ -2698,9 +2793,9 @@ export default function Gallery() {
       try {
         result =
           JSON.parse(text);
-      } catch (error) {
+      } catch {
         throw new Error(
-          "Backend returned invalid video data."
+          "Invalid video response."
         );
       }
 
@@ -2711,110 +2806,159 @@ export default function Gallery() {
         );
       }
 
-      /*
-       * Support:
-       *
-       * [...]
-       *
-       * OR:
-       *
-       * {
-       *   success: true,
-       *   data: [...]
-       * }
-       */
       const videoData =
         Array.isArray(result)
           ? result
-          : Array.isArray(
-                result?.data
-              )
-            ? result.data
-            : [];
-
-      const latestVideos =
-        videoData.map(
-          (item, index) => ({
-            id:
-              item.id ??
-              `video-${index}`,
-
-            type: "video",
-
-            category:
-              item.category ||
-              "Video",
-
-            title:
-              item.title ||
-              "Video",
-
-            description:
-              item.description ||
-              "",
-
-            videoUrl:
-              item.video_url ||
-              item.videoUrl ||
-              item.url ||
-              "",
-
-            thumbnailUrl:
-              item.thumbnail_url ||
-              item.thumbnailUrl ||
-              "",
-
-            link:
-              item.link ||
-              "",
-
-            publishedDate:
-              item.published_date ||
-              "",
-          })
-        );
+          : Array.isArray(result?.data)
+          ? result.data
+          : [];
 
       /*
-       * Backend successfully responded.
-       *
-       * Use exactly backend videos.
+       * Backend is the source of truth.
+       * Whatever the backend returns becomes the latest list.
        */
-      setVideos(
-        latestVideos
+
+      const latestVideos =
+        videoData
+          .map(
+            (item, index) => ({
+              id:
+                item.id ??
+                `video-${index}`,
+
+              type: "video",
+
+              category:
+                item.category ||
+                "Video",
+
+              title:
+                item.title ||
+                "Video",
+
+              description:
+                item.description ||
+                "",
+
+              videoUrl:
+                item.video_url ||
+                item.videoUrl ||
+                item.url ||
+                "",
+
+              thumbnailUrl:
+                item.thumbnail_url ||
+                item.thumbnailUrl ||
+                "",
+
+              link:
+                item.link ||
+                "",
+
+              publishedDate:
+                item.published_date ||
+                "",
+
+              display_order:
+                item.display_order ??
+                index,
+
+              created_at:
+                item.created_at ||
+                "",
+
+              updated_at:
+                item.updated_at ||
+                "",
+            })
+          )
+          .filter(
+            (video) =>
+              video.videoUrl
+          );
+
+      /*
+       * Keep backend ordering.
+       */
+
+      latestVideos.sort(
+        (a, b) =>
+          Number(
+            a.display_order ?? 0
+          ) -
+          Number(
+            b.display_order ?? 0
+          )
       );
 
-      localStorage.setItem(
-        VIDEO_CACHE_KEY,
-        JSON.stringify(
-          latestVideos
-        )
+      setVideos(
+        latestVideos
       );
 
       setUsingVideoCache(
         false
       );
-    } catch (error) {
-      console.error(
-        "GALLERY VIDEO ERROR:",
-        error
+
+      /*
+       * Save the latest DB metadata.
+       */
+
+      saveVideoCache(
+        latestVideos
       );
 
-      const cached =
+      /*
+       * IMPORTANT:
+       *
+       * Wait for local video files to be cached.
+       *
+       * This means when this function completes,
+       * the latest local backend videos have been downloaded
+       * to Cache Storage and can be used when backend stops.
+       */
+
+      await cacheAllVideoFiles(
+        latestVideos
+      );
+    } catch (error) {
+      /*
+       * Backend unavailable.
+       *
+       * DO NOT show "Failed to fetch".
+       * Use the last successful cached database data.
+       */
+
+      console.warn(
+        "VIDEO BACKEND UNAVAILABLE - USING CACHE"
+      );
+
+      const cachedVideos =
         getCachedVideos();
 
       if (
-        cached.length > 0
+        cachedVideos.length > 0
       ) {
-        setVideos(cached);
+        const hydratedVideos =
+          await hydrateCachedVideos(
+            cachedVideos
+          );
+
+        setVideos(
+          hydratedVideos
+        );
 
         setUsingVideoCache(
           true
         );
       } else {
-        setVideos(
-          fallbackVideos
-        );
+        /*
+         * No backend and no cache.
+         * Empty state only.
+         *
+         * No hardcoded videos.
+         */
 
+        setVideos([]);
         setUsingVideoCache(
           false
         );
@@ -2832,7 +2976,6 @@ export default function Gallery() {
 
   useEffect(() => {
     loadPhotos();
-
     loadVideos();
 
     /*
@@ -2845,41 +2988,16 @@ export default function Gallery() {
   ======================================================= */
 
   useEffect(() => {
-    /* ---------------------------------------------------
-       ADMIN GALLERY UPDATE
-    --------------------------------------------------- */
-
     function refreshPhotos() {
-      console.log(
-        "Gallery update detected."
-      );
-
       loadPhotos();
     }
 
-    /* ---------------------------------------------------
-       ADMIN VIDEO UPDATE
-    --------------------------------------------------- */
-
     function refreshVideos() {
-      console.log(
-        "Video update detected."
-      );
-
       loadVideos();
     }
 
-    /* ---------------------------------------------------
-       REFRESH EVERYTHING
-    --------------------------------------------------- */
-
     function refreshEverything() {
-      console.log(
-        "Window focus detected - refreshing gallery."
-      );
-
       loadPhotos();
-
       loadVideos();
     }
 
@@ -2935,16 +3053,13 @@ export default function Gallery() {
         (item) => {
           const itemCategory =
             String(
-              item.category ||
-                ""
+              item.category || ""
             )
               .trim()
               .toLowerCase();
 
           const selectedCategory =
-            String(
-              category
-            )
+            String(category)
               .trim()
               .toLowerCase();
 
@@ -2966,11 +3081,8 @@ export default function Gallery() {
      CHANGE TYPE
   ======================================================= */
 
-  function changeType(
-    newType
-  ) {
+  function changeType(newType) {
     setType(newType);
-
     setCategory("All");
 
     if (
@@ -2994,15 +3106,6 @@ export default function Gallery() {
     type === "photo"
       ? loadingPhotos
       : loadingVideos;
-
-  /* =======================================================
-     ERROR
-  ======================================================= */
-
-  const currentError =
-    type === "photo"
-      ? photoError
-      : "";
 
   /* =======================================================
      CATEGORY TRANSLATION
@@ -3033,16 +3136,10 @@ export default function Gallery() {
 
   return (
     <>
-      {/* ===================================================
-          GALLERY SECTION
-      =================================================== */}
-
       <section className="bg-white py-16 lg:py-20">
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
 
-          {/* =================================================
-              HEADER
-          ================================================= */}
+          {/* HEADER */}
 
           <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
 
@@ -3068,9 +3165,7 @@ export default function Gallery() {
 
             </div>
 
-            {/* =================================================
-                PHOTO / VIDEO SWITCH
-            ================================================= */}
+            {/* PHOTO / VIDEO SWITCH */}
 
             <div className="flex w-fit rounded-full bg-slate-100 p-1">
 
@@ -3114,9 +3209,7 @@ export default function Gallery() {
 
           </div>
 
-          {/* =================================================
-              CATEGORIES
-          ================================================= */}
+          {/* CATEGORIES */}
 
           <div className="mt-10 flex flex-wrap gap-3">
 
@@ -3145,13 +3238,10 @@ export default function Gallery() {
 
           </div>
 
-          {/* =================================================
-              LOADING
-          ================================================= */}
+          {/* LOADING */}
 
           {isLoading && (
             <div className="mt-12 flex min-h-[250px] items-center justify-center">
-
               <div className="text-center">
 
                 <div className="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-4 border-slate-200 border-t-orange-600" />
@@ -3163,45 +3253,10 @@ export default function Gallery() {
                 </p>
 
               </div>
-
             </div>
           )}
 
-          {/* =================================================
-              ERROR
-          ================================================= */}
-
-          {!isLoading &&
-            currentError && (
-              <div className="mt-10 rounded-2xl border border-yellow-200 bg-yellow-50 p-6">
-
-                <p className="text-yellow-700">
-                  {currentError}
-                </p>
-
-                <p className="mt-2 text-sm text-yellow-600">
-                  No static gallery photos are being used.
-                </p>
-
-                <button
-                  type="button"
-                  onClick={
-                    loadPhotos
-                  }
-                  className="mt-4 rounded-lg bg-orange-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-orange-700"
-                >
-                  {t(
-                    "common.tryAgain",
-                    "Try Again"
-                  )}
-                </button>
-
-              </div>
-            )}
-
-          {/* =================================================
-              CACHE STATUS
-          ================================================= */}
+          {/* PHOTO CACHE STATUS */}
 
           {!isLoading &&
             type === "photo" &&
@@ -3209,17 +3264,26 @@ export default function Gallery() {
             filteredItems.length >
               0 && (
               <div className="mt-5 rounded-xl border border-blue-100 bg-blue-50 px-4 py-3">
-
                 <p className="text-sm text-blue-700">
-                  Showing the latest cached gallery photos.
                 </p>
-
               </div>
             )}
 
-          {/* =================================================
-              PHOTO COUNT
-          ================================================= */}
+          {/* VIDEO CACHE STATUS */}
+
+          {!isLoading &&
+            type === "video" &&
+            usingVideoCache &&
+            filteredItems.length >
+              0 && (
+              <div className="mt-5 rounded-xl border border-blue-100 bg-blue-50 px-4 py-3">
+                <p className="text-sm text-blue-700">
+               
+                </p>
+              </div>
+            )}
+
+          {/* PHOTO COUNT */}
 
           {!isLoading &&
             type === "photo" && (
@@ -3255,14 +3319,11 @@ export default function Gallery() {
               </div>
             )}
 
-          {/* =================================================
-              GALLERY GRID
-          ================================================= */}
+          {/* GALLERY GRID */}
 
           {!isLoading &&
             filteredItems.length >
               0 && (
-
               <div className="mt-6 grid grid-cols-2 gap-5 md:grid-cols-3 lg:grid-cols-4">
 
                 {filteredItems.map(
@@ -3270,10 +3331,6 @@ export default function Gallery() {
                     item,
                     index
                   ) => {
-
-                    /* ---------------------------------------
-                       VIDEO CHECK
-                    --------------------------------------- */
 
                     const video =
                       item.type ===
@@ -3293,27 +3350,16 @@ export default function Gallery() {
                     const featured =
                       index === 0;
 
-                    /* ---------------------------------------
-                       THUMBNAIL
-                    --------------------------------------- */
-
                     const thumbnail =
                       item.thumbnailUrl
                         ? getImageUrl(
                             item.thumbnailUrl
                           )
                         : youtube
-                          ? youtubeThumbnail(
-                              item.videoUrl
-                            )
-                          : "";
-
-                    /*
-                     * Cached base64 image.
-                     */
-                    const cachedBase64 =
-                      item._cachedImageBase64 ||
-                      "";
+                        ? youtubeThumbnail(
+                            item.videoUrl
+                          )
+                        : "";
 
                     return (
                       <article
@@ -3325,9 +3371,7 @@ export default function Gallery() {
                         }`}
                       >
 
-                        {/* =================================
-                            LOCAL VIDEO
-                        ================================= */}
+                        {/* LOCAL VIDEO */}
 
                         {localVideo ? (
                           <div className="bg-black">
@@ -3354,12 +3398,9 @@ export default function Gallery() {
                               onError={(
                                 event
                               ) => {
-                                console.error(
-                                  "VIDEO ERROR:",
-                                  getVideoUrl(
-                                    item.videoUrl
-                                  ),
-                                  event
+                                console.warn(
+                                  "VIDEO PLAYBACK ERROR:",
+                                  event.currentTarget.error
                                 );
                               }}
                             />
@@ -3386,22 +3427,24 @@ export default function Gallery() {
                                 </p>
                               )}
 
+                              {item._offlineCached && (
+                                <p className="mt-2 text-xs font-medium text-green-400">
+                                  Available offline
+                                </p>
+                              )}
+
                             </div>
 
                           </div>
                         ) : (
                           <>
-
-                            {/* =============================
-                                PHOTO / YOUTUBE IMAGE
-                            ============================== */}
+                            {/* PHOTO / YOUTUBE IMAGE */}
 
                             <img
                               src={
                                 item.type ===
                                 "photo"
-                                  ? cachedBase64 ||
-                                    getImageUrl(
+                                  ? getImageUrl(
                                       item.image
                                     )
                                   : thumbnail
@@ -3420,7 +3463,6 @@ export default function Gallery() {
                                   "photo"
                                 ) {
                                   const preview =
-                                    cachedBase64 ||
                                     getImageUrl(
                                       item.image
                                     );
@@ -3447,82 +3489,6 @@ export default function Gallery() {
                                 }
 
                               }}
-                              onError={async (
-                                event
-                              ) => {
-                                console.error(
-                                  "IMAGE LOAD ERROR:",
-                                  item.image
-                                );
-
-                                /*
-                                 * First attempt:
-                                 *
-                                 * Use embedded base64
-                                 * cached with the photo.
-                                 */
-                                if (
-                                  item._cachedImageBase64 &&
-                                  event.currentTarget.src !==
-                                    item._cachedImageBase64
-                                ) {
-                                  event.currentTarget.src =
-                                    item._cachedImageBase64;
-
-                                  return;
-                                }
-
-                                /*
-                                 * Second attempt:
-                                 *
-                                 * Try cacheService.
-                                 *
-                                 * This is useful if the image
-                                 * was cached in IndexedDB but
-                                 * not embedded in localStorage.
-                                 */
-                                if (
-                                  item.cacheImageKey
-                                ) {
-                                  try {
-                                    const cachedImage =
-                                      await getCachedImageBase64(
-                                        item.cacheImageKey
-                                      );
-
-                                    if (
-                                      cachedImage &&
-                                      event.currentTarget.src !==
-                                        cachedImage
-                                    ) {
-                                      event.currentTarget.src =
-                                        cachedImage;
-
-                                      return;
-                                    }
-                                  } catch (
-                                    cacheError
-                                  ) {
-                                    console.warn(
-                                      "CACHE IMAGE LOOKUP ERROR:",
-                                      cacheError
-                                    );
-                                  }
-                                }
-
-                                /*
-                                 * IMPORTANT:
-                                 *
-                                 * NO gallery12 fallback.
-                                 *
-                                 * If the image cannot be loaded
-                                 * and there is no cached image,
-                                 * we leave the image source alone.
-                                 *
-                                 * This prevents an unrelated
-                                 * static photo from appearing.
-                                 */
-                              }}
                               className={`w-full object-cover transition duration-700 group-hover:scale-105 ${
                                 item.type ===
                                 "photo"
@@ -3533,11 +3499,47 @@ export default function Gallery() {
                                   ? "h-[300px] md:h-[520px]"
                                   : "h-[220px] md:h-[250px]"
                               }`}
+                              onError={async (
+                                event
+                              ) => {
+
+                                if (
+                                  item.type !==
+                                  "photo"
+                                ) {
+                                  return;
+                                }
+
+                                if (
+                                  item.image?.startsWith(
+                                    "blob:"
+                                  )
+                                ) {
+                                  return;
+                                }
+
+                                const originalUrl =
+                                  getImageUrl(
+                                    item.image_path ||
+                                      item.image
+                                  );
+
+                                const cachedImage =
+                                  await getCachedPhotoImage(
+                                    originalUrl
+                                  );
+
+                                if (
+                                  cachedImage
+                                ) {
+                                  event.currentTarget.src =
+                                    cachedImage;
+                                }
+
+                              }}
                             />
 
-                            {/* =============================
-                                PHOTO OVERLAY
-                            ============================== */}
+                            {/* PHOTO OVERLAY */}
 
                             {item.type ===
                               "photo" && (
@@ -3570,9 +3572,7 @@ export default function Gallery() {
                               </div>
                             )}
 
-                            {/* =============================
-                                YOUTUBE PLAY
-                            ============================== */}
+                            {/* YOUTUBE PLAY */}
 
                             {youtube && (
                               <button
@@ -3587,7 +3587,6 @@ export default function Gallery() {
                                 className="absolute inset-0 flex items-center justify-center"
                                 aria-label={`Play ${item.title}`}
                               >
-
                                 <div className="flex h-14 w-14 items-center justify-center rounded-full bg-white/90 shadow-xl transition hover:scale-110">
 
                                   <Play
@@ -3597,9 +3596,17 @@ export default function Gallery() {
                                   />
 
                                 </div>
-
                               </button>
                             )}
+
+                            {/* OFFLINE YOUTUBE MESSAGE */}
+
+                            {youtube &&
+                              item._offlineYoutube && (
+                                <div className="pointer-events-none absolute bottom-3 left-3 right-3 rounded-lg bg-black/70 px-3 py-2 text-center text-xs text-white">
+                                  Internet is required to play YouTube videos.
+                                </div>
+                              )}
 
                           </>
                         )}
@@ -3612,12 +3619,9 @@ export default function Gallery() {
               </div>
             )}
 
-          {/* =================================================
-              NO RESULTS
-          ================================================= */}
+          {/* NO RESULTS */}
 
           {!isLoading &&
-            !currentError &&
             filteredItems.length ===
               0 && (
               <div className="mt-12 rounded-3xl border border-slate-100 bg-slate-50 py-20 text-center">
@@ -3637,9 +3641,7 @@ export default function Gallery() {
         </div>
       </section>
 
-      {/* ===================================================
-          PHOTO LIGHTBOX
-      =================================================== */}
+      {/* PHOTO LIGHTBOX */}
 
       {selectedImage && (
         <div

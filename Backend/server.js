@@ -112,7 +112,10 @@ const homeFolder = path.join(
   uploadFolder,
   "home"
 );
-
+const aboutFolder = path.join(
+  uploadFolder,
+  "about"
+);
 // ============================================================
 // CREATE REQUIRED FOLDERS
 // ============================================================
@@ -446,6 +449,11 @@ const homeUpload =
     homeFolder,
     10
   );
+  const aboutUpload =
+  createImageUpload(
+    aboutFolder,
+    10
+  );
 
 // ============================================================
 // DEFAULT CONTENT
@@ -566,6 +574,8 @@ const normalizeUploadPath = (imageUrl) => {
   // Return as /uploads/...
   return `/${value}`;
 };
+
+
 // ============================================================
 // RESOLVE CONTENT URLS
 // ============================================================
@@ -679,7 +689,7 @@ const getUploadedImage = (
     files[fieldName] &&
     files[fieldName][0]
   ) {
-    return `/uploads/${files[fieldName][0].filename}`;
+    return `/uploads/home/${files[fieldName][0].filename}`;
   }
 
   return existingImage || "";
@@ -1252,6 +1262,10 @@ app.put(
       maxCount: 1,
     },
     {
+      name: "featuredNewsImage",
+      maxCount: 1,
+    },
+    {
       name: "newsImage1",
       maxCount: 1,
     },
@@ -1554,8 +1568,12 @@ app.put(
             getUploadedImage(
               req.files,
               "newsFeaturedImage",
-              existingNews.featured
-                ?.image || ""
+              getUploadedImage(
+                req.files,
+                "featuredNewsImage",
+                existingNews.featured
+                  ?.image || ""
+              )
             ),
 
           date:
@@ -1677,55 +1695,100 @@ app.put(
   }
 );
 
+// // ============================================================
+// // UPDATE ABOUT
+// // ============================================================
+
+// app.put(
+//   "/api/content/about",
+//   authenticateAdmin,
+//   (req, res) => {
+//     try {
+//       const content =
+//         readContent();
+
+//       content.about = {
+//         ...(content.about || {}),
+
+//         aboutName:
+//           req.body.aboutName || "",
+
+//         aboutPosition:
+//           req.body.aboutPosition || "",
+
+//         aboutDescription:
+//           req.body.aboutDescription ||
+//           "",
+//       };
+
+//       saveContent(content);
+
+//       res.json({
+//         success: true,
+//         message:
+//           "About content updated successfully!",
+//         about:
+//           content.about,
+//       });
+//     } catch (error) {
+//       console.error(
+//         "UPDATE ABOUT ERROR:",
+//         error
+//       );
+
+//       res.status(500).json({
+//         success: false,
+//         message:
+//           "Failed to update About content",
+//       });
+//     }
+//   }
+// );
+
 // ============================================================
-// UPDATE ABOUT
+// GET ABOUT CONTENT FROM POSTGRESQL
 // ============================================================
 
-app.put(
-  "/api/content/about",
-  authenticateAdmin,
-  (req, res) => {
-    try {
-      const content =
-        readContent();
+app.get("/api/about", async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT
+        id,
+        about_name AS "aboutName",
+        about_position AS "aboutPosition",
+        about_description AS "aboutDescription",
+        about_image AS "aboutImage",
+        updated_at AS "updatedAt"
+      FROM about_page
+      ORDER BY id ASC
+      LIMIT 1
+    `);
 
-      content.about = {
-        ...(content.about || {}),
-
-        aboutName:
-          req.body.aboutName || "",
-
-        aboutPosition:
-          req.body.aboutPosition || "",
-
-        aboutDescription:
-          req.body.aboutDescription ||
-          "",
-      };
-
-      saveContent(content);
-
-      res.json({
-        success: true,
-        message:
-          "About content updated successfully!",
-        about:
-          content.about,
-      });
-    } catch (error) {
-      console.error(
-        "UPDATE ABOUT ERROR:",
-        error
-      );
-
-      res.status(500).json({
+    if (result.rows.length === 0) {
+      return res.status(404).json({
         success: false,
-        message:
-          "Failed to update About content",
+        message: "About content not found",
       });
     }
+
+    const about = resolveContentUrls(
+      result.rows[0],
+      req
+    );
+
+    res.json({
+      success: true,
+      about,
+    });
+  } catch (error) {
+    console.error("GET ABOUT ERROR:", error);
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch About content",
+    });
   }
-);
+});
 
 // ============================================================
 // UPDATE BIOGRAPHY
@@ -4060,214 +4123,505 @@ app.delete(
 // ============================================================
 
 // GET GALLERY
+// app.get(
+//   "/api/gallery",
+//   async (req, res) => {
+//     try {
+//       const result =
+//         await pool.query(`
+//           SELECT
+//             id,
+//             title,
+//             caption,
+//             category,
+//             image_filename,
+//             image_path,
+//             created_at,
+//             updated_at
+//           FROM gallery
+//           ORDER BY created_at DESC
+//         `);
+
+//       const data =
+//         result.rows.map(
+//           (row) => ({
+//             ...row,
+
+//             image_path:
+//               getPublicUploadPath(
+//                 row.image_path
+//               ),
+//           })
+//         );
+
+//       res.json({
+//         success: true,
+//         data,
+//       });
+//     } catch (error) {
+//       console.error(
+//         "GET GALLERY ERROR:",
+//         error
+//       );
+
+//       res.status(500).json({
+//         success: false,
+//         message:
+//           "Failed to load gallery images",
+//         error:
+//           error.message,
+//       });
+//     }
+//   }
+// );
+
 app.get(
   "/api/gallery",
   async (req, res) => {
     try {
-      const result =
-        await pool.query(`
-          SELECT
-            id,
-            title,
-            caption,
-            category,
-            image_filename,
-            image_path,
-            created_at,
-            updated_at
-          FROM gallery
-          ORDER BY created_at DESC
-        `);
+      const result = await pool.query(`
+        SELECT
+          id,
+          title,
+          caption,
+          category,
+          image_filename,
+          image_path,
+          display_order,
+          created_at,
+          updated_at
+        FROM gallery
+        ORDER BY
+          display_order ASC NULLS LAST,
+          created_at ASC,
+          id ASC
+      `);
 
-      const data =
-        result.rows.map(
-          (row) => ({
-            ...row,
-
-            image_path:
-              getPublicUploadPath(
-                row.image_path
-              ),
-          })
-        );
+      const data = result.rows.map((row) => ({
+        ...row,
+        image_path: getPublicUploadPath(row.image_path),
+      }));
 
       res.json({
         success: true,
         data,
       });
     } catch (error) {
-      console.error(
-        "GET GALLERY ERROR:",
-        error
-      );
+      console.error("GET GALLERY ERROR:", error);
 
       res.status(500).json({
         success: false,
-        message:
-          "Failed to load gallery images",
-        error:
-          error.message,
+        message: "Failed to fetch gallery",
+        error: error.message,
       });
     }
   }
 );
 
 // ADD GALLERY
+// app.post(
+//   "/api/gallery",
+//   authenticateAdmin,
+//   galleryUpload.single(
+//     "image"
+//   ),
+//   async (req, res) => {
+//     try {
+//       const {
+//         title,
+//         caption,
+//         category,
+//       } = req.body;
+
+//       if (!req.file) {
+//         return res.status(400).json({
+//           success: false,
+//           message:
+//             "Please select an image",
+//         });
+//       }
+
+//       const allowedCategories = [
+//         "Public Events",
+//         "Constituency",
+//         "Meetings",
+//         "Events",
+//       ];
+
+//       const selectedCategory =
+//         allowedCategories.includes(
+//           category
+//         )
+//           ? category
+//           : "Public Events";
+
+//       const imageFilename =
+//         req.file.filename;
+
+//       const imagePath =
+//         `/uploads/gallery/${imageFilename}`;
+
+//       const result =
+//         await pool.query(
+//           `
+//           INSERT INTO gallery
+//           (
+//             title,
+//             caption,
+//             category,
+//             image_filename,
+//             image_path
+//           )
+//           VALUES
+//           ($1,$2,$3,$4,$5)
+//           RETURNING *
+//           `,
+//           [
+//             title || "",
+//             caption || "",
+//             selectedCategory,
+//             imageFilename,
+//             imagePath,
+//           ]
+//         );
+
+//       res.status(201).json({
+//         success: true,
+//         message:
+//           "Gallery image uploaded successfully",
+
+//         data: {
+//           ...result.rows[0],
+//           image_path:
+//             getPublicUploadPath(
+//               result.rows[0]
+//                 .image_path
+//             ),
+//         },
+//       });
+//     } catch (error) {
+//       console.error(
+//         "POST GALLERY ERROR:",
+//         error
+//       );
+
+//       if (req.file) {
+//         deleteFileIfExists(
+//           path.join(
+//             galleryFolder,
+//             req.file.filename
+//           )
+//         );
+//       }
+
+//       res.status(500).json({
+//         success: false,
+//         message:
+//           "Failed to upload gallery image",
+//         error:
+//           error.message,
+//       });
+//     }
+//   }
+// );
+
 app.post(
   "/api/gallery",
   authenticateAdmin,
-  galleryUpload.single(
-    "image"
-  ),
+  galleryUpload.single("image"),
   async (req, res) => {
     try {
       const {
         title,
         caption,
         category,
+        display_order,
       } = req.body;
 
       if (!req.file) {
         return res.status(400).json({
           success: false,
-          message:
-            "Please select an image",
+          message: "Image is required",
         });
       }
 
-      const allowedCategories = [
-        "Public Events",
-        "Constituency",
-        "Meetings",
-        "Events",
-      ];
-
-      const selectedCategory =
-        allowedCategories.includes(
-          category
-        )
-          ? category
-          : "Public Events";
-
-      const imageFilename =
-        req.file.filename;
+      const imageFilename = req.file.filename;
 
       const imagePath =
         `/uploads/gallery/${imageFilename}`;
 
-      const result =
-        await pool.query(
-          `
-          INSERT INTO gallery
-          (
-            title,
-            caption,
-            category,
-            image_filename,
-            image_path
-          )
-          VALUES
-          ($1,$2,$3,$4,$5)
-          RETURNING *
-          `,
-          [
-            title || "",
-            caption || "",
-            selectedCategory,
-            imageFilename,
-            imagePath,
-          ]
-        );
+      const orderValue =
+        display_order === undefined ||
+        display_order === ""
+          ? 0
+          : Number(display_order);
+
+      if (!Number.isInteger(orderValue)) {
+        return res.status(400).json({
+          success: false,
+          message: "display_order must be a valid number",
+        });
+      }
+
+      const result = await pool.query(
+        `
+        INSERT INTO gallery
+        (
+          title,
+          caption,
+          category,
+          image_filename,
+          image_path,
+          display_order
+        )
+        VALUES ($1, $2, $3, $4, $5, $6)
+        RETURNING
+          id,
+          title,
+          caption,
+          category,
+          image_filename,
+          image_path,
+          display_order,
+          created_at,
+          updated_at
+        `,
+        [
+          title || "",
+          caption || "",
+          category || "All",
+          imageFilename,
+          imagePath,
+          orderValue,
+        ]
+      );
+
+      const row = result.rows[0];
 
       res.status(201).json({
         success: true,
-        message:
-          "Gallery image uploaded successfully",
-
+        message: "Gallery image added successfully",
         data: {
-          ...result.rows[0],
-          image_path:
-            getPublicUploadPath(
-              result.rows[0]
-                .image_path
-            ),
+          ...row,
+          image_path: getPublicUploadPath(
+            row.image_path
+          ),
         },
       });
     } catch (error) {
-      console.error(
-        "POST GALLERY ERROR:",
-        error
-      );
+      console.error("POST GALLERY ERROR:", error);
 
       if (req.file) {
-        deleteFileIfExists(
-          path.join(
-            galleryFolder,
-            req.file.filename
-          )
-        );
+        deleteFileIfExists(req.file.path);
       }
 
       res.status(500).json({
         success: false,
-        message:
-          "Failed to upload gallery image",
-        error:
-          error.message,
+        message: "Failed to add gallery image",
+        error: error.message,
       });
     }
   }
 );
 
 // UPDATE GALLERY
+// app.put(
+//   "/api/gallery/:id",
+//   authenticateAdmin,
+//   galleryUpload.single(
+//     "image"
+//   ),
+//   async (req, res) => {
+//     try {
+//       const { id } =
+//         req.params;
+
+//       const {
+//         title,
+//         caption,
+//         category,
+//       } = req.body;
+
+//       const existing =
+//         await pool.query(
+//           `
+//           SELECT *
+//           FROM gallery
+//           WHERE id = $1
+//           `,
+//           [id]
+//         );
+
+//       if (
+//         existing.rows.length ===
+//         0
+//       ) {
+//         return res.status(404).json({
+//           success: false,
+//           message:
+//             "Gallery image not found",
+//         });
+//       }
+
+//       const oldImage =
+//         existing.rows[0];
+
+//       let imageFilename =
+//         oldImage.image_filename;
+
+//       let imagePath =
+//         normalizeUploadPath(
+//           oldImage.image_path
+//         );
+
+//       if (req.file) {
+//         imageFilename =
+//           req.file.filename;
+
+//         imagePath =
+//           `/uploads/gallery/${req.file.filename}`;
+//       }
+
+//       const allowedCategories = [
+//         "Public Events",
+//         "Constituency",
+//         "Meetings",
+//         "Events",
+//       ];
+
+//       const selectedCategory =
+//         allowedCategories.includes(
+//           category
+//         )
+//           ? category
+//           : oldImage.category;
+
+//       const result =
+//         await pool.query(
+//           `
+//           UPDATE gallery
+//           SET
+//             title = $1,
+//             caption = $2,
+//             category = $3,
+//             image_filename = $4,
+//             image_path = $5,
+//             updated_at = CURRENT_TIMESTAMP
+//           WHERE id = $6
+//           RETURNING *
+//           `,
+//           [
+//             title || "",
+//             caption || "",
+//             selectedCategory,
+//             imageFilename,
+//             imagePath,
+//             id,
+//           ]
+//         );
+
+//       if (
+//         req.file &&
+//         oldImage.image_path
+//       ) {
+//         deleteUploadByUrl(
+//           oldImage.image_path
+//         );
+//       }
+
+//       res.json({
+//         success: true,
+//         message:
+//           "Gallery image updated successfully",
+
+//         data: {
+//           ...result.rows[0],
+//           image_path:
+//             getPublicUploadPath(
+//               result.rows[0]
+//                 .image_path
+//             ),
+//         },
+//       });
+//     } catch (error) {
+//       console.error(
+//         "UPDATE GALLERY ERROR:",
+//         error
+//       );
+
+//       if (req.file) {
+//         deleteFileIfExists(
+//           path.join(
+//             galleryFolder,
+//             req.file.filename
+//           )
+//         );
+//       }
+
+//       res.status(500).json({
+//         success: false,
+//         message:
+//           "Failed to update gallery image",
+//         error:
+//           error.message,
+//       });
+//     }
+//   }
+// );
+
 app.put(
   "/api/gallery/:id",
   authenticateAdmin,
-  galleryUpload.single(
-    "image"
-  ),
+  galleryUpload.single("image"),
   async (req, res) => {
+    const client = await pool.connect();
+
     try {
-      const { id } =
-        req.params;
+      const { id } = req.params;
 
       const {
         title,
         caption,
         category,
+        display_order,
       } = req.body;
 
-      const existing =
-        await pool.query(
-          `
-          SELECT *
-          FROM gallery
-          WHERE id = $1
-          `,
-          [id]
-        );
+      await client.query("BEGIN");
 
-      if (
-        existing.rows.length ===
-        0
-      ) {
+      const existingResult = await client.query(
+        `
+        SELECT
+          id,
+          image_filename,
+          image_path
+        FROM gallery
+        WHERE id = $1
+        FOR UPDATE
+        `,
+        [id]
+      );
+
+      if (existingResult.rows.length === 0) {
+        await client.query("ROLLBACK");
+
+        if (req.file) {
+          deleteFileIfExists(req.file.path);
+        }
+
         return res.status(404).json({
           success: false,
-          message:
-            "Gallery image not found",
+          message: "Gallery image not found",
         });
       }
 
-      const oldImage =
-        existing.rows[0];
+      const existing =
+        existingResult.rows[0];
 
       let imageFilename =
-        oldImage.image_filename;
+        existing.image_filename;
 
       let imagePath =
-        normalizeUploadPath(
-          oldImage.image_path
-        );
+        existing.image_path;
 
       if (req.file) {
         imageFilename =
@@ -4277,147 +4631,282 @@ app.put(
           `/uploads/gallery/${req.file.filename}`;
       }
 
-      const allowedCategories = [
-        "Public Events",
-        "Constituency",
-        "Meetings",
-        "Events",
-      ];
-
-      const selectedCategory =
-        allowedCategories.includes(
-          category
-        )
-          ? category
-          : oldImage.category;
-
-      const result =
-        await pool.query(
-          `
-          UPDATE gallery
-          SET
-            title = $1,
-            caption = $2,
-            category = $3,
-            image_filename = $4,
-            image_path = $5,
-            updated_at = CURRENT_TIMESTAMP
-          WHERE id = $6
-          RETURNING *
-          `,
-          [
-            title || "",
-            caption || "",
-            selectedCategory,
-            imageFilename,
-            imagePath,
-            id,
-          ]
-        );
+      let orderValue;
 
       if (
-        req.file &&
-        oldImage.image_path
+        display_order === undefined ||
+        display_order === ""
       ) {
+        orderValue = 0;
+      } else {
+        orderValue = Number(display_order);
+      }
+
+      if (!Number.isInteger(orderValue)) {
+        await client.query("ROLLBACK");
+
+        if (req.file) {
+          deleteFileIfExists(req.file.path);
+        }
+
+        return res.status(400).json({
+          success: false,
+          message:
+            "display_order must be a valid number",
+        });
+      }
+
+      const result = await client.query(
+        `
+        UPDATE gallery
+        SET
+          title = $1,
+          caption = $2,
+          category = $3,
+          image_filename = $4,
+          image_path = $5,
+          display_order = $6,
+          updated_at = CURRENT_TIMESTAMP
+        WHERE id = $7
+        RETURNING
+          id,
+          title,
+          caption,
+          category,
+          image_filename,
+          image_path,
+          display_order,
+          created_at,
+          updated_at
+        `,
+        [
+          title || "",
+          caption || "",
+          category || "All",
+          imageFilename,
+          imagePath,
+          orderValue,
+          id,
+        ]
+      );
+
+      await client.query("COMMIT");
+
+      // Delete old physical file only after DB update succeeds
+      if (req.file && existing.image_path) {
         deleteUploadByUrl(
-          oldImage.image_path
+          existing.image_path
         );
       }
+
+      const row = result.rows[0];
 
       res.json({
         success: true,
         message:
           "Gallery image updated successfully",
-
         data: {
-          ...result.rows[0],
+          ...row,
           image_path:
             getPublicUploadPath(
-              result.rows[0]
-                .image_path
+              row.image_path
             ),
         },
       });
     } catch (error) {
-      console.error(
-        "UPDATE GALLERY ERROR:",
-        error
-      );
+      try {
+        await client.query("ROLLBACK");
+      } catch (_) {}
 
       if (req.file) {
-        deleteFileIfExists(
-          path.join(
-            galleryFolder,
-            req.file.filename
-          )
-        );
+        deleteFileIfExists(req.file.path);
       }
+
+      console.error(
+        "PUT GALLERY ERROR:",
+        error
+      );
 
       res.status(500).json({
         success: false,
         message:
           "Failed to update gallery image",
-        error:
-          error.message,
+        error: error.message,
       });
+    } finally {
+      client.release();
     }
   }
 );
 
 // DELETE GALLERY
+// app.delete(
+//   "/api/gallery/:id",
+//   authenticateAdmin,
+//   async (req, res) => {
+//     try {
+//       const result =
+//         await pool.query(
+//           `
+//           DELETE FROM gallery
+//           WHERE id = $1
+//           RETURNING image_filename, image_path
+//           `,
+//           [req.params.id]
+//         );
+
+//       if (
+//         result.rows.length ===
+//         0
+//       ) {
+//         return res.status(404).json({
+//           success: false,
+//           message:
+//             "Gallery image not found",
+//         });
+//       }
+
+//       const imagePath =
+//         result.rows[0]
+//           .image_path;
+
+//       if (imagePath) {
+//         deleteUploadByUrl(
+//           imagePath
+//         );
+//       } else if (
+//         result.rows[0]
+//           .image_filename
+//       ) {
+//         deleteFileIfExists(
+//           path.join(
+//             galleryFolder,
+//             result.rows[0]
+//               .image_filename
+//           )
+//         );
+//       }
+
+//       res.json({
+//         success: true,
+//         message:
+//           "Gallery image deleted successfully",
+//       });
+//     } catch (error) {
+//       console.error(
+//         "DELETE GALLERY ERROR:",
+//         error
+//       );
+
+//       res.status(500).json({
+//         success: false,
+//         message:
+//           "Failed to delete gallery image",
+//         error:
+//           error.message,
+//       });
+//     }
+//   }
+// );
+
 app.delete(
   "/api/gallery/:id",
   authenticateAdmin,
   async (req, res) => {
-    try {
-      const result =
-        await pool.query(
-          `
-          DELETE FROM gallery
-          WHERE id = $1
-          RETURNING image_filename, image_path
-          `,
-          [req.params.id]
-        );
+    const client = await pool.connect();
 
-      if (
-        result.rows.length ===
-        0
-      ) {
-        return res.status(404).json({
+    try {
+      const { id } = req.params;
+
+      if (!id || !/^\d+$/.test(String(id))) {
+        return res.status(400).json({
           success: false,
-          message:
-            "Gallery image not found",
+          message: "Invalid gallery image ID",
         });
       }
 
-      const imagePath =
-        result.rows[0]
-          .image_path;
+      await client.query("BEGIN");
 
-      if (imagePath) {
-        deleteUploadByUrl(
-          imagePath
+      // First get the exact database row
+      const existingResult =
+        await client.query(
+          `
+          SELECT
+            id,
+            image_filename,
+            image_path
+          FROM gallery
+          WHERE id = $1
+          FOR UPDATE
+          `,
+          [id]
         );
-      } else if (
-        result.rows[0]
-          .image_filename
-      ) {
-        deleteFileIfExists(
-          path.join(
-            galleryFolder,
-            result.rows[0]
-              .image_filename
-          )
-        );
+
+      if (existingResult.rows.length === 0) {
+        await client.query("ROLLBACK");
+
+        return res.status(404).json({
+          success: false,
+          message: "Gallery image not found",
+        });
       }
+
+      const existing =
+        existingResult.rows[0];
+
+      // Delete the DATABASE row
+      const deleteResult =
+        await client.query(
+          `
+          DELETE FROM gallery
+          WHERE id = $1
+          RETURNING
+            id,
+            image_filename,
+            image_path
+          `,
+          [id]
+        );
+
+      await client.query("COMMIT");
+
+      // Delete physical image after DB deletion succeeds
+      let physicalFileDeleted = false;
+
+      if (existing.image_path) {
+        physicalFileDeleted =
+          deleteUploadByUrl(
+            existing.image_path
+          );
+      } else if (
+        existing.image_filename
+      ) {
+        physicalFileDeleted =
+          deleteFileIfExists(
+            path.join(
+              galleryFolder,
+              existing.image_filename
+            )
+          );
+      }
+
+      console.log(
+        `Gallery image deleted from DB: ${deleteResult.rows[0].id}`
+      );
 
       res.json({
         success: true,
         message:
           "Gallery image deleted successfully",
+        deletedId:
+          deleteResult.rows[0].id,
+        physicalFileDeleted,
       });
     } catch (error) {
+      try {
+        await client.query("ROLLBACK");
+      } catch (_) {}
+
       console.error(
         "DELETE GALLERY ERROR:",
         error
@@ -4427,13 +4916,226 @@ app.delete(
         success: false,
         message:
           "Failed to delete gallery image",
-        error:
-          error.message,
+        error: error.message,
       });
+    } finally {
+      client.release();
     }
   }
 );
 
+//redorder-route for gallery
+app.put(
+  "/api/gallery/reorder",
+  authenticateAdmin,
+  async (req, res) => {
+    const client = await pool.connect();
+
+    try {
+      const { order } = req.body;
+
+      if (!Array.isArray(order)) {
+        return res.status(400).json({
+          success: false,
+          message: "order must be an array",
+        });
+      }
+
+      await client.query("BEGIN");
+
+      for (const item of order) {
+        if (
+          !item ||
+          item.id === undefined ||
+          item.id === null
+        ) {
+          continue;
+        }
+
+        const displayOrder =
+          Number(item.display_order);
+
+        if (
+          !Number.isInteger(displayOrder)
+        ) {
+          continue;
+        }
+
+        await client.query(
+          `
+          UPDATE gallery
+          SET
+            display_order = $1,
+            updated_at = CURRENT_TIMESTAMP
+          WHERE id = $2
+          `,
+          [
+            displayOrder,
+            String(item.id),
+          ]
+        );
+      }
+
+      await client.query("COMMIT");
+
+      res.json({
+        success: true,
+        message:
+          "Gallery order updated successfully",
+      });
+    } catch (error) {
+      try {
+        await client.query(
+          "ROLLBACK"
+        );
+      } catch (_) {}
+
+      console.error(
+        "REORDER GALLERY ERROR:",
+        error
+      );
+
+      res.status(500).json({
+        success: false,
+        message:
+          "Failed to reorder gallery",
+        error: error.message,
+      });
+    } finally {
+      client.release();
+    }
+  }
+);
+// ============================================================
+// UPDATE ABOUT CONTENT + IMAGE
+// ============================================================
+
+app.put(
+  "/api/content/about",
+  authenticateAdmin,
+
+  aboutUpload.fields([
+    {
+      name: "aboutImage",
+      maxCount: 1,
+    },
+  ]),
+
+  async (req, res) => {
+    try {
+      const {
+        aboutName,
+        aboutPosition,
+        aboutDescription,
+      } = req.body;
+
+      // ======================================================
+      // GET CURRENT IMAGE FROM DATABASE
+      // ======================================================
+
+      const existingResult = await pool.query(`
+        SELECT
+          id,
+          about_image
+        FROM about_page
+        ORDER BY id ASC
+        LIMIT 1
+      `);
+
+      if (existingResult.rows.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: "About content not found",
+        });
+      }
+
+      const existingAbout =
+        existingResult.rows[0];
+
+      // Keep existing image if no new image is uploaded
+      let aboutImage =
+        existingAbout.about_image || "";
+
+      // ======================================================
+      // IF NEW IMAGE WAS UPLOADED
+      // ======================================================
+
+      if (
+        req.files &&
+        req.files.aboutImage &&
+        req.files.aboutImage[0]
+      ) {
+        aboutImage =
+          `/uploads/about/${req.files.aboutImage[0].filename}`;
+      }
+
+      // ======================================================
+      // UPDATE POSTGRESQL
+      // ======================================================
+
+      const result = await pool.query(
+        `
+        UPDATE about_page
+        SET
+          about_name = $1,
+          about_position = $2,
+          about_description = $3,
+          about_image = $4,
+          updated_at = CURRENT_TIMESTAMP
+        WHERE id = $5
+
+        RETURNING
+          id,
+          about_name AS "aboutName",
+          about_position AS "aboutPosition",
+          about_description AS "aboutDescription",
+          about_image AS "aboutImage",
+          updated_at AS "updatedAt"
+        `,
+        [
+          aboutName || "",
+          aboutPosition || "",
+          aboutDescription || "",
+          aboutImage,
+          existingAbout.id,
+        ]
+      );
+
+      // ======================================================
+      // CONVERT /uploads/... TO FULL URL
+      // ======================================================
+
+      const about = resolveContentUrls(
+        result.rows[0],
+        req
+      );
+
+      // ======================================================
+      // SEND RESPONSE
+      // ======================================================
+
+      res.json({
+        success: true,
+        message:
+          "About content updated successfully!",
+        about,
+      });
+
+    } catch (error) {
+
+      console.error(
+        "UPDATE ABOUT ERROR:",
+        error
+      );
+
+      res.status(500).json({
+        success: false,
+        message:
+          "Failed to update About content",
+      });
+    }
+  }
+);
 // ============================================================
 // TEST ENVIRONMENT
 // ============================================================
@@ -4504,7 +5206,8 @@ app.use(
       return res.status(400).json({
         success: false,
         message:
-          `Upload error: ${error.message}`,
+          `Upload error: ${error.message}${error.field ? ` (field: ${error.field})` : ""}`,
+        field: error.field || null,
       });
     }
 

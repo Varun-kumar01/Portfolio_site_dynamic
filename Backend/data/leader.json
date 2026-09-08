@@ -10,9 +10,9 @@
     "experience": "40+ Years"
   },
   "contact": {
-    "email": "office@email.com",
+    "email": "alduri@email.com",
     "phone": "6309563624",
-    "address": "Dharmapuri, Jagtial, Telangana",
+    "address": "Dharmapuriii, Jagtial, Telangana",
     "officeHours": ""
   },
   "quote": "True leadership is measured by service, integrity and the positive change we create for people.",
@@ -29,91 +29,91 @@
     "state": "Telangana"
   },
   "home": {
-    "heroTitle": "LAXMAN KUMAR",
-    "heroSubtitle": "Building a Better Telangana",
-    "heroDescription": "Committed to transparent governance, inclusive growth, stronger infrastructure, quality education and public welfare.",
-    "heroImage": "/leader.png",
-    "aboutHeading": "Dedicated to the Progress of Every Citizen",
-    "aboutDescription": "Public service is built on integrity, transparency and commitment. Through continuous interaction with citizens, community participation and development-focused initiatives, every effort is directed towards building a stronger and more prosperous Telangana.",
+    "heroTitle": "",
+    "heroSubtitle": "",
+    "heroDescription": "",
+    "heroImage": "/uploads/1788770575601-career2.jpeg",
+    "aboutHeading": "",
+    "aboutDescription": "",
     "features": [
-      "Transparent Governance ",
-      "Infrastructure Development",
-      "Quality Education fs",
-      "Public Welfare"
+      "",
+      "",
+      "",
+      ""
     ],
     "stats": [
       {
-        "number": "200+",
-        "text": "Development Projects"
+        "number": "",
+        "text": ""
       },
       {
-        "number": "25+",
-        "text": "Years of Public Service"
+        "number": "",
+        "text": ""
       }
     ],
     "focusAreas": {
-      "label": "Focus Areas",
-      "heading": "Committed to Inclusive Development",
-      "description": "Focused on strengthening infrastructure, education, social welfare and citizen-centric governance to improve the quality of life across the constituency.",
+      "label": "",
+      "heading": "",
+      "description": "",
       "items": [
         {
-          "title": "Infrastructure Development",
-          "description": "Improving roads, public facilities, drinking water systems and strengthening civic infrastructure for sustainable growth."
+          "title": "",
+          "description": ""
         },
         {
-          "title": "Education & Youth",
-          "description": "Promoting quality education, skill development, scholarships and opportunities that empower students and young leaders."
+          "title": "",
+          "description": ""
         },
         {
-          "title": "SC & Tribal Welfare",
-          "description": "Committed to the welfare, empowerment and inclusive development of Scheduled Castes and Tribal communities."
+          "title": "",
+          "description": ""
         },
         {
-          "title": "Citizen-Centric Governance",
-          "description": "Delivering transparent, accessible and accountable governance while addressing the needs of every citizen."
+          "title": "",
+          "description": ""
         }
       ]
     },
     "developmentHighlights": {
-      "label": "Development Highlights ggd",
-      "heading": "Building Stronger Communities rgfbd",
-      "description": "Development is driven by better infrastructure, quality education, healthcare and sustainable opportunities that improve everyday life. fbb",
+      "label": "",
+      "heading": "",
+      "description": "",
       "items": [
         {
-          "title": "Healthcare gbfgb",
-          "description": "Enhancing healthcare access through medical camps, awareness programmes and better health facilities. bbf",
-          "image": ""
+          "title": "",
+          "description": "",
+          "image": "/uploads/1788789173240-career8.jpeg"
         },
         {
-          "title": "Agriculture gbfb",
-          "description": "Working alongside farmers to encourage sustainable agriculture and rural development initiatives. g",
-          "image": ""
+          "title": "",
+          "description": "",
+          "image": "/uploads/1788789071714-career1.jpeg"
         },
         {
-          "title": "Infrastructure Development",
-          "description": "Strengthening roads, public buildings, drinking water facilities and civic infrastructure to improve connectivity and everyday life.",
-          "image": ""
+          "title": "",
+          "description": "",
+          "image": "/uploads/1788789173245-career6.jpeg"
         },
         {
-          "title": "Education & Youth",
-          "description": "Supporting schools, scholarships, digital learning and opportunities that empower students and young leaders.",
-          "image": ""
+          "title": "",
+          "description": "",
+          "image": "/uploads/1788789173269-career8.jpeg"
         }
       ]
     },
     "galleryPreview": {
       "label": "Gallery",
       "heading": "Moments That Define Public Service",
-      "description": "A glimpse into public meetings, development activities, community interactions and important moments of service.",
+      "description": "",
       "mainTitle": "Community Development",
       "momentsNumber": "500+",
       "momentsText": "Moments",
       "images": [
-        "/uploads/1786864922195-45077911.png",
+        "/uploads/1788864216857-career6.jpeg",
         "/uploads/1786864922230-991655599.png",
-        "/uploads/1786864922235-245642756.png",
-        "/uploads/1786864922257-146872032.png",
-        "/uploads/1786864922265-761723142.png"
+        "/uploads/1788864160862-career5.jpeg",
+        "/uploads/1788864216858-career4.jpeg",
+        "/uploads/1788864216864-career12.jpeg"
       ]
     },
     "newsPreview": {
@@ -128,14 +128,14 @@
       },
       "news": [
         {
-          "image": "",
-          "date": "",
-          "title": ""
+          "image": "/uploads/home/1788865449386-career11.jpeg",
+          "date": "12 sep 2026",
+          "title": "health"
         },
         {
-          "image": "",
-          "date": "",
-          "title": ""
+          "image": "/uploads/home/1788865449386-career2.jpeg",
+          "date": "21 sep 2026",
+          "title": "wertyuio"
         }
       ]
     },

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { API_BASE_URL } from "../../config";
+import { fetchContentWithCache } from "../../services/cacheService";
 
 import {
   Phone,
@@ -53,19 +54,8 @@ export default function Footer() {
 
       try {
 
-        const response = await fetch(
-          `${API_BASE_URL}/api/content?lang=${
-            i18n.language?.startsWith("te") ? "te" : "en"
-          }`
-        );
-
-        if (!response.ok) {
-          throw new Error(
-            "Failed to load Footer data"
-          );
-        }
-
-        const data = await response.json();
+        const language = i18n.language?.startsWith("te") ? "te" : "en";
+        const data = await fetchContentWithCache(language, API_BASE_URL);
 
 
         setWebsiteData({

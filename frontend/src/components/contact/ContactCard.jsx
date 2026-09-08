@@ -9,6 +9,7 @@
 
 // import SocialLinks from "./SocialLinks";
 import { API_BASE_URL } from "../../config";
+import { fetchContentWithCache } from "../../services/cacheService";
 
 // const ContactCard = () => {
 //   return (
@@ -141,7 +142,7 @@ import { FaXTwitter } from "react-icons/fa6";
 const ContactCard = () => {
   const { i18n, t } = useTranslation();
 
-  const [contact, setContact] = useState({
+  const emptyContact = {
     email: "",
     phone: "",
     address: "",
@@ -151,7 +152,9 @@ const ContactCard = () => {
     twitter: "",
     youtube: "",
     linkedin: "",
-  });
+  };
+
+  const [contact, setContact] = useState(emptyContact);
 
 
   const [loading, setLoading] = useState(true);
@@ -174,23 +177,8 @@ const ContactCard = () => {
         setError("");
 
 
-        const response = await fetch(
-          `${API_BASE_URL}/api/content?lang=${
-            i18n.language?.startsWith("te") ? "te" : "en"
-          }`
-        );
-
-
-        if (!response.ok) {
-
-          throw new Error(
-            `Failed to load contact details (${response.status})`
-          );
-
-        }
-
-
-        const data = await response.json();
+        const language = i18n.language?.startsWith("te") ? "te" : "en";
+        const data = await fetchContentWithCache(language, API_BASE_URL);
 
 
         console.log(
@@ -255,9 +243,7 @@ const ContactCard = () => {
         );
 
 
-        setError(
-          "Unable to load contact information."
-        );
+        setContact(emptyContact);
 
       } finally {
 
