@@ -1024,11 +1024,17 @@ const getNewsCacheKey = (language) =>
 
 const getSavedNews = (language) => {
   try {
+<<<<<<< HEAD
     const requestedKey = getNewsCacheKey(language);
     const fallbackLanguage = getLanguage(language) === "te" ? "en" : "te";
     const saved =
       localStorage.getItem(requestedKey) ||
       localStorage.getItem(getNewsCacheKey(fallbackLanguage));
+=======
+    const saved = localStorage.getItem(
+      getNewsCacheKey(language)
+    );
+>>>>>>> bf416a3379ba5d88784addfc8c377ca6a27e1ddb
 
     if (!saved) {
       return [];
@@ -1062,6 +1068,7 @@ const saveNewsData = (
       return;
     }
 
+<<<<<<< HEAD
     const serializedData = JSON.stringify(data);
 
     localStorage.setItem(
@@ -1071,6 +1078,11 @@ const saveNewsData = (
     localStorage.setItem(
       getNewsCacheKey("te"),
       serializedData
+=======
+    localStorage.setItem(
+      getNewsCacheKey(language),
+      JSON.stringify(data)
+>>>>>>> bf416a3379ba5d88784addfc8c377ca6a27e1ddb
     );
   } catch (error) {
     console.error(
@@ -1702,6 +1714,7 @@ export default function News() {
             )
           : categoryValue;
 
+<<<<<<< HEAD
   const getLocalizedNews = (item) => {
     if (!isTelugu || !item?.id) {
       return item;
@@ -1981,6 +1994,259 @@ export default function News() {
           // Keep current newsData.
           // =================================================
 
+=======
+  // ===================================================
+  // STATES
+  // ===================================================
+
+  const [
+    newsData,
+    setNewsData,
+  ] = useState(
+    () =>
+      getSavedNews(
+        initialLanguage
+      )
+  );
+
+  const [
+    category,
+    setCategory,
+  ] = useState("All");
+
+  const [
+    search,
+    setSearch,
+  ] = useState("");
+
+  const [
+    checkingBackend,
+    setCheckingBackend,
+  ] = useState(true);
+
+  const [
+    backendOffline,
+    setBackendOffline,
+  ] = useState(false);
+
+  const [
+    refreshing,
+    setRefreshing,
+  ] = useState(false);
+
+  const [
+    lastUpdated,
+    setLastUpdated,
+  ] = useState(null);
+
+  const [
+    error,
+    setError,
+  ] = useState("");
+
+  // ===================================================
+  // LOAD NEWS
+  // ===================================================
+
+  const loadNews =
+    useCallback(
+      async (
+        showRefresh = false
+      ) => {
+        try {
+          if (showRefresh) {
+            setRefreshing(true);
+          }
+
+          setCheckingBackend(
+            true
+          );
+
+          setError("");
+
+          const currentLanguage =
+            getLanguage(
+              i18n.language
+            );
+
+          // =================================================
+          // API URL
+          // =================================================
+
+          const url =
+            `${API_URL}?lang=${currentLanguage}&_=${Date.now()}`;
+
+          console.log(
+            "NEWS API:",
+            url
+          );
+
+          // =================================================
+          // FETCH
+          // =================================================
+
+          const response =
+            await fetch(
+              url,
+              {
+                method: "GET",
+
+                headers: {
+                  Accept:
+                    "application/json",
+
+                  "Cache-Control":
+                    "no-cache, no-store, must-revalidate",
+
+                  Pragma:
+                    "no-cache",
+                },
+
+                cache:
+                  "no-store",
+              }
+            );
+
+          // =================================================
+          // HTTP ERROR
+          // =================================================
+
+          if (!response.ok) {
+            throw new Error(
+              `Server returned ${response.status}`
+            );
+          }
+
+          // =================================================
+          // JSON
+          // =================================================
+
+          const result =
+            await response.json();
+
+          console.log(
+            "LATEST NEWS:",
+            result
+          );
+
+          // =================================================
+          // API SUCCESS CHECK
+          // =================================================
+
+          if (
+            !result.success
+          ) {
+            throw new Error(
+              result.message ||
+                "News API returned unsuccessful response."
+            );
+          }
+
+          // =================================================
+          // DATA
+          // =================================================
+
+          const latestNews =
+            Array.isArray(
+              result.data
+            )
+              ? result.data
+              : [];
+
+          console.log(
+            "NEWS DATA FROM DATABASE:",
+            latestNews
+          );
+
+          // =================================================
+          // DATABASE IS SOURCE OF TRUTH
+          // =================================================
+
+          setNewsData(
+            latestNews
+          );
+
+          // =================================================
+          // BACKEND ONLINE
+          // =================================================
+
+          setBackendOffline(
+            false
+          );
+
+          // =================================================
+          // LAST UPDATED
+          // =================================================
+
+          setLastUpdated(
+            new Date()
+          );
+
+          // =================================================
+          // SAVE JSON CACHE
+          // =================================================
+          //
+          // IMPORTANT:
+          //
+          // Only successful backend
+          // data is saved.
+          //
+          // Backend failure can therefore
+          // NEVER overwrite good cached
+          // data with [].
+          // =================================================
+
+          saveNewsData(
+            latestNews,
+            currentLanguage
+          );
+
+          // =================================================
+          // CACHE IMAGES
+          // =================================================
+          //
+          // Runs in background.
+          //
+          // It does not block rendering.
+          // =================================================
+
+          cacheNewsImages(
+            latestNews
+          ).catch(
+            (
+              cacheError
+            ) => {
+              console.warn(
+                "News image caching error:",
+                cacheError
+              );
+            }
+          );
+        } catch (error) {
+          // =================================================
+          // BACKEND ERROR
+          // =================================================
+
+          console.error(
+            "NEWS BACKEND ERROR:",
+            error
+          );
+
+          // =================================================
+          // IMPORTANT
+          // =================================================
+          //
+          // DO NOT:
+          //
+          // setNewsData([])
+          //
+          // Existing cached data may already
+          // be displayed.
+          //
+          // Keep current newsData.
+          // =================================================
+
+>>>>>>> bf416a3379ba5d88784addfc8c377ca6a27e1ddb
           setBackendOffline(
             true
           );
@@ -2554,6 +2820,7 @@ export default function News() {
       {/* =================================================
           NEWS GRID
       ================================================= */}
+<<<<<<< HEAD
 
       <section>
         <div
@@ -2584,6 +2851,35 @@ export default function News() {
                   const displayItem = getLocalizedNews(item);
 
                   return (
+=======
+
+      <section>
+        <div
+          className="
+            mx-auto
+            max-w-7xl
+            px-4
+            py-10
+            sm:px-6
+            lg:px-8
+            lg:py-14
+          "
+        >
+          {filteredNews.length > 0 ? (
+            <div
+              className="
+                grid
+                gap-6
+                sm:grid-cols-2
+                lg:grid-cols-3
+              "
+            >
+              {filteredNews.map(
+                (
+                  item,
+                  index
+                ) => (
+>>>>>>> bf416a3379ba5d88784addfc8c377ca6a27e1ddb
                   <article
                     key={
                       item.id ||
@@ -2676,7 +2972,11 @@ export default function News() {
                           text-slate-900
                         "
                       >
+<<<<<<< HEAD
                           {displayItem.title ||
+=======
+                        {item.title ||
+>>>>>>> bf416a3379ba5d88784addfc8c377ca6a27e1ddb
                           "Untitled News"}
                       </h2>
 
@@ -2691,8 +2991,13 @@ export default function News() {
                           text-slate-600
                         "
                       >
+<<<<<<< HEAD
                         {displayItem.description ||
                           displayItem.content ||
+=======
+                        {item.description ||
+                          item.content ||
+>>>>>>> bf416a3379ba5d88784addfc8c377ca6a27e1ddb
                           item.caption ||
                           ""}
                       </p>
@@ -2731,8 +3036,12 @@ export default function News() {
                       )}
                     </div>
                   </article>
+<<<<<<< HEAD
                   );
                 }
+=======
+                )
+>>>>>>> bf416a3379ba5d88784addfc8c377ca6a27e1ddb
               )}
             </div>
           ) : (

@@ -10,9 +10,15 @@
     "experience": "40+ Years"
   },
   "contact": {
+<<<<<<< HEAD
     "email": "alduri@email.com",
     "phone": "6309563624",
     "address": "Dharmapuriii, Jagtial, Telangana",
+=======
+    "email": "office@email.com",
+    "phone": "09959511127",
+    "address": "Dharmapuri, Jagtial, Telangana",
+>>>>>>> bf416a3379ba5d88784addfc8c377ca6a27e1ddb
     "officeHours": ""
   },
   "quote": "True leadership is measured by service, integrity and the positive change we create for people.",
